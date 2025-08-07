@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: certifact-facturas-service-ng
+server:
+  port: 8081
