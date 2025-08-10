@@ -27,8 +27,8 @@ public class ComprobanteController {
             @RequestParam(name = "filtroRuc", required = false) String filtroRuc,
             @RequestParam(name = "filtroSerie", required = false) String filtroSerie,
             @RequestParam(name = "filtroNumero", required = false) Integer filtroNumero,
-            @RequestParam(name = "pageNumber", required = false) Integer pageNumber,
-            @RequestParam(name = "perPage", required = false) Integer perPage,
+            @RequestParam(name = "pageNumber", required = true) Integer pageNumber,
+            @RequestParam(name = "perPage", required = true) Integer perPage,
             @RequestParam(name = "estadoSunat", required = false) Integer estadoSunat,
             @RequestParam(name = "idUsuario", required = true) Long idUsuario
     ) {

@@ -16,15 +16,16 @@ public interface ComprobanteFeign {
     @GetMapping("/api/data/invoice")
     List<ComprobanteInterDto> listarComprobantesConFiltros(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
-            @RequestParam(name = "filtroDesde", required = true) Date filtroDesde,
-            @RequestParam(name = "filtroHasta", required = true) Date filtroHasta,
+            @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
+            @RequestParam(name = "filtroHasta", required = true) String filtroHasta,
             @RequestParam(name = "filtroTipoComprobante", required = false) String filtroTipoComprobante,
             @RequestParam(name = "filtroRuc", required = false) String filtroRuc,
             @RequestParam(name = "filtroSerie", required = false) String filtroSerie,
             @RequestParam(name = "filtroNumero", required = false) Integer filtroNumero,
-            @RequestParam(name = "pageNumber", required = false) Integer pageNumber,
-            @RequestParam(name = "perPage", required = false) Integer perPage,
-            @RequestParam(name = "estadoSunat", required = false) String estadoSunat
+            @RequestParam(name = "idOficina", required = false) Integer idOficina,
+            @RequestParam(name = "estadoSunat", required = false) String estadoSunat,
+            @RequestParam(name = "pageNumber", required = true) Integer pageNumber,
+            @RequestParam(name = "perPage", required = true) Integer perPage
     );
 
     @GetMapping("/api/data/user/{idUsuario}")
@@ -33,29 +34,31 @@ public interface ComprobanteFeign {
     @GetMapping("/api/data/invoice/count-total")
     Integer contarComprobantes(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
-            @RequestParam(name = "filtroDesde", required = true) Date filtroDesde,
-            @RequestParam(name = "filtroHasta", required = true) Date filtroHasta,
+            @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
+            @RequestParam(name = "filtroHasta", required = true) String filtroHasta,
             @RequestParam(name = "filtroTipoComprobante", required = false) String filtroTipoComprobante,
             @RequestParam(name = "filtroRuc", required = false) String filtroRuc,
             @RequestParam(name = "filtroSerie", required = false) String filtroSerie,
             @RequestParam(name = "filtroNumero", required = false) Integer filtroNumero,
-            @RequestParam(name = "pageNumber", required = false) Integer pageNumber,
-            @RequestParam(name = "perPage", required = false) Integer perPage,
-            @RequestParam(name = "estadoSunat", required = false) String estadoSunat
+            @RequestParam(name = "idOficina", required = false) Integer idOficina,
+            @RequestParam(name = "estadoSunat", required = false) String estadoSunat,
+            @RequestParam(name = "pageNumber", required = true) Integer pageNumber,
+            @RequestParam(name = "perPage", required = true) Integer perPage
     );
 
-    @GetMapping("/api/data/invoice/count-total-money")
+    @GetMapping("/api/data/invoice/cash-total")
     List<ComprobanteInterDto> obtenerTotalSolesGeneral(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
-            @RequestParam(name = "filtroDesde", required = true) Date filtroDesde,
-            @RequestParam(name = "filtroHasta", required = true) Date filtroHasta,
+            @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
+            @RequestParam(name = "filtroHasta", required = true) String filtroHasta,
             @RequestParam(name = "filtroTipoComprobante", required = false) String filtroTipoComprobante,
             @RequestParam(name = "filtroRuc", required = false) String filtroRuc,
             @RequestParam(name = "filtroSerie", required = false) String filtroSerie,
             @RequestParam(name = "filtroNumero", required = false) Integer filtroNumero,
-            @RequestParam(name = "pageNumber", required = false) Integer pageNumber,
-            @RequestParam(name = "perPage", required = false) Integer perPage,
-            @RequestParam(name = "estadoSunat", required = false) String estadoSunat
+            @RequestParam(name = "idOficina", required = false) Integer idOficina,
+            @RequestParam(name = "estadoSunat", required = false) String estadoSunat,
+            @RequestParam(name = "pageNumber", required = true) Integer pageNumber,
+            @RequestParam(name = "perPage", required = true) Integer perPage
     );
 
 }

@@ -21,6 +21,10 @@ import java.util.Map;
 @Slf4j
 public class ComprobanteServiceImpl implements ComprobanteService {
 
+    private static final String CODSOLES = "PEN";
+    private static final String CODDOLAR = "USD";
+    private static final String CODEURO = "EUR";
+
     private final ComprobanteFeign comprobanteFeign;
 
     @Override
@@ -29,8 +33,6 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             Integer filtroNumero, Integer pageNumber, Integer perPage, Integer estadoSunats, Long idUsuario) {
         Integer idOficina = null;
         Integer numPagina = null;
-        Date filtroDesde = null;
-        Date filtroHasta = null;
         String estadoSunat = null;
 
         List<ComprobanteInterDto> result = null;
@@ -43,7 +45,6 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         ComprobanteInterDto comprobanteMonedaDolar = null;
         ComprobanteInterDto comprobanteMonedaEur = null;
 
-
         try {
             UserInterDto usuarioLogueado = comprobanteFeign.obtenerUsuario(idUsuario);
             if(usuarioLogueado == null) {
@@ -53,23 +54,26 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                 idOficina = usuarioLogueado.getIdOficina();
             }
             numPagina = (pageNumber-1) * perPage;
-            filtroDesde = UtilDate.stringToDate(fechaEmisionDesde, "dd-MM-yyyy");
-            filtroHasta = UtilDate.stringToDate(fechaEmisionHasta, "dd-MM-yyyy");
             if(filtroNumero == null) filtroNumero = 0;
             if(idOficina == null) idOficina = 0;
             estadoSunat = estadoSunats.toString();
 
-            result = comprobanteFeign.listarComprobantesConFiltros(usuarioLogueado.getRuc(), filtroDesde, filtroHasta, filtroTipoComprobante, filtroRuc,
-                    filtroSerie, filtroNumero, pageNumber, perPage, estadoSunat);
-            cantidad = comprobanteFeign.contarComprobantes(usuarioLogueado.getRuc(), filtroDesde, filtroHasta, filtroTipoComprobante, filtroRuc,
-                    filtroSerie, filtroNumero, pageNumber, perPage, estadoSunat);
-            tsolespayment = comprobanteFeign.obtenerTotalSolesGeneral(usuarioLogueado.getRuc(), filtroDesde, filtroHasta, filtroTipoComprobante, filtroRuc,
-                    filtroSerie, filtroNumero, pageNumber, perPage, estadoSunat);
+            result = comprobanteFeign.listarComprobantesConFiltros(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
+                    filtroSerie, filtroNumero, idOficina, estadoSunat, numPagina, perPage);
 
-            comprobanteMonedaSol = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals("")).findFirst().orElse(null);
+            cantidad = comprobanteFeign.contarComprobantes(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
+                    filtroSerie, filtroNumero, idOficina, estadoSunat, numPagina, perPage);
+
+            tsolespayment = comprobanteFeign.obtenerTotalSolesGeneral(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
+                    filtroSerie, filtroNumero, idOficina, estadoSunat, pageNumber, perPage);
+
+            //log.info("RESULTADO: {}", tsolespayment);
+
+            comprobanteMonedaSol = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals(CODSOLES)).findFirst().orElse(null);
             if(comprobanteMonedaSol!=null) {
                 tsolesnew = comprobanteMonedaSol.getMontoImporteTotalVenta()!=null?comprobanteMonedaSol.getMontoImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
             }
+
             comprobanteMonedaDolar = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals("")).findFirst().orElse(null);
             if (comprobanteMonedaDolar!=null) {
                 tdolaresnew = comprobanteMonedaDolar.getMontoImporteTotalVenta()!=null?comprobanteMonedaDolar.getMontoImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
@@ -81,8 +85,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         } catch (Exception e) {
             log.error("ERROR: {}", e.getMessage());
         }
-        return ImmutableMap.of("comprobantesList", result, "total", cantidad, "totalsoles", tsolesnew,
-                "totaldolares", tdolaresnew, "totaleuros", teurosnew);
+        return ImmutableMap.of("comprobantesList", result, "cantidad", cantidad, "totalsoles", tsolesnew, "totaldolares", tdolaresnew, "totaleuros", teurosnew);
     }
 
 }
