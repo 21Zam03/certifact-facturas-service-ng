@@ -1,18 +1,22 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
+import com.certicom.certifact_facturas_service_ng.dto.model.ComprobanteDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.LeyendaDto;
+import com.certicom.certifact_facturas_service_ng.entity.ComprobanteEntity;
 import com.google.common.collect.ImmutableMap;
 import com.certicom.certifact_facturas_service_ng.dto.model.ComprobanteInterDto;
 import com.certicom.certifact_facturas_service_ng.dto.model.UserInterDto;
 import com.certicom.certifact_facturas_service_ng.exceptions.ExcepcionNegocio;
 import com.certicom.certifact_facturas_service_ng.feign.ComprobanteFeign;
 import com.certicom.certifact_facturas_service_ng.service.ComprobanteService;
-import com.certicom.certifact_facturas_service_ng.util.UtilDate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Date;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -86,6 +90,37 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             log.error("ERROR: {}", e.getMessage());
         }
         return ImmutableMap.of("comprobantesList", result, "cantidad", cantidad, "totalsoles", tsolesnew, "totaldolares", tdolaresnew, "totaleuros", teurosnew);
+    }
+
+    @Override
+    public Map<String, Object> generarComprobante(ComprobanteDto comprobanteDto, Boolean isEdit, Long idUsuario) {
+        if(comprobanteDto.getCodigoTipoOperacion() != null) {
+            if(comprobanteDto.getCodigoTipoOperacion().equals("1001") ||  comprobanteDto.getCodigoTipoOperacion().equals("1002") ||
+            comprobanteDto.getCodigoTipoOperacion().equals("1003") ||  comprobanteDto.getCodigoTipoOperacion().equals("1004")) {
+                LeyendaDto leyendaDto = LeyendaDto.builder()
+                        .descripcion("Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central")
+                        .codigo("2006")
+                        .build();
+                comprobanteDto.setLeyendas(new ArrayList<>());
+                comprobanteDto.getLeyendas().add(leyendaDto);
+            }
+        }
+        return generarDocumento(comprobanteDto, isEdit, idUsuario);
+    }
+
+    Map<String, Object> generarDocumento(ComprobanteDto comprobanteDto, Boolean isEdit, Long idUsuario) {
+        String usuarioBoleta = "";
+        Map<String, Object> resultado = new HashMap<>();
+        Map<String, Object> plantillaGenerado;
+        return Map.of();
+    }
+
+    public ComprobanteEntity registrarComprobante(
+            ComprobanteDto comprobanteDto, Long idArchivoRegistro, Boolean isEdit,
+            ComprobanteEntity antiguoComprobante, String estado, String estadoAnterior, String estadoEnSunat,
+            Integer estadoItem, String mensajeRespuesta, String registroUsuario, String usuarioModificacion,
+            Timestamp fechaRegistro, Timestamp fechaModificacion) {
+        return null;
     }
 
 }
