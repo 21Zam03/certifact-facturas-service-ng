@@ -3,3 +3,89 @@ spring:
     name: certifact-facturas-service-ng
 server:
   port: 8081
+
+urlspublicas:
+  descargaComprobante: dsds
+
+json:
+  payment_voucher:
+    input:
+      tipoComprobante: documento_tipo_comprobante
+      serie: documento_serie
+      numero: documento_numero
+      fechaEmision: documento_fecha_emision
+      horaEmision: documento_hora_emision
+      fechaVencimiento: documento_fecha_vencimiento
+      codigoMoneda: documento_tipo_moneda
+      tipoTransaccion: documento_tipo_transaccion
+      montoPendiente: monto_pendiente
+      cantidadCuotas: cantidad_cuotas
+      pagoCuenta: pago_cuenta
+      idpay: idpay
+      rucEmisor: emisor_ruc
+      codigoLocalAnexoEmisor: emisor_codigo_domicilio_fiscal
+      direccionOficinaEmisor: emisor_direccion_oficina
+      tipoDocumentoReceptor: cliente_tipo_documento
+      numeroDocumentoReceptor: cliente_numero_documento
+      denominacionReceptor: cliente_denominacion
+      direccionReceptor: cliente_direccion
+      emailReceptor: cliente_email
+      tipoDocumentoRelacionado: otro_documento_relacionado_tipo
+      numeroDocumentoRelacionado: otro_documento_relacionado_numero
+      totalValorVentaExportacion: total_venta_exportacion
+      totalValorVentaGravada: total_venta_gravadas
+      totalValorVentaInafecta: total_venta_inafectas
+      totalValorVentaExonerada: total_venta_exoneradas
+      totalValorVentaGratuita: total_venta_gratuitas
+      totalValorVentaGravadaIVAP: total_venta_ivap
+      totalValorBaseIsc: total_base_isc
+      totalValorBaseOtrosTributos: total_base_otros_trib
+      totalImpOperGratuita: total_imp_ope_grat
+      totalDescuento: total_descuento
+      totalIgv: total_igv
+      totalIvap: total_ivap
+      totalIsc: total_isc
+      totalOtrostributos: total_otros_tributos
+      descuentoGlobales: descuentos_globales
+      totalOtrosCargos: total_otros_cargos
+      totalAnticipos: total_anticipos
+      importeTotal: importe_total
+      tipoOperacion: tipo_operacion
+      tipoNotaCredito: tipo_nota_credito
+      tipoNotaDebito: tipo_nota_debito
+      serieAfectado: documento_afectado_serie
+      numeroAfectado: documento_afectado_numero
+      tipoComprobanteAfectado: documento_afectado_tipo_comprobante
+      motivoNota: documento_afectado_motivo_nota
+      ordenCompra: orden_compra
+      codigoMedioPago: codigo_medio_pago
+      cuentaFinancieraBeneficiario: cuenta_financiera_beneficiario
+      codigoBienDetraccion: codigo_bien_detraccion
+      porcentajeDetraccion: porcentaje_detraccion
+      montoDetraccion: monto_detraccion
+      montoRetencion: monto_retencion
+      porcentajeRetencion: porcentaje_retencion
+      retencion: retencion
+      detraccion: detraccion
+      redondeoImporteTotal: redondeo_importe_total
+      items: items
+      anticipos: anticipos
+      anticipo:
+        serie: documento_anticipo_serie
+        numero: documento_anticipo_numero
+        tipoDocumento: documento_anticipo_tipo_documento
+        monto: documento_anticipo_monto_anticipado
+      guiasRelacionadas: guias_relacionadas
+      guiaRelacionada:
+        codigoTipoGuia: codigo_tipo_guia
+        serieNumeroGuia: serie_numero_guia
+        idguiaremision: idguiaremision
+      camposAdicionales: campos_adicionales
+      cuotas: cuotas
+      campoAdicional:
+        nombreCampo: nombre_campo
+        valorCampo: valor_campo
+      cuota:
+        numero: cuota_numero
+        monto: cuota_monto
+        fecha: cuota_fecha

@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import java.util.Date;
 import java.util.List;
 
 @FeignClient(name = "comprobante-service", url = "http://localhost:8080")
@@ -60,5 +59,8 @@ public interface ComprobanteFeign {
             @RequestParam(name = "pageNumber", required = true) Integer pageNumber,
             @RequestParam(name = "perPage", required = true) Integer perPage
     );
+
+    @GetMapping("/api/data/company/estado")
+    public String obtenerEstadoEmpresaPorRuc(@RequestParam String rucEmisor);
 
 }

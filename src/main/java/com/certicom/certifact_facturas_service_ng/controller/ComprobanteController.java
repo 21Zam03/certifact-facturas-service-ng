@@ -1,7 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.controller;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.ComprobanteInterDto;
-import com.certicom.certifact_facturas_service_ng.dto.request.ComprobanteFiltroRequest;
+import com.certicom.certifact_facturas_service_ng.dto.request.ComprobanteRequest;
 import com.certicom.certifact_facturas_service_ng.service.ComprobanteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -43,14 +42,10 @@ public class ComprobanteController {
     }
 
     @PostMapping
-    public ResponseEntity<?> registrarComprobante(ComprobanteInterDto comprobanteInterDto) {
-
+    public ResponseEntity<?> registrarComprobante(@RequestBody @Valid ComprobanteRequest comprobanteRequest) {
+        log.info("ComprobanteController - registrarComprobante - [comprobanteRequest={}]",comprobanteRequest.toString());
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PutMapping
-    public ResponseEntity<?> editarComprobante() {
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
 
 }
