@@ -1,6 +1,8 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.ComprobanteInterDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.EmpresaDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.OficinaDto;
 import com.certicom.certifact_facturas_service_ng.dto.model.UserInterDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -62,5 +64,18 @@ public interface ComprobanteFeign {
 
     @GetMapping("/api/data/company/estado")
     public String obtenerEstadoEmpresaPorRuc(@RequestParam String rucEmisor);
+
+    @GetMapping("/api/data/company/{ruc}")
+    public EmpresaDto obtenerEmpresaPorRuc(@PathVariable String ruc);
+
+    @GetMapping("/api/data/invoice")
+    public Integer obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(
+            @RequestParam String tipoComprobante, @RequestParam String serie, @RequestParam String ruc
+    );
+
+    @GetMapping("/api/data/office")
+    public OficinaDto obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
+            @RequestParam Integer empresaId, @RequestParam String serie, @RequestParam String tipoComprobante
+    );
 
 }

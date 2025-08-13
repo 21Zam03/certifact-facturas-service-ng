@@ -1,5 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.validation;
 
+import com.certicom.certifact_facturas_service_ng.dto.others.Tipo;
+
 import java.math.BigDecimal;
 
 public class ConstantesSunat {
@@ -26,7 +28,7 @@ public class ConstantesSunat {
     public static final Integer TIPO_AFCETACION_IGV_GRAVADO_ONEROSA = 10;
     public static final String TIPO_AFCETACION_IGV_EXONERADO = "20";
     public static final String TIPO_AFCETACION_IGV_INAFECTO = "30";
-    /*
+
     public static final Tipo TRIBUTO_IGV = new Tipo(1000, "IGV", "VAT");
     public static final Tipo TRIBUTO_IVAP = new Tipo(1016, "IVAP", "VAT");
     public static final Tipo TRIBUTO_ISC = new Tipo(2000, "ISC", "EXC");
@@ -36,7 +38,7 @@ public class ConstantesSunat {
     public static final Tipo TRIBUTO_INAFECTO = new Tipo(9998, "INA", "FRE");
     public static final Tipo TRIBUTO_BOLSAS = new Tipo(7152, "ICBPER", "OTH");
     public static final Tipo TRIBUTO_OTROS = new Tipo(9999, "OTROS", "OTH");
-*/
+
     //Refencia la catalogo 05
     public static final String CODIGO_TRIBUTO_IGV = "1000";
     public static final String CODIGO_TRIBUTO_IVAP = "1016";
