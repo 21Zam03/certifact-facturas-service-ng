@@ -30,8 +30,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
 
     private final FacturaComprobanteFeign facturaComprobanteFeign;
 
-    @Autowired
-    private AmazonS3 s3client;
+    private final AmazonS3 s3client;
 
     @Value("${apifact.aws.s3.bucket}")
     private String bucketName;

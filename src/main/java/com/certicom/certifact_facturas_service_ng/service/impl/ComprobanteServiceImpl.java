@@ -184,6 +184,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
 
             SubidaRegistroArchivoEntity archivoSubido = subirXmlComprobante(empresaDto, nombreDocumento, comprobante.getTipoComprobante(),
                     ConstantesParametro.REGISTRO_STATUS_NUEVO, fileXMLZipBase64);
+            log.info("ARVHIVO SUBIDO: {}", archivoSubido);
 /*
             fechaActual = Calendar.getInstance().getTime();
             estadoRegistro = EstadoComprobanteEnum.REGISTRADO.getCodigo();
@@ -273,7 +274,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
     private SubidaRegistroArchivoEntity subirXmlComprobante(
             EmpresaDto empresaDto, String nombreDocumento, String tipoDocumento,
             String estadoRegistro, String archivoXMLZipBase64) {
-        SubidaRegistroArchivoEntity archivo = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(archivoXMLZipBase64),
+        SubidaRegistroArchivoEntity archivo = amazonS3ClientService.subirArchivoAlStorage(UtilArchivo.b64ToByteArrayInputStream(archivoXMLZipBase64),
                 nombreDocumento, "invoice", empresaDto);
         return archivo;
     }
