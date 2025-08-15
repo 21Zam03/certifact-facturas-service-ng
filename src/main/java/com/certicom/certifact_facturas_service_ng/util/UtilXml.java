@@ -7,6 +7,7 @@ import org.dom4j.io.XMLWriter;
 import org.w3c.dom.Element;
 
 import java.io.StringWriter;
+import java.util.Map;
 
 public class UtilXml {
 
@@ -20,6 +21,14 @@ public class UtilXml {
     public static Element appendChild(org.w3c.dom.Document doc, Element element, String key) {
         Element elementChild = doc.createElement(key);
         elementChild.appendChild(doc.createTextNode(" "));
+        element.appendChild(elementChild);
+        return elementChild;
+    }
+
+    public static Element appendChild(org.w3c.dom.Document doc, Element element, String key, Object value, Map<String, String> attributes) {
+        Element elementChild = doc.createElement(key);
+        elementChild.appendChild(doc.createTextNode(value.toString()));
+        attributes.forEach((k,v)-> elementChild.setAttribute(k, v));
         element.appendChild(elementChild);
         return elementChild;
     }

@@ -1,4 +1,4 @@
-package com.certicom.certifact_facturas_service_ng.dto.model;
+package com.certicom.certifact_facturas_service_ng.dto.others;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @ToString
-public class LeyendaDto {
+public class Leyenda {
 
     private String descripcion;
     private String codigo;

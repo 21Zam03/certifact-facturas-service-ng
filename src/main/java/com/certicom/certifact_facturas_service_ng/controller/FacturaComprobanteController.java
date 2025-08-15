@@ -1,5 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.controller;
 
+import com.certicom.certifact_facturas_service_ng.dto.model.ComprobanteDto;
 import com.certicom.certifact_facturas_service_ng.dto.request.ComprobanteRequest;
 import com.certicom.certifact_facturas_service_ng.service.ComprobanteService;
 import jakarta.validation.Valid;
@@ -15,7 +16,7 @@ import java.util.Map;
 @RequestMapping("/api/invoices")
 @RequiredArgsConstructor
 @Slf4j
-public class ComprobanteController {
+public class FacturaComprobanteController {
 
     private final ComprobanteService comprobanteService;
 
@@ -44,8 +45,28 @@ public class ComprobanteController {
     @PostMapping
     public ResponseEntity<?> registrarComprobante(@RequestBody @Valid ComprobanteRequest comprobanteRequest) {
         log.info("ComprobanteController - registrarComprobante - [comprobanteRequest={}]",comprobanteRequest.toString());
-        return new ResponseEntity<>(HttpStatus.OK);
+        ComprobanteDto comprobante = ComprobanteDto.builder()
+                .rucEmisor(comprobanteRequest.getRucEmisor())
+                .tipoComprobante(comprobanteRequest.getTipoComprobante())
+                .serie(comprobanteRequest.getSerie())
+                .numero(comprobanteRequest.getNumero())
+                .fechaEmision(comprobanteRequest.getFechaEmision())
+                .horaEmision(comprobanteRequest.getHoraEmision())
+                .fechaEmision(comprobanteRequest.getFechaEmision())
+                .codigoMoneda(comprobanteRequest.getCodigoMoneda())
+                .fechaVencimiento(comprobanteRequest.getFechaVencimiento())
+                .codigoTipoOperacion(comprobanteRequest.getCodigoTipoOperacion())
+                .tipoDocumentoEmisor(comprobanteRequest.getTipoDocumentoReceptor())
+                .numeroDocumentoReceptor(comprobanteRequest.getNumeroDocumentoReceptor())
+                .denominacionReceptor(comprobanteRequest.getDenominacionReceptor())
+                .direccionReceptor(comprobanteRequest.getDireccionReceptor())
+                .emailReceptor(comprobanteRequest.getEmailReceptor())
+                .totalValorVentaGravada(comprobanteRequest.getTotalValorVentaGravada())
+                .totalIgv(comprobanteRequest.getTotalIgv())
+                .importeTotalVenta(comprobanteRequest.getImporteTotalVenta())
+                .items(comprobanteRequest.getItems())
+                .build();
+        return new ResponseEntity<>(comprobanteService.generarComprobante(comprobante, false, 2L), HttpStatus.OK);
     }
-
 
 }

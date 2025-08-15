@@ -5,8 +5,8 @@ import com.certicom.certifact_facturas_service_ng.entity.SubidaRegistroArchivoEn
 
 import java.io.InputStream;
 
-public interface AmazonService {
+public interface AmazonS3ClientService {
 
-    SubidaRegistroArchivoEntity uploadFileStorage(InputStream inputStream, String nameFile, String folder, EmpresaDto company);
+    SubidaRegistroArchivoEntity subirArchivoAlStorage(InputStream inputStream, String nameFile, String folder, EmpresaDto company);
 
 }

@@ -33,7 +33,7 @@ import java.util.Enumeration;
 import static com.certicom.certifact_facturas_service_ng.util.UtilFirma.*;
 
 @Component
-public class Firma {
+public class Firmado {
 
     @Value("${apifact.keystoreblizlink.file}")
     private String keystoreFileblizlink;

@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.validation;
 
 import com.certicom.certifact_facturas_service_ng.exceptions.ExcepcionCamposValidacion;
-import com.certicom.certifact_facturas_service_ng.feign.ComprobanteFeign;
+import com.certicom.certifact_facturas_service_ng.feign.FacturaComprobanteFeign;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
 import com.fasterxml.jackson.core.JacksonException;
@@ -18,7 +18,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class ComprobanteValidate extends CamposEntrada<Object> {
 
-    private final ComprobanteFeign comprobanteFeign;
+    private final FacturaComprobanteFeign comprobanteFeign;
 
     private static final BigDecimal MONTO_MINIMO_BOLETA_TO_DATOS_CLIENTE = new BigDecimal("700");
 

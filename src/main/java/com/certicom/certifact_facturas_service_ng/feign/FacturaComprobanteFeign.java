@@ -1,18 +1,14 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.ComprobanteInterDto;
-import com.certicom.certifact_facturas_service_ng.dto.model.EmpresaDto;
-import com.certicom.certifact_facturas_service_ng.dto.model.OficinaDto;
-import com.certicom.certifact_facturas_service_ng.dto.model.UserInterDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.*;
+import com.certicom.certifact_facturas_service_ng.entity.SubidaRegistroArchivoEntity;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "comprobante-service", url = "http://localhost:8080")
-public interface ComprobanteFeign {
+@FeignClient(name = "comprobante-service", url = "http://localhost:8090")
+public interface FacturaComprobanteFeign {
 
     @GetMapping("/api/data/invoice")
     List<ComprobanteInterDto> listarComprobantesConFiltros(
@@ -77,5 +73,8 @@ public interface ComprobanteFeign {
     public OficinaDto obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
             @RequestParam Integer empresaId, @RequestParam String serie, @RequestParam String tipoComprobante
     );
+
+    @PostMapping("/api/data/file")
+    public SubidaRegistroArchivoEntity regitrarSubidaArchivo(@RequestBody SubidaRegistroArchivoDto subidaRegistroArchivoDto);
 
 }

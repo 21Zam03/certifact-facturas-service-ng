@@ -12,7 +12,7 @@ public interface ComprobanteService {
             Integer pageNumber, Integer perPage, Integer estadoSunat, Long idUsuario);
 
     Map<String, Object> generarComprobante(
-            ComprobanteDto comprobanteDto, Boolean isEdit, Long idUsuario
+            ComprobanteDto comprobante, Boolean isEdit, Long idUsuario
     );
 
 }

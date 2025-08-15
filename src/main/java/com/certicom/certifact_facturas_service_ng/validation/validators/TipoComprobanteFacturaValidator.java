@@ -1,5 +1,7 @@
-package com.certicom.certifact_facturas_service_ng.validation;
+package com.certicom.certifact_facturas_service_ng.validation.validators;
 
+import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
+import com.certicom.certifact_facturas_service_ng.validation.anottations.TipoComprobanteFactura;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +20,7 @@ public class TipoComprobanteFacturaValidator implements ConstraintValidator<Tipo
         if(tipoComprobante == null || tipoComprobante.isEmpty()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(
-                    "El campo ["+tipoComprobanteEntrada+"] no puede ser nulo o estar vacio"
+                    "El campo ["+tipoComprobanteEntrada+"] es obligatorio"
             ).addConstraintViolation();
             return false;
         }

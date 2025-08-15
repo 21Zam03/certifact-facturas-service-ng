@@ -1,8 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.dto.model;
 
-import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
-import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
-import com.certicom.certifact_facturas_service_ng.dto.others.GuiaRelacionada;
+import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -35,8 +33,8 @@ public class ComprobanteDto {
     private String direccionReceptor;
     private String emailReceptor;
     private List<GuiaRelacionada> guiasRelacionadas;
-    //private List<DocumentoRelacionado> documentosRelacionados;
-    private List<LeyendaDto> leyendas;
+    private List<DocumentoRelacionado> documentosRelacionados;
+    private List<Leyenda> leyendas;
     private String serieNumeroOtroDocumentoRelacionado;
     private String codigoTipoOtroDocumentoRelacionado;
     private BigDecimal totalValorVentaExportacion;
@@ -70,8 +68,8 @@ public class ComprobanteDto {
     private String identificadorDocumento;
     private String ordenCompra;
     private List<Anticipo> anticipos;
-    //private List<CampoAdicional> camposAdicionales;
-    //private List<PaymentVoucherCuota> cuotas;
+    private List<CampoAdicional> camposAdicionales;
+    private List<ComprobanteCuota> cuotas;
     private String codigoBienDetraccion;
     private BigDecimal porcentajeDetraccion;
     private BigDecimal porcentajeRetencion;

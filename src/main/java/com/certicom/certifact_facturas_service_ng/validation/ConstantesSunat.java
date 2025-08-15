@@ -140,6 +140,14 @@ public class ConstantesSunat {
     public static final String UBL_VERSION_2_1 = "2.1";
     public static final String CUSTOMIZATION_VERSION_2_0 = "2.0";
 
+    //public static final String SUPERADMIN = "s-admin";
+
+    public static final String CODIGO_VALOR_REFERENCIAL_DETRACCION_SERVICIO_TRANSPORTE = "01";
+    public static final String CODIGO_VALOR_REFERENCIAL_DETRACCION_CARGA_EFECTIVA = "02";
+    public static final String CODIGO_VALOR_REFERENCIAL_DETRACCION_CARGA_UTIL = "03";
+
     public static final String SUPERADMIN = "s-admin";
+    public static final String DESCRIPCION_ANULA= "Se anula guia transportista ";
+    public static final String DESCRIPCION_TIPO_GUIA="Guía de Remisión Remitente";
 
 }

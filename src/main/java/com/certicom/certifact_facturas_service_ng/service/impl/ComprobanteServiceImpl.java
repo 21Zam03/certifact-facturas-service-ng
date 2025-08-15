@@ -1,20 +1,19 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.*;
+import com.certicom.certifact_facturas_service_ng.dto.others.Leyenda;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.entity.ComprobanteEntity;
 import com.certicom.certifact_facturas_service_ng.entity.SubidaRegistroArchivoEntity;
-import com.certicom.certifact_facturas_service_ng.enums.EstadoComprobanteEnum;
-import com.certicom.certifact_facturas_service_ng.enums.EstadoSunatEnum;
 import com.certicom.certifact_facturas_service_ng.enums.OperacionLogEnum;
-import com.certicom.certifact_facturas_service_ng.service.AmazonService;
+import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.PlantillaService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
 import com.certicom.certifact_facturas_service_ng.util.UtilArchivo;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import com.google.common.collect.ImmutableMap;
 import com.certicom.certifact_facturas_service_ng.exceptions.ExcepcionNegocio;
-import com.certicom.certifact_facturas_service_ng.feign.ComprobanteFeign;
+import com.certicom.certifact_facturas_service_ng.feign.FacturaComprobanteFeign;
 import com.certicom.certifact_facturas_service_ng.service.ComprobanteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,9 +37,9 @@ public class ComprobanteServiceImpl implements ComprobanteService {
     @Value("${urlspublicas.descargaComprobante}")
     private String urlServiceDownload;
 
-    private final ComprobanteFeign comprobanteFeign;
+    private final FacturaComprobanteFeign comprobanteFeign;
     private final PlantillaService plantillaService;
-    private final AmazonService amazonService;
+    private final AmazonS3ClientService amazonS3ClientService;
 
     @Override
     public Map<String, Object> obtenerComprobantesEstadoPorFiltro(
@@ -104,81 +103,88 @@ public class ComprobanteServiceImpl implements ComprobanteService {
     }
 
     @Override
-    public Map<String, Object> generarComprobante(ComprobanteDto comprobanteDto, Boolean isEdit, Long idUsuario) {
-        if(comprobanteDto.getCodigoTipoOperacion() != null) {
-            if(comprobanteDto.getCodigoTipoOperacion().equals("1001") ||  comprobanteDto.getCodigoTipoOperacion().equals("1002") ||
-            comprobanteDto.getCodigoTipoOperacion().equals("1003") ||  comprobanteDto.getCodigoTipoOperacion().equals("1004")) {
-                LeyendaDto leyendaDto = LeyendaDto.builder()
+    public Map<String, Object> generarComprobante(ComprobanteDto comprobante, Boolean isEdit, Long idUsuario) {
+        if(comprobante.getCodigoTipoOperacion() != null) {
+            if(comprobante.getCodigoTipoOperacion().equals("1001") ||  comprobante.getCodigoTipoOperacion().equals("1002") ||
+            comprobante.getCodigoTipoOperacion().equals("1003") ||  comprobante.getCodigoTipoOperacion().equals("1004")) {
+                Leyenda leyendaDto = Leyenda.builder()
                         .descripcion("Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central")
                         .codigo("2006")
                         .build();
-                comprobanteDto.setLeyendas(new ArrayList<>());
-                comprobanteDto.getLeyendas().add(leyendaDto);
+                comprobante.setLeyendas(new ArrayList<>());
+                comprobante.getLeyendas().add(leyendaDto);
             }
         }
-        return generarDocumento(comprobanteDto, isEdit, idUsuario);
+        return generarDocumento(comprobante, isEdit, idUsuario);
     }
 
-    Map<String, Object> generarDocumento(ComprobanteDto comprobanteDto, Boolean isEdit, Long idUsuario) {
+    Map<String, Object> generarDocumento(ComprobanteDto comprobante, Boolean isEdit, Long idUsuario) {
 
         /*resultado=[resultado]*/
         Map<String, Object> resultado = new HashMap<>();
+        ResponsePSE response = new ResponsePSE();
+        String messageResponse = null;
+        Boolean status = false;
+        String nombreDocumento = null;
+
+        ComprobanteEntity comprobanteCreado = null;
 
         Map<String, String> plantillaGenerado;
-        ResponsePSE response = new ResponsePSE();
         String fileXMLZipBase64 = null;
         String fileXMLBase64 = null;
-        String messageResponse = null;
-        String nombreDocumento = null;
         String estadoRegistro;
         String estadoEnSunat;
         Integer estadoItem = null;
-        ComprobanteEntity comprobanteCreado = null;
+
         Long idPaymentVoucher;
         Date fechaActual;
-        Boolean status;
 
-        StringBuilder msgLog = new StringBuilder();
         ComprobanteEntity antiguoComprobante = null;
 
         try {
-            log.info("GENERANDO FACTURA - {} - {}", comprobanteDto.getSerie(), comprobanteDto.getNumero());
+            /*PREPARAMOS LOS DATOS NECESARIOS DEL COMPROBANTE*/
+            log.info("GENERANDO COMPROBANTE - {} - {}", comprobante.getSerie(), comprobante.getNumero());
 
-            formatearComprobante(comprobanteDto);
-            EmpresaDto empresaDto = completarDatosEmisor(comprobanteDto, isEdit);
+            formatearComprobante(comprobante);
+            EmpresaDto empresaDto = completarDatosEmisor(comprobante, isEdit);
 
-            if (comprobanteDto.getTipoTransaccion() == null) {
-                comprobanteDto.setTipoTransaccion(BigDecimal.ONE);
+            if (comprobante.getTipoTransaccion() == null) {
+                comprobante.setTipoTransaccion(BigDecimal.ONE);
             }
-
-            if (Boolean.TRUE.equals(empresaDto.getAllowSaveOficina()) && comprobanteDto.getOficinaId() == null) {
+            log.info("COMPROBANTE: {}", comprobante);
+            log.info("EMPRESA: {}", empresaDto);
+            if (Boolean.TRUE.equals(empresaDto.getAllowSaveOficina()) && comprobante.getOficinaId() == null) {
                 OficinaDto oficinaDto = comprobanteFeign.obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
-                        empresaDto.getId(), comprobanteDto.getSerie(), comprobanteDto.getTipoComprobante());
+                        empresaDto.getId(), comprobante.getSerie(), comprobante.getTipoComprobante());
                 if(oficinaDto!=null) {
                     if (oficinaDto.getId() != null) {
-                        comprobanteDto.setOficinaId(oficinaDto.getId());
+                        comprobante.setOficinaId(oficinaDto.getId());
                     }
                 }
+                log.info("OFICINA: {}", oficinaDto);
             }
 
+            /*GENERAMOS PLANTILLA XML DE ACUERDO A SU OSE*/
             if (empresaDto.getOseId() != null && empresaDto.getOseId() == 1) {
-                plantillaGenerado = plantillaService.buildPaymentVoucherSignOse(comprobanteDto);
+                plantillaGenerado = plantillaService.buildPaymentVoucherSignOse(comprobante);
             } else if (empresaDto.getOseId() != null && empresaDto.getOseId() == 2) {
-                plantillaGenerado = plantillaService.buildPaymentVoucherSignOseBliz(comprobanteDto);
+                plantillaGenerado = plantillaService.buildPaymentVoucherSignOseBliz(comprobante);
             } else if (empresaDto.getOseId() != null && (empresaDto.getOseId() == 10 || empresaDto.getOseId() == 12)) {
-                plantillaGenerado = plantillaService.buildPaymentVoucherSignCerti(comprobanteDto);
+                plantillaGenerado = plantillaService.buildPaymentVoucherSignCerti(comprobante);
             } else {
-                plantillaGenerado = plantillaService.buildPaymentVoucherSign(comprobanteDto);
+                plantillaGenerado = plantillaService.buildPaymentVoucherSign(comprobante);
             }
 
-            /*LOGGER*/
+            log.info("PLANTILLA GENERADA: {}", plantillaGenerado.get(ConstantesParametro.PARAM_FILE_XML_BASE64));
+
             nombreDocumento = plantillaGenerado.get(ConstantesParametro.PARAM_NAME_DOCUMENT);
             fileXMLZipBase64 = plantillaGenerado.get(ConstantesParametro.PARAM_FILE_ZIP_BASE64);
             fileXMLBase64 = plantillaGenerado.get(ConstantesParametro.PARAM_FILE_XML_BASE64);
 
-            SubidaRegistroArchivoEntity archivoSubido = subirXmlComprobante(empresaDto, nombreDocumento, comprobanteDto.getTipoComprobante(),
-                    ConstantesParametro.REGISTRO_STATUS_NUEVO, fileXMLZipBase64);
 
+            SubidaRegistroArchivoEntity archivoSubido = subirXmlComprobante(empresaDto, nombreDocumento, comprobante.getTipoComprobante(),
+                    ConstantesParametro.REGISTRO_STATUS_NUEVO, fileXMLZipBase64);
+/*
             fechaActual = Calendar.getInstance().getTime();
             estadoRegistro = EstadoComprobanteEnum.REGISTRADO.getCodigo();
             estadoEnSunat = EstadoSunatEnum.ACEPTADO.getAbreviado();
@@ -193,7 +199,8 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             idPaymentVoucher = comprobanteCreado.getId();
 
             status = true;
-            resultado.put("idPaymentVoucher", idPaymentVoucher);
+            resultado.put("idPaymentVoucher", idPaymentVoucher);*/
+            status = true;
         } catch (Exception e) {
             status = false;
             messageResponse = e.getMessage();
@@ -210,7 +217,6 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         transformarUrlsAResponse(response, comprobanteCreado);
         resultado.put(ConstantesParametro.PARAM_BEAN_RESPONSE_PSE, response);
 
-        /*LOGGER*/
         return resultado;
     }
 
@@ -240,12 +246,12 @@ public class ComprobanteServiceImpl implements ComprobanteService {
 
     private EmpresaDto completarDatosEmisor(ComprobanteDto comprobanteDto, boolean isEdit) {
         EmpresaDto empresaDto = comprobanteFeign.obtenerEmpresaPorRuc(comprobanteDto.getRucEmisor());
-        comprobanteDto.setDenominacionEmisor(empresaDto.getGetRazon());
+        comprobanteDto.setDenominacionEmisor(empresaDto.getRazon());
         comprobanteDto.setTipoDocumentoEmisor(ConstantesSunat.TIPO_DOCUMENTO_IDENTIDAD_RUC);
-        comprobanteDto.setNombreComercialEmisor(empresaDto.getGetNombreComer());
-        comprobanteDto.setUblVersion(empresaDto.getGetUblVersion() != null ? empresaDto.getGetUblVersion() : ConstantesSunat.UBL_VERSION_2_0);
+        comprobanteDto.setNombreComercialEmisor(empresaDto.getNombreComer());
+        comprobanteDto.setUblVersion(empresaDto.getUblVersion() != null ? empresaDto.getUblVersion() : ConstantesSunat.UBL_VERSION_2_0);
 
-        if (!isEdit && (empresaDto.getGetSimultaneo() != null && empresaDto.getGetSimultaneo())) {
+        if (!isEdit && (empresaDto.getSimultaneo() != null && empresaDto.getSimultaneo())) {
             Integer proximoNumero;
             proximoNumero = getProximoNumero(comprobanteDto.getTipoComprobante(), comprobanteDto.getSerie(), comprobanteDto.getRucEmisor());
             if (proximoNumero > comprobanteDto.getNumero()) {
@@ -267,7 +273,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
     private SubidaRegistroArchivoEntity subirXmlComprobante(
             EmpresaDto empresaDto, String nombreDocumento, String tipoDocumento,
             String estadoRegistro, String archivoXMLZipBase64) {
-        SubidaRegistroArchivoEntity archivo = amazonService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(archivoXMLZipBase64),
+        SubidaRegistroArchivoEntity archivo = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(archivoXMLZipBase64),
                 nombreDocumento, "invoice", empresaDto);
         return archivo;
     }

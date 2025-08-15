@@ -1,7 +1,8 @@
-package com.certicom.certifact_facturas_service_ng.validation;
+package com.certicom.certifact_facturas_service_ng.validation.validators;
 
-import com.certicom.certifact_facturas_service_ng.feign.ComprobanteFeign;
+import com.certicom.certifact_facturas_service_ng.feign.FacturaComprobanteFeign;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
+import com.certicom.certifact_facturas_service_ng.validation.anottations.RucActivo;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 import lombok.RequiredArgsConstructor;
@@ -15,14 +16,14 @@ public class RucActivoValidator implements ConstraintValidator<RucActivo, String
     @Value("${json.payment_voucher.input.rucEmisor}")
     private String rucEmisorEntrada;
 
-    private final ComprobanteFeign comprobanteFeign;
+    private final FacturaComprobanteFeign comprobanteFeign;
 
     @Override
     public boolean isValid(String rucEmisor, ConstraintValidatorContext context) {
         if(rucEmisor == null || rucEmisor.isEmpty()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(
-                    "El campo ["+rucEmisorEntrada+"] no puede ser null o vacio"
+                    "El campo ["+rucEmisorEntrada+"] es obligatorio."
             ).addConstraintViolation();
             return false;
         }

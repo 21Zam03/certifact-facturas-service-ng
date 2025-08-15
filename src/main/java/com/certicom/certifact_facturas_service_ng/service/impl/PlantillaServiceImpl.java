@@ -5,14 +5,19 @@ import com.certicom.certifact_facturas_service_ng.dto.others.FirmaResp;
 import com.certicom.certifact_facturas_service_ng.exceptions.FirmaException;
 import com.certicom.certifact_facturas_service_ng.exceptions.PlantillaException;
 import com.certicom.certifact_facturas_service_ng.service.PlantillaService;
-import com.certicom.certifact_facturas_service_ng.signed.Firma;
+import com.certicom.certifact_facturas_service_ng.signed.Firmado;
 import com.certicom.certifact_facturas_service_ng.templates.template.FacturaTemplate;
+import com.certicom.certifact_facturas_service_ng.templates.template.NotaCreditoTemplate;
+import com.certicom.certifact_facturas_service_ng.templates.template.NotaDebitoTemplate;
 import com.certicom.certifact_facturas_service_ng.templates.template21.FacturaTemplate21;
+import com.certicom.certifact_facturas_service_ng.templates.template21.NotaCreditoTemplate21;
+import com.certicom.certifact_facturas_service_ng.templates.template21.NotaDebitoTemplate21;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
 import com.certicom.certifact_facturas_service_ng.util.UtilArchivo;
 import com.certicom.certifact_facturas_service_ng.util.UtilConversion;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -26,12 +31,17 @@ import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class PlantillaServiceImpl implements PlantillaService {
 
-    //private final FacturaTemplateOse invoiceTemplateOse;
     private final FacturaTemplate facturaTemplate;
     private final FacturaTemplate21 facturaTemplate21;
-    private final Firma firma;
+    private final NotaCreditoTemplate notaCreditoTemplate;
+    private final NotaCreditoTemplate21 notaCreditoTemplate21;
+    private final NotaDebitoTemplate notaDebitoTemplate;
+    private final NotaDebitoTemplate21 notaDebitoTemplate21;
+
+    private final Firmado firma;
 
     @Override
     public Map<String, String> buildPaymentVoucherSignOse(ComprobanteDto comprobanteDto) {
@@ -66,16 +76,17 @@ public class PlantillaServiceImpl implements PlantillaService {
                 break;
         }
 */
-        return Map.of();
+        return null;
     }
 
     @Override
     public Map<String, String> buildPaymentVoucherSignOseBliz(ComprobanteDto comprobanteDto) {
-        return Map.of();
+        return null;
     }
 
     @Override
     public Map<String, String> buildPaymentVoucherSignCerti(ComprobanteDto comprobanteDto) throws PlantillaException, FirmaException, IOException, NoSuchAlgorithmException {
+        /*FACTURA, NOTA DE CREDITO Y DEBITO*/
         String xmlGenerado = null;
         String idFirma;
         String nombreDocumento;
@@ -91,24 +102,19 @@ public class PlantillaServiceImpl implements PlantillaService {
                 }
                 break;
             case ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO:
-                /*
-                * if(voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
-                    xmlGenerado = creditNoteTemplateOse.buildCreditNote(voucher);
+                if(comprobanteDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
+                    xmlGenerado = notaCreditoTemplate.construirNotaCredito(comprobanteDto);
 
-                }else if(voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
-                    xmlGenerado = creditNoteTemplateOse.buildCreditNote(voucher);
+                }else if(comprobanteDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
+                    xmlGenerado = notaCreditoTemplate21.construirNotaCredito(comprobanteDto);
                 }
-                * */
                 break;
             default:
-                /*
-                * if(voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
-                    xmlGenerado = debitNoteTemplateOse.buildDebitNote(voucher);
-                }else if(voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
-                    xmlGenerado = debitNoteTemplateOse.buildDebitNote(voucher);
+                if(comprobanteDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
+                    xmlGenerado = notaDebitoTemplate.construirNotaDebito(comprobanteDto);
+                }else if(comprobanteDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
+                    xmlGenerado = notaDebitoTemplate21.buildDebitNote(comprobanteDto);
                 }
-                *
-                * */
                 break;
         }
 
@@ -125,7 +131,7 @@ public class PlantillaServiceImpl implements PlantillaService {
 
     @Override
     public Map<String, String> buildPaymentVoucherSign(ComprobanteDto comprobanteDto) {
-        return Map.of();
+        return null;
     }
 
     private Map<String, String> buildDataTemplate(FirmaResp firmaResp, String nombreDocumento) throws FirmaException, IOException, NoSuchAlgorithmException {

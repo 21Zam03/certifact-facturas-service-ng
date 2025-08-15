@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.sql.Timestamp;
 
+/*table= register_file_upload*/
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,11 +24,10 @@ public class SubidaRegistroArchivoEntity {
     private String tipoArchivo;
     private String usuarioUpload;
     private String uuid;
-    //private CompanyEntity company;
+    private Integer codCompany;
     private String estado;
     private Timestamp fechaModificacion;
     private String userNameModify;
-
     private Boolean isOld;
 
 }

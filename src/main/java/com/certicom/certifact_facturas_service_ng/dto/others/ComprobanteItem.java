@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.dto.others;
 
-import com.certicom.certifact_facturas_service_ng.entity.ComprobanteDetalleEntity;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -20,18 +18,26 @@ public class ComprobanteItem implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private Integer numeroItem;
+    @JsonProperty("unidad_medida")
     private String codigoUnidadMedida;
+
     private BigDecimal cantidad;
     private String descripcion;
+    @JsonProperty("codigo_producto_interno")
     private String codigoProducto;
     private String codigoProductoSunat;
     private String codigoProductoGS1;
+    @JsonProperty("valor_unitario")
     private BigDecimal valorUnitario;
+    @JsonProperty("valor_venta")
     private BigDecimal valorVenta;
     private BigDecimal descuento;
     private String codigoDescuento;
+    @JsonProperty("precio_venta_unitario")
     private BigDecimal precioVentaUnitario;
+
     private BigDecimal valorReferencialUnitario;
+    @JsonProperty("monto_base_igv")
     private BigDecimal montoBaseIgv;
     private BigDecimal montoBaseIvap;
     private BigDecimal montoBaseExportacion;
@@ -40,6 +46,7 @@ public class ComprobanteItem implements Serializable {
     private BigDecimal montoBaseGratuito;
     private BigDecimal montoBaseIsc;
     private BigDecimal montoBaseOtrosTributos;
+    @JsonProperty("igv")
     private BigDecimal igv;
     private BigDecimal isc;
     private BigDecimal montoIcbper;
@@ -47,16 +54,19 @@ public class ComprobanteItem implements Serializable {
     private BigDecimal ivap;
     private BigDecimal impuestoVentaGratuita;
     private BigDecimal otrosTributos;
+    @JsonProperty("porcentaje_igv")
     private BigDecimal porcentajeIgv;
     private BigDecimal porcentajeIvap;
     private BigDecimal porcentajeIsc;
     private BigDecimal porcentajeOtrosTributos;
     private BigDecimal porcentajeTributoVentaGratuita;
+    @JsonProperty("tipo_afectacion_igv")
     private String codigoTipoAfectacionIGV;
     private String codigoTipoCalculoISC;
     private Long productoId;
 
     //DETRACCION 027
+
     private String detalleViajeDetraccion;
     private String ubigeoOrigenDetraccion;
     private String direccionOrigenDetraccion;
@@ -78,7 +88,7 @@ public class ComprobanteItem implements Serializable {
     private String marca;
     private String adicional;
 
-
+/*
     public static List<ComprobanteItem> transformarAListaBean(List<ComprobanteDetalleEntity> lines) {
         List<ComprobanteItem> items = new ArrayList<>();
         lines.forEach(line -> {
@@ -141,5 +151,5 @@ public class ComprobanteItem implements Serializable {
         });
         return items;
     }
-
+*/
 }
