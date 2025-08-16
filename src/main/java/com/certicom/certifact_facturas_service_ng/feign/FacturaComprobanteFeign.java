@@ -1,6 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.*;
+import com.certicom.certifact_facturas_service_ng.entity.ComprobanteEntity;
 import com.certicom.certifact_facturas_service_ng.entity.SubidaRegistroArchivoEntity;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -10,7 +11,7 @@ import java.util.List;
 @FeignClient(name = "comprobante-service", url = "http://localhost:8090")
 public interface FacturaComprobanteFeign {
 
-    @GetMapping("/api/data/invoice")
+    @GetMapping("/api/data/payment-voucher-i")
     List<ComprobanteInterDto> listarComprobantesConFiltros(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
@@ -76,5 +77,8 @@ public interface FacturaComprobanteFeign {
 
     @PostMapping("/api/data/file")
     public SubidaRegistroArchivoEntity regitrarSubidaArchivo(@RequestBody SubidaRegistroArchivoDto subidaRegistroArchivoDto);
+
+    @PostMapping("/api/data/payment-voucher")
+    public ComprobanteEntity registrarComprobante(@RequestBody ComprobanteDto comprobanteDto);
 
 }

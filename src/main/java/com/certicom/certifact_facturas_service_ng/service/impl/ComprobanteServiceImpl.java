@@ -1,11 +1,15 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.*;
+import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
 import com.certicom.certifact_facturas_service_ng.dto.others.Leyenda;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.entity.ComprobanteEntity;
 import com.certicom.certifact_facturas_service_ng.entity.SubidaRegistroArchivoEntity;
+import com.certicom.certifact_facturas_service_ng.enums.EstadoComprobanteEnum;
+import com.certicom.certifact_facturas_service_ng.enums.EstadoSunatEnum;
 import com.certicom.certifact_facturas_service_ng.enums.OperacionLogEnum;
+import com.certicom.certifact_facturas_service_ng.exceptions.ServicioException;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.PlantillaService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
@@ -181,22 +185,23 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             fileXMLZipBase64 = plantillaGenerado.get(ConstantesParametro.PARAM_FILE_ZIP_BASE64);
             fileXMLBase64 = plantillaGenerado.get(ConstantesParametro.PARAM_FILE_XML_BASE64);
 
-
+            /*SE SUBE FORMATO XML DEL COMPROBANTE A AMAZON Y SE GUARDA REGISTRO EN BASE DE DATOS*/
             SubidaRegistroArchivoEntity archivoSubido = subirXmlComprobante(empresaDto, nombreDocumento, comprobante.getTipoComprobante(),
                     ConstantesParametro.REGISTRO_STATUS_NUEVO, fileXMLZipBase64);
-            log.info("ARVHIVO SUBIDO: {}", archivoSubido);
-/*
+            log.info("ARVHIVO SUBIDO: {}", archivoSubido.toString());
+
+
             fechaActual = Calendar.getInstance().getTime();
             estadoRegistro = EstadoComprobanteEnum.REGISTRADO.getCodigo();
             estadoEnSunat = EstadoSunatEnum.ACEPTADO.getAbreviado();
-            comprobanteDto.setCodigoHash(plantillaGenerado.get(ConstantesParametro.CODIGO_HASH));
+            comprobante.setCodigoHash(plantillaGenerado.get(ConstantesParametro.CODIGO_HASH));
 
             comprobanteCreado = registrarComprobante(
-                    comprobanteDto, archivoSubido.getIdRegisterFileSend(), isEdit, antiguoComprobante, estadoRegistro,
+                    comprobante, archivoSubido.getIdRegisterFileSend(), isEdit, antiguoComprobante, estadoRegistro,
                     estadoRegistro, estadoEnSunat, estadoItem, messageResponse, "", null,
                     new Timestamp(fechaActual.getTime()), null, OperacionLogEnum.REGISTER_PAYMENT_VOUCHER
             );
-
+/*
             idPaymentVoucher = comprobanteCreado.getId();
 
             status = true;
@@ -280,10 +285,159 @@ public class ComprobanteServiceImpl implements ComprobanteService {
     }
 
     private ComprobanteEntity registrarComprobante(
-            ComprobanteDto comprobanteDto, Long idArchivoRegistro, Boolean isEdit,
+            ComprobanteDto comprobante, Long idArchivoRegistro, Boolean isEdit,
             ComprobanteEntity antiguoComprobante, String estado, String estadoAnterior, String estadoEnSunat,
             Integer estadoItem, String mensajeRespuesta, String registroUsuario, String usuarioModificacion,
             Timestamp fechaRegistro, Timestamp fechaModificacion, OperacionLogEnum operacionLogEnum) {
+
+        ComprobanteEntity comprobanteEntity = new ComprobanteEntity();
+        EmpresaDto empresa = comprobanteFeign.obtenerEmpresaPorRuc(comprobante.getRucEmisor());
+        if(empresa == null) {
+            throw new ServicioException("Error al momento de obtener la empresa");
+        }
+
+        /**/
+        /*
+        if (idRegisterFile != null) {
+            entity.addFile(PaymentVoucherFileEntity.builder()
+                    .estadoArchivo(EstadoArchivoEnum.ACTIVO)
+                    .registerFileUpload(RegisterFileUploadEntity.builder().idRegisterFileSend(idRegisterFile).build())
+                    .tipoArchivo(TipoArchivoEnum.XML)
+                    .build());
+        }
+
+        if (comprobante.getAnticipos() != null && !comprobante.getAnticipos().isEmpty()) {
+            for (Anticipo anticipo : comprobante.getAnticipos()) {
+                AnticipoEntity anticipoEntity = new AnticipoEntity();
+                anticipoEntity.setMontoAnticipo(anticipo.getMontoAnticipado());
+                anticipoEntity.setNumeroAnticipo(anticipo.getNumeroAnticipo());
+                anticipoEntity.setSerieAnticipo(anticipo.getSerieAnticipo());
+                anticipoEntity.setTipoDocumentoAnticipo(anticipo.getTipoDocumentoAnticipo());
+
+                entity.addAnticipo(anticipoEntity);
+            }
+        }
+        if (voucher.getCamposAdicionales() != null && !voucher.getCamposAdicionales().isEmpty()) {
+
+            for (CampoAdicional campoAdicional : voucher.getCamposAdicionales()) {
+                AditionalFieldEntity aditionalFieldEntity = new AditionalFieldEntity();
+                TypeFieldEntity typeField = typeFieldRepository.findByName(campoAdicional.getNombreCampo());
+                if (typeField != null)
+                    aditionalFieldEntity.setTypeField(typeField);
+                else {
+
+                    typeField = new TypeFieldEntity();
+                    typeField.setName(campoAdicional.getNombreCampo());
+                    typeField.setCompanys(new ArrayList<>());
+                    typeField.getCompanys().add(CompanyEntity.builder().id(company.getId()).build());
+                    typeField = typeFieldRepository.save(typeField);
+                    aditionalFieldEntity.setTypeField(typeField);
+                }
+                aditionalFieldEntity.setValorCampo(campoAdicional.getValorCampo());
+                entity.addAditionalField(aditionalFieldEntity);
+            }
+        }
+
+        if (voucher.getCuotas() != null && !voucher.getCuotas().isEmpty()) {
+            for (PaymentVoucherCuota cuota : voucher.getCuotas()) {
+                CuotasPaymentVoucherEntity centity = new CuotasPaymentVoucherEntity();
+                centity.setNumero(cuota.getNumero());
+                centity.setMonto(cuota.getMonto());
+                centity.setFecha(cuota.getFecha());
+                entity.addCuotas(centity);
+            }
+        }
+
+        boolean existGuiaRelacionada = false;
+        if (voucher.getGuiasRelacionadas() != null && !voucher.getGuiasRelacionadas().isEmpty()) {
+
+            for (GuiaRelacionada guiaRelacionada : voucher.getGuiasRelacionadas()) {
+                GuiaRelacionadaEntity guiaRelacionadaEntity = new GuiaRelacionadaEntity();
+                guiaRelacionadaEntity.setCodigoTipoGuia(guiaRelacionada.getCodigoTipoGuia());
+                guiaRelacionadaEntity.setSerieNumeroGuia(guiaRelacionada.getSerieNumeroGuia());
+                guiaRelacionadaEntity.setIdguiaremision(guiaRelacionada.getIdguiaremision());
+                entity.addGuiaRelacionada(guiaRelacionadaEntity);
+                if (guiaRelacionadaEntity.getIdguiaremision()!= null) {
+                    existGuiaRelacionada = true;
+                }
+            }
+        }
+
+        for (PaymentVoucherLine item : voucher.getItems()) {
+
+            DetailsPaymentVoucherEntity detailEntity = new DetailsPaymentVoucherEntity();
+
+            detailEntity.setNumeroItem(item.getNumeroItem());
+            detailEntity.setCantidad(item.getCantidad());
+            detailEntity.setCodigoUnidadMedida(item.getCodigoUnidadMedida());
+
+            detailEntity.setDescripcion(item.getDescripcion());
+            detailEntity.setCodigoProducto(item.getCodigoProducto());
+            detailEntity.setCodigoProductoSunat(item.getCodigoProductoSunat());
+            detailEntity.setCodigoProductoGS1(item.getCodigoProductoGS1());
+
+            detailEntity.setValorUnitario(item.getValorUnitario());
+            detailEntity.setPrecioVentaUnitario(item.getPrecioVentaUnitario());
+            detailEntity.setValorReferencialUnitario(item.getValorReferencialUnitario());
+
+            detailEntity.setMontoBaseExonerado(item.getMontoBaseExonerado());
+            detailEntity.setMontoBaseExportacion(item.getMontoBaseExportacion());
+            detailEntity.setMontoBaseGratuito(item.getMontoBaseGratuito());
+            detailEntity.setMontoBaseIgv(item.getMontoBaseIgv());
+            detailEntity.setMontoBaseInafecto(item.getMontoBaseInafecto());
+            detailEntity.setMontoBaseIsc(item.getMontoBaseIsc());
+            detailEntity.setMontoBaseIvap(item.getIvap());
+            detailEntity.setMontoBaseOtrosTributos(item.getMontoBaseOtrosTributos());
+
+            detailEntity.setAfectacionIGV(item.getIgv());
+            detailEntity.setSistemaISC(item.getIsc());
+            detailEntity.setIvap(item.getIvap());
+            detailEntity.setTributoVentaGratuita(item.getImpuestoVentaGratuita());
+            detailEntity.setOtrosTributos(item.getOtrosTributos());
+
+            detailEntity.setCodigoTipoAfectacionIGV(item.getCodigoTipoAfectacionIGV());
+            detailEntity.setCodigoTipoSistemaISC(item.getCodigoTipoCalculoISC());
+
+            detailEntity.setPorcentajeIgv(item.getPorcentajeIgv());
+            detailEntity.setPorcentajeIsc(item.getPorcentajeIsc());
+            detailEntity.setPorcentajeIvap(item.getPorcentajeIvap());
+            detailEntity.setPorcentajeOtrosTributos(item.getPorcentajeOtrosTributos());
+            detailEntity.setPorcentajeTributoVentaGratuita(item.getPorcentajeTributoVentaGratuita());
+
+            detailEntity.setDescuento(item.getDescuento());
+            detailEntity.setCodigoDescuento(item.getCodigoDescuento());
+            detailEntity.setValorVenta(item.getValorVenta());
+
+            detailEntity.setEstado(ConstantesParameter.REGISTRO_ACTIVO);
+            detailEntity.setDetalleViajeDetraccion(item.getDetalleViajeDetraccion());
+            detailEntity.setUbigeoOrigenDetraccion(item.getUbigeoOrigenDetraccion());
+            detailEntity.setDireccionOrigenDetraccion(item.getDireccionOrigenDetraccion());
+            detailEntity.setUbigeoDestinoDetraccion(item.getUbigeoDestinoDetraccion());
+            detailEntity.setDireccionDestinoDetraccion(item.getDireccionDestinoDetraccion());
+            detailEntity.setValorServicioTransporte(item.getValorServicioTransporte());
+            detailEntity.setValorCargaEfectiva(item.getValorCargaEfectiva());
+            detailEntity.setValorCargaUtil(item.getValorCargaUtil());
+
+            detailEntity.setHidroMatricula(item.getHidroMatricula());
+            detailEntity.setHidroCantidad(item.getHidroCantidad());
+            detailEntity.setHidroDescripcionTipo(item.getHidroDescripcionTipo());
+            detailEntity.setHidroEmbarcacion(item.getHidroEmbarcacion());
+            detailEntity.setHidroFechaDescarga(item.getHidroFechaDescarga());
+            detailEntity.setHidroLugarDescarga(item.getHidroLugarDescarga());
+
+            detailEntity.setMontoIcbper(item.getMontoIcbper());
+            detailEntity.setMontoBaseIcbper(item.getMontoBaseIcbper());
+
+            detailEntity.setUnidadManejo(item.getUnidadManejo());
+            detailEntity.setInstruccionesEspeciales(item.getInstruccionesEspeciales());
+            detailEntity.setMarca(item.getMarca());
+            detailEntity.setAdicional(item.getAdicional());
+            entity.addDetailsPaymentVoucher(detailEntity);
+
+
+        }
+
+        * */
 
         return null;
     }
