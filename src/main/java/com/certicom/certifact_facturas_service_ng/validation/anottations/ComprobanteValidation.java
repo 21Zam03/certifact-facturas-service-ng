@@ -1,18 +1,18 @@
 package com.certicom.certifact_facturas_service_ng.validation.anottations;
 
-import com.certicom.certifact_facturas_service_ng.validation.validators.NumeroComprobanteValidator;
+import com.certicom.certifact_facturas_service_ng.validation.validators.ComprobanteValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 import java.lang.annotation.*;
 
-@Documented
-@Constraint(validatedBy = NumeroComprobanteValidator.class)
-@Target({ ElementType.FIELD })
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface NumeroComprobante {
+@Constraint(validatedBy = ComprobanteValidator.class)
+@Documented
+public @interface ComprobanteValidation {
 
-    String message() default "El numero esta en mal formato";
+    String message() default "El comprobante tiene campos mal formateados";
 
     Class<?>[] groups() default {};
 

@@ -11,22 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class CampoAdicional {
 
+    private Integer id;
     private String nombreCampo;
     private String valorCampo;
-
-    /*
-    public static List<CampoAdicional> transformToBeanList(List<CampoAdicionalEntity> adds) {
-        List<CampoAdicional> resp = new ArrayList<>();
-        if (adds == null) return resp;
-
-        adds.forEach(aditionalFieldEntity -> {
-            resp.add(CampoAdicional.builder()
-                    .nombreCampo(aditionalFieldEntity.getTypeField().getName())
-                    .valorCampo(aditionalFieldEntity.getValorCampo())
-                    .build());
-        });
-
-        return resp;
-    }*/
 
 }

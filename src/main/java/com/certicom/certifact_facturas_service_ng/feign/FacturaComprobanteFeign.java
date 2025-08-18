@@ -8,10 +8,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "comprobante-service", url = "http://localhost:8090")
+@FeignClient(name = "facturas-service-sp", url = "http://localhost:8090")
 public interface FacturaComprobanteFeign {
 
-    @GetMapping("/api/data/payment-voucher-i")
+    @GetMapping("/api/invoice-sp")
     List<ComprobanteInterDto> listarComprobantesConFiltros(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
@@ -26,10 +26,10 @@ public interface FacturaComprobanteFeign {
             @RequestParam(name = "perPage", required = true) Integer perPage
     );
 
-    @GetMapping("/api/data/user/{idUsuario}")
+    @GetMapping("/api/invoice-sp/user/{idUsuario}")
     UserInterDto obtenerUsuario(@PathVariable Long idUsuario);
 
-    @GetMapping("/api/data/invoice/count-total")
+    @GetMapping("/api/invoice-sp/count-total")
     Integer contarComprobantes(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
@@ -44,7 +44,7 @@ public interface FacturaComprobanteFeign {
             @RequestParam(name = "perPage", required = true) Integer perPage
     );
 
-    @GetMapping("/api/data/invoice/cash-total")
+    @GetMapping("/api/invoice-sp/cash-total")
     List<ComprobanteInterDto> obtenerTotalSolesGeneral(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
@@ -59,26 +59,29 @@ public interface FacturaComprobanteFeign {
             @RequestParam(name = "perPage", required = true) Integer perPage
     );
 
-    @GetMapping("/api/data/company/estado")
+    @GetMapping("/api/invoice-sp/company/state")
     public String obtenerEstadoEmpresaPorRuc(@RequestParam String rucEmisor);
 
-    @GetMapping("/api/data/company/{ruc}")
+    @GetMapping("/api/invoice-sp/company/{ruc}")
     public EmpresaDto obtenerEmpresaPorRuc(@PathVariable String ruc);
 
-    @GetMapping("/api/data/invoice")
+    @GetMapping("/api/invoice-sp/number")
     public Integer obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(
             @RequestParam String tipoComprobante, @RequestParam String serie, @RequestParam String ruc
     );
 
-    @GetMapping("/api/data/office")
+    @GetMapping("/api/invoice-sp/office")
     public OficinaDto obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
             @RequestParam Integer empresaId, @RequestParam String serie, @RequestParam String tipoComprobante
     );
 
-    @PostMapping("/api/data/file")
+    @PostMapping("/api/invoice-sp/file")
     public SubidaRegistroArchivoEntity regitrarSubidaArchivo(@RequestBody SubidaRegistroArchivoDto subidaRegistroArchivoDto);
 
-    @PostMapping("/api/data/payment-voucher")
+    @PostMapping("/api/invoice-sp")
     public ComprobanteEntity registrarComprobante(@RequestBody ComprobanteDto comprobanteDto);
+
+    @GetMapping("/api/invoice-sp/additional-field")
+    public Integer obtenerCampoAdicionalIdPorNombre(@RequestParam String nombreCampo);
 
 }

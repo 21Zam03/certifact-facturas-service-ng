@@ -1,14 +1,12 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.*;
-import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
-import com.certicom.certifact_facturas_service_ng.dto.others.Leyenda;
+import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
+import com.certicom.certifact_facturas_service_ng.entity.ComprobanteArchivoEntity;
 import com.certicom.certifact_facturas_service_ng.entity.ComprobanteEntity;
 import com.certicom.certifact_facturas_service_ng.entity.SubidaRegistroArchivoEntity;
-import com.certicom.certifact_facturas_service_ng.enums.EstadoComprobanteEnum;
-import com.certicom.certifact_facturas_service_ng.enums.EstadoSunatEnum;
-import com.certicom.certifact_facturas_service_ng.enums.OperacionLogEnum;
+import com.certicom.certifact_facturas_service_ng.enums.*;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServicioException;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.PlantillaService;
@@ -37,6 +35,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
     private static final String CODSOLES = "PEN";
     private static final String CODDOLAR = "USD";
     private static final String CODEURO = "EUR";
+    private final FacturaComprobanteFeign facturaComprobanteFeign;
 
     @Value("${urlspublicas.descargaComprobante}")
     private String urlServiceDownload;
@@ -201,11 +200,18 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                     estadoRegistro, estadoEnSunat, estadoItem, messageResponse, "", null,
                     new Timestamp(fechaActual.getTime()), null, OperacionLogEnum.REGISTER_PAYMENT_VOUCHER
             );
-/*
-            idPaymentVoucher = comprobanteCreado.getId();
+            log.info("COMPROBANTE: {}", comprobanteCreado);
 
+            /*
+            * Registrar el payment_voucher_file
+            * Registrar el anticipo_payment_voucher
+            * Registrar aditional_field_payment_voucher
+            *
+            * */
+
+            idPaymentVoucher = comprobanteCreado.getIdPaymentVoucher();
             status = true;
-            resultado.put("idPaymentVoucher", idPaymentVoucher);*/
+            resultado.put("idPaymentVoucher", idPaymentVoucher);
             status = true;
         } catch (Exception e) {
             status = false;
@@ -252,6 +258,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
 
     private EmpresaDto completarDatosEmisor(ComprobanteDto comprobanteDto, boolean isEdit) {
         EmpresaDto empresaDto = comprobanteFeign.obtenerEmpresaPorRuc(comprobanteDto.getRucEmisor());
+        comprobanteDto.setRucEmisor(empresaDto.getRuc());
         comprobanteDto.setDenominacionEmisor(empresaDto.getRazon());
         comprobanteDto.setTipoDocumentoEmisor(ConstantesSunat.TIPO_DOCUMENTO_IDENTIDAD_RUC);
         comprobanteDto.setNombreComercialEmisor(empresaDto.getNombreComer());
@@ -290,79 +297,49 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             Integer estadoItem, String mensajeRespuesta, String registroUsuario, String usuarioModificacion,
             Timestamp fechaRegistro, Timestamp fechaModificacion, OperacionLogEnum operacionLogEnum) {
 
-        ComprobanteEntity comprobanteEntity = new ComprobanteEntity();
+        /*
+        * ComprobanteEntity comprobanteAcrear = new ComprobanteEntity();
         EmpresaDto empresa = comprobanteFeign.obtenerEmpresaPorRuc(comprobante.getRucEmisor());
         if(empresa == null) {
             throw new ServicioException("Error al momento de obtener la empresa");
         }
+        *
+        * */
 
-        /**/
-        /*
-        if (idRegisterFile != null) {
-            entity.addFile(PaymentVoucherFileEntity.builder()
-                    .estadoArchivo(EstadoArchivoEnum.ACTIVO)
-                    .registerFileUpload(RegisterFileUploadEntity.builder().idRegisterFileSend(idRegisterFile).build())
-                    .tipoArchivo(TipoArchivoEnum.XML)
-                    .build());
+        /*INFORMACION DE ARCHIVOS*/
+        if (idArchivoRegistro != null) {
+            List<ComprobanteArchivo> comprobantesArchivosList = new ArrayList<>();
+            ComprobanteArchivo comprobanteArchivo = ComprobanteArchivo.builder()
+                    .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
+                    .subidaRegistroArchivoId(idArchivoRegistro)
+                    .tipoArchivo(TipoArchivoEnum.XML.name())
+                    .build();
+            comprobantesArchivosList.add(comprobanteArchivo);
+            comprobante.setComprobanteArchivoList(comprobantesArchivosList);
         }
 
-        if (comprobante.getAnticipos() != null && !comprobante.getAnticipos().isEmpty()) {
-            for (Anticipo anticipo : comprobante.getAnticipos()) {
-                AnticipoEntity anticipoEntity = new AnticipoEntity();
-                anticipoEntity.setMontoAnticipo(anticipo.getMontoAnticipado());
-                anticipoEntity.setNumeroAnticipo(anticipo.getNumeroAnticipo());
-                anticipoEntity.setSerieAnticipo(anticipo.getSerieAnticipo());
-                anticipoEntity.setTipoDocumentoAnticipo(anticipo.getTipoDocumentoAnticipo());
+        /*INFORMACION DE ANTICIPOS - SUPONEMOS QUE LA DATA VIENE DESDE EL FRONT*/
 
-                entity.addAnticipo(anticipoEntity);
-            }
-        }
-        if (voucher.getCamposAdicionales() != null && !voucher.getCamposAdicionales().isEmpty()) {
-
-            for (CampoAdicional campoAdicional : voucher.getCamposAdicionales()) {
-                AditionalFieldEntity aditionalFieldEntity = new AditionalFieldEntity();
-                TypeFieldEntity typeField = typeFieldRepository.findByName(campoAdicional.getNombreCampo());
-                if (typeField != null)
-                    aditionalFieldEntity.setTypeField(typeField);
-                else {
-
-                    typeField = new TypeFieldEntity();
-                    typeField.setName(campoAdicional.getNombreCampo());
-                    typeField.setCompanys(new ArrayList<>());
-                    typeField.getCompanys().add(CompanyEntity.builder().id(company.getId()).build());
-                    typeField = typeFieldRepository.save(typeField);
-                    aditionalFieldEntity.setTypeField(typeField);
-                }
-                aditionalFieldEntity.setValorCampo(campoAdicional.getValorCampo());
-                entity.addAditionalField(aditionalFieldEntity);
+        /*INFORMACION DE CAMPOS ADICIONALES*/
+        if (comprobante.getCamposAdicionales() != null && !comprobante.getCamposAdicionales().isEmpty()) {
+            for (CampoAdicional campoAdicional : comprobante.getCamposAdicionales()) {
+                Integer campoAdicionalId = comprobanteFeign.obtenerCampoAdicionalIdPorNombre(campoAdicional.getNombreCampo());
+                campoAdicional.setId(campoAdicionalId);
             }
         }
 
-        if (voucher.getCuotas() != null && !voucher.getCuotas().isEmpty()) {
-            for (PaymentVoucherCuota cuota : voucher.getCuotas()) {
-                CuotasPaymentVoucherEntity centity = new CuotasPaymentVoucherEntity();
-                centity.setNumero(cuota.getNumero());
-                centity.setMonto(cuota.getMonto());
-                centity.setFecha(cuota.getFecha());
-                entity.addCuotas(centity);
-            }
-        }
+        /*INFORMACION DE CUOTAS - SUPONEMOS QUE LA DATA VIENE DESDE EL FRONT*/
 
         boolean existGuiaRelacionada = false;
-        if (voucher.getGuiasRelacionadas() != null && !voucher.getGuiasRelacionadas().isEmpty()) {
-
-            for (GuiaRelacionada guiaRelacionada : voucher.getGuiasRelacionadas()) {
-                GuiaRelacionadaEntity guiaRelacionadaEntity = new GuiaRelacionadaEntity();
-                guiaRelacionadaEntity.setCodigoTipoGuia(guiaRelacionada.getCodigoTipoGuia());
-                guiaRelacionadaEntity.setSerieNumeroGuia(guiaRelacionada.getSerieNumeroGuia());
-                guiaRelacionadaEntity.setIdguiaremision(guiaRelacionada.getIdguiaremision());
-                entity.addGuiaRelacionada(guiaRelacionadaEntity);
-                if (guiaRelacionadaEntity.getIdguiaremision()!= null) {
+        if (comprobante.getGuiasRelacionadas() != null && !comprobante.getGuiasRelacionadas().isEmpty()) {
+            for (GuiaRelacionada guiaRelacionada : comprobante.getGuiasRelacionadas()) {
+                if (guiaRelacionada.getIdguiaremision() != null) {
                     existGuiaRelacionada = true;
+                    break;
                 }
             }
         }
-
+/*
         for (PaymentVoucherLine item : voucher.getItems()) {
 
             DetailsPaymentVoucherEntity detailEntity = new DetailsPaymentVoucherEntity();
@@ -434,12 +411,9 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             detailEntity.setAdicional(item.getAdicional());
             entity.addDetailsPaymentVoucher(detailEntity);
 
-
         }
-
         * */
-
-        return null;
+        return facturaComprobanteFeign.registrarComprobante(comprobante);
     }
 
     private void transformarUrlsAResponse(ResponsePSE response, ComprobanteEntity comprobanteEntity) {

@@ -1,13 +1,13 @@
 package com.certicom.certifact_facturas_service_ng.dto.request;
 
-import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
-import com.certicom.certifact_facturas_service_ng.validation.anottations.NumeroComprobante;
-import com.certicom.certifact_facturas_service_ng.validation.anottations.RucActivo;
-import com.certicom.certifact_facturas_service_ng.validation.anottations.SerieFactura;
-import com.certicom.certifact_facturas_service_ng.validation.anottations.TipoComprobanteFactura;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.certicom.certifact_facturas_service_ng.deserializer.ComprobanteDeserializer;
+import com.certicom.certifact_facturas_service_ng.dto.others.*;
+import com.certicom.certifact_facturas_service_ng.validation.anottations.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import jakarta.validation.Valid;
 import lombok.*;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -16,59 +16,86 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @ToString
-public class ComprobanteRequest {
+@JsonDeserialize(using = ComprobanteDeserializer.class)
+@ComprobanteValidation
+public class ComprobanteRequest implements Serializable {
 
-    //EMISOR
-    @RucActivo
-    @JsonProperty("emisor_ruc")
-    private String rucEmisor;
+    private static final long serialVersionUID = 1L;
 
-    //DOCUMENTO
-    @TipoComprobanteFactura
-    @JsonProperty("documento_tipo_comprobante")
     private String tipoComprobante;
-    @SerieFactura
-    @JsonProperty("documento_serie")
     private String serie;
-    @NumeroComprobante
-    @JsonProperty("documento_numero")
     private Integer numero;
-    @JsonProperty("documento_fecha_emision")
     private String fechaEmision;
-    @JsonProperty("documento_hora_emision")
     private String horaEmision;
-    @JsonProperty("documento_tipo_moneda")
-    private String codigoMoneda;
-    @JsonProperty("documento_fecha_vencimiento")
     private String fechaVencimiento;
-    @JsonProperty("tipo_operacion")
+    private String codigoMoneda;
     private String codigoTipoOperacion;
-
-    //@JsonProperty("documento_numero")
-    //private String codigoTipoOperacionCatalogo51;
-
-    //RECEPTOR
-    @JsonProperty("cliente_tipo_documento")
+    private String codigoTipoOperacionCatalogo51;
+    private String rucEmisor;
+    private String direccionOficinaEmisor;
+    private String codigoLocalAnexoEmisor;
     private String tipoDocumentoReceptor;
-
-    @JsonProperty("cliente_numero_documento")
     private String numeroDocumentoReceptor;
-    @JsonProperty("cliente_denominacion")
     private String denominacionReceptor;
-    @JsonProperty("cliente_direccion")
     private String direccionReceptor;
-    @JsonProperty("cliente_email")
     private String emailReceptor;
-
-    //MONTOS
-    @JsonProperty("total_venta_gravadas")
+    private List<GuiaRelacionada> guiasRelacionadas;
+    private List<DocumentoRelacionado> documentosRelacionados;
+    private List<Leyenda> leyendas;
+    private String serieNumeroOtroDocumentoRelacionado;
+    private String codigoTipoOtroDocumentoRelacionado;
+    private BigDecimal totalValorVentaExportacion;
     private BigDecimal totalValorVentaGravada;
-    @JsonProperty("total_igv")
+    private BigDecimal totalValorVentaGravadaIVAP;
+    private BigDecimal totalValorVentaInafecta;
+    private BigDecimal totalValorVentaExonerada;
+    private BigDecimal totalValorVentaGratuita;
+    private BigDecimal totalValorBaseOtrosTributos;
+    private BigDecimal totalValorBaseIsc;
     private BigDecimal totalIgv;
-    @JsonProperty("importe_total")
+    private BigDecimal totalIvap;
+    private BigDecimal totalIsc;
+    private BigDecimal totalImpOperGratuita;
+    private BigDecimal totalOtrostributos;
+    private BigDecimal totalDescuento;
+    private BigDecimal descuentoGlobales;
+    private BigDecimal sumatoriaOtrosCargos;
+    private BigDecimal totalAnticipos;
     private BigDecimal importeTotalVenta;
-
-    //PRODUCTOS
+    private String serieAfectado;
+    private Integer numeroAfectado;
+    private String tipoComprobanteAfectado;
+    private String codigoTipoNotaCredito;
+    private String codigoTipoNotaDebito;
+    private String motivoNota;
     private List<ComprobanteItem> items;
+    private String denominacionEmisor;
+    private String nombreComercialEmisor;
+    private String tipoDocumentoEmisor;
+    private String identificadorDocumento;
+    private String ordenCompra;
+    private List<Anticipo> anticipos;
+
+    private List<CampoAdicional> camposAdicionales;
+    private List<ComprobanteCuota> cuotas;
+    private String codigoBienDetraccion;
+    private BigDecimal porcentajeDetraccion;
+    private BigDecimal porcentajeRetencion;
+    private String cuentaFinancieraBeneficiario;
+    private String codigoMedioPago;
+    private BigDecimal montoDetraccion;
+    private BigDecimal montoRetencion;
+    private String detraccion;
+    private String UblVersion;
+    private String codigoHash;
+    private Integer oficinaId;
+    private Integer retencion;
+    private BigDecimal tipoTransaccion;
+    private BigDecimal montoPendiente;
+    private BigDecimal cantidadCuotas;
+    private BigDecimal pagoCuenta;
+
+    private String idpay;
+    private String fechaRegistro;
 
 }

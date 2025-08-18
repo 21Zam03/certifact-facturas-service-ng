@@ -13,8 +13,6 @@ import java.util.List;
 @ToString
 public class ComprobanteDto {
 
-    private static final long serialVersionUID = 1L;
-
     private String tipoComprobante;
     private String serie;
     private Integer numero;
@@ -89,5 +87,7 @@ public class ComprobanteDto {
 
     private String idpay;
     private String fechaRegistro;
+
+    private List<ComprobanteArchivo> comprobanteArchivoList;
 
 }

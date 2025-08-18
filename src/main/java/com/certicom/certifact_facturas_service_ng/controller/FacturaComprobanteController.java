@@ -65,8 +65,12 @@ public class FacturaComprobanteController {
                 .totalIgv(comprobanteRequest.getTotalIgv())
                 .importeTotalVenta(comprobanteRequest.getImporteTotalVenta())
                 .items(comprobanteRequest.getItems())
+                //.anticipos(comprobanteRequest.getAnticipos())
+                .camposAdicionales(comprobanteRequest.getCamposAdicionales())
+                .cuotas(comprobanteRequest.getCuotas())
                 .build();
-        return new ResponseEntity<>(comprobanteService.generarComprobante(comprobante, false, 2L), HttpStatus.OK);
+        //return new ResponseEntity<>(comprobanteService.generarComprobante(comprobante, false, 2L), HttpStatus.OK);
+        return new ResponseEntity<>("TEST",  HttpStatus.OK);
     }
 
 }

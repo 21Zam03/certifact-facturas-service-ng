@@ -5,15 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class GuiaRelacionada {
+public class ComprobanteArchivo {
 
-    private Long idguiaremision;
-    private String codigoTipoGuia;
-    private String serieNumeroGuia;
+    private Long id;
+    private String tipoArchivo;
+    private String estadoArchivo;
+    private Long subidaRegistroArchivoId;
 
 }

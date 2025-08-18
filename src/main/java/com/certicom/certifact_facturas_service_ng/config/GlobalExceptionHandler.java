@@ -9,7 +9,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -18,10 +20,26 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         Map<String, Object> errors = new HashMap<>();
+        errors.put("estado", false);
+
+        List<String> mensajes = new ArrayList<>();
+
+        // Errores de campo (ej. @NotNull, @Size, @Valid en anticipo.serieAnticipo, etc.)
         ex.getBindingResult().getFieldErrors().forEach(error -> {
-            errors.put("estado", false);
-            errors.put("mensaje", error.getDefaultMessage());
+            mensajes.add(String.format("Campo [%s]: %s", error.getField(), error.getDefaultMessage()));
         });
+
+        // Errores de clase (ej. validaciones cruzadas en ComprobanteRequest)
+        ex.getBindingResult().getGlobalErrors().forEach(error -> {
+            String mensaje = error.getDefaultMessage();
+            if (mensaje == null || mensaje.isBlank()) {
+                mensaje = "El comprobante tiene campos mal formateados"; // fallback
+            }
+            mensajes.add(String.format("Objeto [%s]: %s", error.getObjectName(), mensaje));
+        });
+
+        errors.put("mensajes", mensajes);
+
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 

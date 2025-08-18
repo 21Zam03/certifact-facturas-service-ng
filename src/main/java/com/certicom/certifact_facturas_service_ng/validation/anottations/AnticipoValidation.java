@@ -1,18 +1,18 @@
 package com.certicom.certifact_facturas_service_ng.validation.anottations;
 
-import com.certicom.certifact_facturas_service_ng.validation.validators.SerieFacturaValidator;
+import com.certicom.certifact_facturas_service_ng.validation.validators.AnticipoValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
 import java.lang.annotation.*;
 
-@Documented
-@Constraint(validatedBy = SerieFacturaValidator.class)
-@Target({ ElementType.FIELD })
+@Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-public @interface SerieFactura {
+@Constraint(validatedBy = AnticipoValidator.class)
+@Documented
+public @interface AnticipoValidation {
 
-    String message() default "La serie esta en mal formato";
+    String message() default "El anticipo tiene campos mal formateados";
 
     Class<?>[] groups() default {};
 

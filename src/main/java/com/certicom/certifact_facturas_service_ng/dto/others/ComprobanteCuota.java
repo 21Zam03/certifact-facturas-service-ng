@@ -20,21 +20,4 @@ public class ComprobanteCuota {
     private BigDecimal monto;
     private String fecha;
 
-    public static List<ComprobanteCuota> transformToBeanList(List<CuotaComprobanteEntity> lines) {
-        List<ComprobanteCuota> items = new ArrayList<>();
-        if (lines == null) return items;
-
-        lines.forEach(CuotasPaymentVoucherEntity -> {
-            items.add(ComprobanteCuota.builder()
-                    .numero(CuotasPaymentVoucherEntity.getNumero())
-                    .monto(CuotasPaymentVoucherEntity.getMonto())
-                    .fecha(CuotasPaymentVoucherEntity.getFecha())
-                    .build());
-        });
-
-        return items;
-
-
-    }
-
 }
