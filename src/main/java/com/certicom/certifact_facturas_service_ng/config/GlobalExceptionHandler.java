@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
         // Errores de clase (ej. validaciones cruzadas en ComprobanteRequest)
         ex.getBindingResult().getGlobalErrors().forEach(error -> {
             String mensaje = error.getDefaultMessage();
-            if (mensaje == null || mensaje.isBlank()) {
+            if (mensaje == null || mensaje.isEmpty()) {
                 mensaje = "El comprobante tiene campos mal formateados"; // fallback
             }
             mensajes.add(String.format("Objeto [%s]: %s", error.getObjectName(), mensaje));

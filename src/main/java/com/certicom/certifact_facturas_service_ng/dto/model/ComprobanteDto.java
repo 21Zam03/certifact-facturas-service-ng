@@ -4,6 +4,7 @@ import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Data
@@ -86,7 +87,12 @@ public class ComprobanteDto {
     private BigDecimal pagoCuenta;
 
     private String idpay;
-    private String fechaRegistro;
+
+    private Timestamp fechaRegistro;
+    private Timestamp fechaModificacion;
+    private String userName;
+    private String codigoTipoDocumentoRelacionado;
+    private String serieNumeroDocumentoRelacionado;
 
     private List<ComprobanteArchivo> comprobanteArchivoList;
 

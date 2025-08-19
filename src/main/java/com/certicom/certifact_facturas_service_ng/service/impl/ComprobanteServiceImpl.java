@@ -298,13 +298,18 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             Timestamp fechaRegistro, Timestamp fechaModificacion, OperacionLogEnum operacionLogEnum) {
 
         /*
-        * ComprobanteEntity comprobanteAcrear = new ComprobanteEntity();
+        ComprobanteEntity comprobanteAcrear = new ComprobanteEntity();
         EmpresaDto empresa = comprobanteFeign.obtenerEmpresaPorRuc(comprobante.getRucEmisor());
         if(empresa == null) {
             throw new ServicioException("Error al momento de obtener la empresa");
         }
-        *
+
         * */
+        if(!isEdit) {
+            comprobante.setFechaRegistro(fechaRegistro);
+            comprobante.setUserName(registroUsuario);
+        } else {
+        }
 
         /*INFORMACION DE ARCHIVOS*/
         if (idArchivoRegistro != null) {
