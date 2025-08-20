@@ -1,8 +1,9 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.*;
-import com.certicom.certifact_facturas_service_ng.entity.ComprobanteEntity;
+import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
 import com.certicom.certifact_facturas_service_ng.entity.SubidaRegistroArchivoEntity;
+import com.certicom.certifact_facturas_service_ng.entity.TmpVoucherSendBillEntity;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -79,9 +80,17 @@ public interface FacturaComprobanteFeign {
     public SubidaRegistroArchivoEntity regitrarSubidaArchivo(@RequestBody SubidaRegistroArchivoDto subidaRegistroArchivoDto);
 
     @PostMapping("/api/invoice-sp")
-    public ComprobanteEntity registrarComprobante(@RequestBody ComprobanteDto comprobanteDto);
+    public PaymentVoucherEntity registrarComprobante(@RequestBody PaymentVoucherEntity entity);
 
     @GetMapping("/api/invoice-sp/additional-field")
     public Integer obtenerCampoAdicionalIdPorNombre(@RequestParam String nombreCampo);
+
+    @GetMapping("/api/invoice-sp/payment-voucher")
+    public PaymentVoucherEntity findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
+            @RequestParam String rucEmisor, @RequestParam String tipoComprobante,
+            @RequestParam String serie, @RequestParam Integer numero);
+
+    @GetMapping("/api/invoice-sp/tmpVoucher/{id}")
+    public TmpVoucherSendBillEntity findTmpVoucherByIdPaymentVoucher(@PathVariable Long id);
 
 }

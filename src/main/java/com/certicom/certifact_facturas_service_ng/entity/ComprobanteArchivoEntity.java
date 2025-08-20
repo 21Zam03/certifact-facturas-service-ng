@@ -14,6 +14,6 @@ public class ComprobanteArchivoEntity {
     private Long id;
     private String tipoArchivo;
     private String estadoArchivo;
-
+    private Long subidaRegistroArchivoId;
 
 }

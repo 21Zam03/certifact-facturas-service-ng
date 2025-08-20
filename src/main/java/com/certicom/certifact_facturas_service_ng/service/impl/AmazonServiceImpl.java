@@ -6,7 +6,7 @@ import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.certicom.certifact_facturas_service_ng.dto.model.EmpresaDto;
 import com.certicom.certifact_facturas_service_ng.dto.model.SubidaRegistroArchivoDto;
 import com.certicom.certifact_facturas_service_ng.entity.SubidaRegistroArchivoEntity;
-import com.certicom.certifact_facturas_service_ng.exceptions.ServicioException;
+import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
 import com.certicom.certifact_facturas_service_ng.feign.FacturaComprobanteFeign;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.util.UtilDate;
@@ -77,7 +77,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
         } catch (Exception ex) {
             ex.printStackTrace();
             log.error("error [" + ex.getMessage() + "] occurred while uploading [" + nameFile + "] ");
-            throw new ServicioException("Ocurrio un error al subir el archivo: " + ex.getMessage());
+            throw new ServiceException("Ocurrio un error al subir el archivo: " + ex.getMessage());
         }
     }
 

@@ -3,15 +3,16 @@ package com.certicom.certifact_facturas_service_ng.service.impl;
 import com.certicom.certifact_facturas_service_ng.dto.model.*;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
-import com.certicom.certifact_facturas_service_ng.entity.ComprobanteArchivoEntity;
-import com.certicom.certifact_facturas_service_ng.entity.ComprobanteEntity;
-import com.certicom.certifact_facturas_service_ng.entity.SubidaRegistroArchivoEntity;
+import com.certicom.certifact_facturas_service_ng.entity.*;
 import com.certicom.certifact_facturas_service_ng.enums.*;
-import com.certicom.certifact_facturas_service_ng.exceptions.ServicioException;
+import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
+import com.certicom.certifact_facturas_service_ng.exceptions.SignedException;
+import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.PlantillaService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
 import com.certicom.certifact_facturas_service_ng.util.UtilArchivo;
+import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import com.google.common.collect.ImmutableMap;
 import com.certicom.certifact_facturas_service_ng.exceptions.ExcepcionNegocio;
@@ -123,14 +124,15 @@ public class ComprobanteServiceImpl implements ComprobanteService {
 
     Map<String, Object> generarDocumento(ComprobanteDto comprobante, Boolean isEdit, Long idUsuario) {
 
-        /*resultado=[resultado]*/
         Map<String, Object> resultado = new HashMap<>();
         ResponsePSE response = new ResponsePSE();
         String messageResponse = null;
         Boolean status = false;
         String nombreDocumento = null;
+        boolean isFacturaOrNoteAssociated = true;
 
-        ComprobanteEntity comprobanteCreado = null;
+        PaymentVoucherEntity comprobanteCreado = null;
+        PaymentVoucherEntity paymentVoucherOld = null;
 
         Map<String, String> plantillaGenerado;
         String fileXMLZipBase64 = null;
@@ -142,8 +144,6 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         Long idPaymentVoucher;
         Date fechaActual;
 
-        ComprobanteEntity antiguoComprobante = null;
-
         try {
             /*PREPARAMOS LOS DATOS NECESARIOS DEL COMPROBANTE*/
             log.info("GENERANDO COMPROBANTE - {} - {}", comprobante.getSerie(), comprobante.getNumero());
@@ -151,11 +151,57 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             formatearComprobante(comprobante);
             EmpresaDto empresaDto = completarDatosEmisor(comprobante, isEdit);
 
+            //FLAG DE ENVIO POR SENDBILL O RESUMEN
+            if (comprobante.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO)
+                    || comprobante.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_DEBITO)) {
+                isFacturaOrNoteAssociated = false;
+            }
+
             if (comprobante.getTipoTransaccion() == null) {
                 comprobante.setTipoTransaccion(BigDecimal.ONE);
             }
-            log.info("COMPROBANTE: {}", comprobante);
-            log.info("EMPRESA: {}", empresaDto);
+
+            if(isEdit) {
+                messageResponse = ConstantesParametro.MSG_EDICION_DOCUMENTO_OK;
+                paymentVoucherOld = comprobanteFeign.findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
+                        comprobante.getRucEmisor(), comprobante.getTipoComprobante(), comprobante.getSerie(), comprobante.getNumero());
+                //VALIDO QUE EXISTA EL COMPROBANTE A EDITAR
+                if (paymentVoucherOld == null)
+                    throw new ServiceException("Este comprobante que desea editar, no existe en la base de datos del PSE");
+
+                //VALIDO QUE EL ESTADO DEL COMPROBANTE SEA REGISTRADO Y QUE AUN NO ESTE EN LA SUNAT PARA PODER EDITARLO
+                if ((!paymentVoucherOld.getEstado().equals(EstadoComprobanteEnum.REGISTRADO.getCodigo()) &&
+                        !paymentVoucherOld.getEstado().equals(EstadoComprobanteEnum.ERROR.getCodigo()))
+                        || paymentVoucherOld.getEstadoSunat().equals(EstadoSunatEnum.ACEPTADO.getAbreviado())
+                        || paymentVoucherOld.getEstadoSunat().equals(EstadoSunatEnum.ANULADO.getAbreviado())
+                ) {
+                    throw new ServiceException("Este comprobante no se puede editar, ya fue declarado a Sunat.");
+                }
+            } else {
+                messageResponse = ConstantesParametro.MSG_REGISTRO_DOCUMENTO_OK;
+            }
+
+            //SETEANDO ESTADO DEL ITEM RESUMEN
+            if (!isFacturaOrNoteAssociated) {
+                //SI ESTA EDITANDO UNA BOLETA O NOTAS ASOCIADAS A BOLETAS
+                if (isEdit) {
+                    //SI EL COMPROBANTE YA ESTA REGISTRADO EN SUNAT, EL ESTADO DE RESUMEN ES 2 MODIFICACION
+                    if (paymentVoucherOld.getEstadoSunat().equals(EstadoSunatEnum.ACEPTADO.getAbreviado())) {
+                        estadoItem = ConstantesParametro.STATE_ITEM_PENDIENTE_MODIFICACION;
+                        //SI NO EL ESTADO ES 1 ADICIONAR
+                    } else {
+                        estadoItem = ConstantesParametro.STATE_ITEM_PENDIENTE_ADICION;
+                    }
+                }
+                //SI NO ESTA EDITANDO EL ESTADO PARA RESUMEN ES 1 ADICIONAR
+                else {
+                    estadoItem = ConstantesParametro.STATE_ITEM_PENDIENTE_ADICION;
+                }
+            }
+
+            //log.info("COMPROBANTE: {}", comprobante);
+            //log.info("EMPRESA: {}", empresaDto);
+
             if (Boolean.TRUE.equals(empresaDto.getAllowSaveOficina()) && comprobante.getOficinaId() == null) {
                 OficinaDto oficinaDto = comprobanteFeign.obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
                         empresaDto.getId(), comprobante.getSerie(), comprobante.getTipoComprobante());
@@ -192,27 +238,27 @@ public class ComprobanteServiceImpl implements ComprobanteService {
 
             fechaActual = Calendar.getInstance().getTime();
             estadoRegistro = EstadoComprobanteEnum.REGISTRADO.getCodigo();
-            estadoEnSunat = EstadoSunatEnum.ACEPTADO.getAbreviado();
+            estadoEnSunat = EstadoSunatEnum.NO_ENVIADO.getAbreviado();
             comprobante.setCodigoHash(plantillaGenerado.get(ConstantesParametro.CODIGO_HASH));
 
             comprobanteCreado = registrarComprobante(
-                    comprobante, archivoSubido.getIdRegisterFileSend(), isEdit, antiguoComprobante, estadoRegistro,
+                    comprobante, archivoSubido.getIdRegisterFileSend(), isEdit, paymentVoucherOld, estadoRegistro,
                     estadoRegistro, estadoEnSunat, estadoItem, messageResponse, "", null,
                     new Timestamp(fechaActual.getTime()), null, OperacionLogEnum.REGISTER_PAYMENT_VOUCHER
             );
             log.info("COMPROBANTE: {}", comprobanteCreado);
 
-            /*
-            * Registrar el payment_voucher_file
-            * Registrar el anticipo_payment_voucher
-            * Registrar aditional_field_payment_voucher
-            *
-            * */
-
             idPaymentVoucher = comprobanteCreado.getIdPaymentVoucher();
-            status = true;
             resultado.put("idPaymentVoucher", idPaymentVoucher);
             status = true;
+        } catch (TemplateException | SignedException e) {
+            status = false;
+            messageResponse = "Error al generar plantilla del documento[" + comprobante.getIdentificadorDocumento() + "] " + e.getMessage();
+            log.info("ERROR: {}", messageResponse);
+        } catch (ServiceException e) {
+            status = false;
+            messageResponse = e.getMessage();
+            log.info("ERROR: {}", messageResponse);
         } catch (Exception e) {
             status = false;
             messageResponse = e.getMessage();
@@ -220,7 +266,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         }
 
         if(!status) {
-            throw new ExcepcionNegocio(messageResponse);
+            throw new ServiceException(messageResponse);
         }
 
         response.setMensaje(messageResponse);
@@ -291,9 +337,9 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         return archivo;
     }
 
-    private ComprobanteEntity registrarComprobante(
+    private PaymentVoucherEntity registrarComprobante(
             ComprobanteDto comprobante, Long idArchivoRegistro, Boolean isEdit,
-            ComprobanteEntity antiguoComprobante, String estado, String estadoAnterior, String estadoEnSunat,
+            PaymentVoucherEntity antiguoComprobante, String estado, String estadoAnterior, String estadoEnSunat,
             Integer estadoItem, String mensajeRespuesta, String registroUsuario, String usuarioModificacion,
             Timestamp fechaRegistro, Timestamp fechaModificacion, OperacionLogEnum operacionLogEnum) {
 
@@ -305,35 +351,202 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         }
 
         * */
-        if(!isEdit) {
-            comprobante.setFechaRegistro(fechaRegistro);
-            comprobante.setUserName(registroUsuario);
-        } else {
+
+        PaymentVoucherEntity entity = new PaymentVoucherEntity();
+
+        log.info("SEGUIMIENTO COMPROBANTE - FACTURA - ND - NC - [OPERACION: {}]", operacionLogEnum);
+
+        if(isEdit) {
+            List<ComprobanteDetalleEntity> items = antiguoComprobante.getComprobanteDetalleEntityList();
+            List<AnticipoEntity> anticipos = antiguoComprobante.getAnticipoEntityList();
+            List<ComprobanteCampoAdicionalEntity> adicionales = antiguoComprobante.getComprobanteCampoAdicionalEntityList();
+            List<ComprobanteCuotaEntity> cuotas = antiguoComprobante.getCuotasEntityList();
+            List<GuiaRelacionadaEntity> guias = antiguoComprobante.getGuiaRelacionadaEntityList();
+
+            if (items != null && !items.isEmpty()) {
+                for (ComprobanteDetalleEntity item : items) {
+                    //historialStockService.eliminarHistorialStockByDetail(item);
+                    System.out.println("Eliminar items - stock del comprobante");
+                }
+                for (ComprobanteDetalleEntity item : items) {
+                    //detailsPaymentVoucherRepository.deleteDetailsPaymentVoucher(item.getIdDetailsPayment());
+                    System.out.println("Eliminar items del comprobante");
+                }
+            }
+            if (anticipos != null && !anticipos.isEmpty()) {
+                for (AnticipoEntity anticipo : anticipos) {
+                    //anticipoRepository.deleteAnticipo(anticipo.getIdAnticipoPayment());
+                    System.out.println("Eliminar anticipos del comprobante");
+                }
+            }
+            if (adicionales != null && !adicionales.isEmpty()) {
+                for (ComprobanteCampoAdicionalEntity adicional : adicionales) {
+                    //aditionalFieldRepository.deleteAditionakField(adicional.getId());
+                    System.out.println("Eliminar campos adicionales del comprobante");
+                }
+            }
+            if (cuotas != null && !cuotas.isEmpty()) {
+                for (ComprobanteCuotaEntity cuota : cuotas) {
+                    //cuotaPaymentVoucherRepository.deleteCuotaPayment(cuota.getId());
+                    System.out.println("Eliminar cuotas del comprobante");
+                }
+            }
+            if (guias != null && !guias.isEmpty()) {
+                for (GuiaRelacionadaEntity guia : guias) {
+                    //guiaRelacionadaRepository.deleteGuiaRelacionada(guia.getIdGuiaPayment());
+                    System.out.println("Eliminar guias relacionadas del comprobante");
+                }
+            }
+            entity.setOficinaEntity(antiguoComprobante.getOficinaEntity());
+            entity.setIdPaymentVoucher(antiguoComprobante.getIdPaymentVoucher());
+            entity.setUuid(antiguoComprobante.getUuid());
+            entity.setComprobanteArchivoEntityList(antiguoComprobante.getComprobanteArchivoEntityList());
+            entity.setFechaRegistro(antiguoComprobante.getFechaRegistro());
         }
+
+        entity.setSerie(comprobante.getSerie());
+        entity.setNumero(comprobante.getNumero());
+        entity.setFechaEmision(comprobante.getFechaEmision());
+        entity.setFechaEmisionDate(UtilFormat.fechaDate(comprobante.getFechaEmision()));
+        entity.setHoraEmision(comprobante.getHoraEmision());
+        entity.setTipoComprobante(comprobante.getTipoComprobante());
+        entity.setCodigoMoneda(comprobante.getCodigoMoneda());
+        entity.setFechaVencimiento(comprobante.getFechaVencimiento());
+        entity.setTipoOperacion(comprobante.getCodigoTipoOperacion());
+
+        entity.setRucEmisor(comprobante.getRucEmisor());
+        entity.setCodigoLocalAnexo(comprobante.getCodigoLocalAnexoEmisor());
+
+        entity.setTipoDocIdentReceptor(comprobante.getTipoDocumentoReceptor());
+        entity.setNumDocIdentReceptor(comprobante.getNumeroDocumentoReceptor());
+        entity.setDenominacionReceptor(comprobante.getDenominacionReceptor());
+
+        entity.setEmailReceptor(comprobante.getEmailReceptor());
+        entity.setDireccionReceptor(comprobante.getDireccionReceptor());
+
+        entity.setCodigoTipoDocumentoRelacionado(comprobante.getCodigoTipoOtroDocumentoRelacionado());
+        entity.setSerieNumeroDocumentoRelacionado(comprobante.getSerieNumeroOtroDocumentoRelacionado());
+
+        entity.setTotalValorVentaOperacionExportada(comprobante.getTotalValorVentaExportacion());
+        entity.setTotalValorVentaOperacionGravada(comprobante.getTotalValorVentaGravada());
+        entity.setTotalValorVentaOperacionInafecta(comprobante.getTotalValorVentaInafecta());
+        entity.setTotalValorVentaOperacionExonerada(comprobante.getTotalValorVentaExonerada());
+        entity.setTotalValorVentaOperacionGratuita(comprobante.getTotalValorVentaGratuita());
+        entity.setTotalValorVentaGravadaIVAP(comprobante.getTotalValorVentaGravadaIVAP());
+        entity.setTotalValorBaseIsc(comprobante.getTotalValorBaseIsc());
+        entity.setTotalValorBaseOtrosTributos(comprobante.getTotalValorBaseOtrosTributos());
+        entity.setTotalDescuento(comprobante.getTotalDescuento());
+
+        entity.setMontoDescuentoGlobal(comprobante.getDescuentoGlobales());
+        entity.setMontoSumatorioOtrosCargos(comprobante.getSumatoriaOtrosCargos());
+        entity.setMontoImporteTotalVenta(comprobante.getImporteTotalVenta());
+        entity.setMontoTotalAnticipos(comprobante.getTotalAnticipos());
+
+        entity.setSumatoriaIGV(comprobante.getTotalIgv());
+        entity.setSumatoriaISC(comprobante.getTotalIsc());
+        entity.setSumatoriaTributosOperacionGratuita(comprobante.getTotalImpOperGratuita());
+        entity.setSumatoriaOtrosTributos(comprobante.getTotalOtrostributos());
+        entity.setSumatoriaIvap(comprobante.getTotalIvap());
+
+        entity.setSerieAfectado(comprobante.getSerieAfectado());
+        entity.setNumeroAfectado(comprobante.getNumeroAfectado());
+        entity.setTipoComprobanteAfectado(comprobante.getTipoComprobanteAfectado());
+        entity.setMotivoNota(comprobante.getMotivoNota());
+        entity.setCodigoTipoNotaCredito(comprobante.getCodigoTipoNotaCredito());
+        entity.setCodigoTipoNotaDebito(comprobante.getCodigoTipoNotaDebito());
+
+        entity.setIdentificadorDocumento(comprobante.getRucEmisor()+ "-" +comprobante.getTipoComprobante()+ "-" +
+                comprobante.getSerie()+ "-" +comprobante.getNumero());
+
+        entity.setEstado(estado);
+        entity.setEstadoAnterior(estadoAnterior);
+        entity.setEstadoItem(estadoItem);
+        entity.setEstadoSunat(estadoEnSunat);
+        entity.setMensajeRespuesta(mensajeRespuesta);
+
+        if(!isEdit) {
+            entity.setFechaRegistro(fechaRegistro);
+            entity.setUserName(registroUsuario);
+        } else {
+            entity.setFechaModificacion(antiguoComprobante.getFechaModificacion());
+            entity.setUserName(antiguoComprobante.getUserName());
+        }
+
+        entity.setFechaModificacion(fechaModificacion);
+        entity.setUserNameModify(usuarioModificacion);
+        entity.setOrdenCompra(comprobante.getOrdenCompra());
+        entity.setUblVersion(comprobante.getUblVersion());
+        entity.setCodigoHash(comprobante.getCodigoHash());
+
+        entity.setCodigoMedioPago(comprobante.getCodigoMedioPago());
+        entity.setCuentaFinancieraBeneficiario(comprobante.getCuentaFinancieraBeneficiario());
+        entity.setCodigoBienDetraccion(comprobante.getCodigoBienDetraccion());
+        entity.setPorcentajeDetraccion(comprobante.getPorcentajeDetraccion());
+        entity.setMontoDetraccion(comprobante.getMontoDetraccion());
+        entity.setDetraccion(comprobante.getDetraccion());
+
+        entity.setPorcentajeRetencion(comprobante.getPorcentajeRetencion());
+        entity.setMontoRetencion(comprobante.getMontoRetencion());
+        entity.setRetencion(comprobante.getRetencion());
+
+        entity.setTipoTransaccion(comprobante.getTipoTransaccion());
+        entity.setMontoPendiente(comprobante.getMontoPendiente());
+        entity.setCantidadCuotas(comprobante.getCantidadCuotas());
+        entity.setPagoCuenta(comprobante.getPagoCuenta());
 
         /*INFORMACION DE ARCHIVOS*/
         if (idArchivoRegistro != null) {
-            List<ComprobanteArchivo> comprobantesArchivosList = new ArrayList<>();
-            ComprobanteArchivo comprobanteArchivo = ComprobanteArchivo.builder()
+            List<ComprobanteArchivoEntity> comprobantesArchivosList = new ArrayList<>();
+            ComprobanteArchivoEntity comprobanteArchivo = ComprobanteArchivoEntity.builder()
                     .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
                     .subidaRegistroArchivoId(idArchivoRegistro)
                     .tipoArchivo(TipoArchivoEnum.XML.name())
                     .build();
             comprobantesArchivosList.add(comprobanteArchivo);
-            comprobante.setComprobanteArchivoList(comprobantesArchivosList);
+            entity.setComprobanteArchivoEntityList(comprobantesArchivosList);
         }
 
-        /*INFORMACION DE ANTICIPOS - SUPONEMOS QUE LA DATA VIENE DESDE EL FRONT*/
+        /*INFORMACION DE ANTICIPOS*/
+        if (comprobante.getAnticipos() != null && !comprobante.getAnticipos().isEmpty()) {
+            List<AnticipoEntity> anticipoEntityList = new ArrayList<>();
+            for (Anticipo anticipo : comprobante.getAnticipos()) {
+                AnticipoEntity anticipoEntity = new AnticipoEntity();
+                anticipoEntity.setMontoAnticipo(anticipo.getMontoAnticipado());
+                anticipoEntity.setNumeroAnticipo(anticipo.getNumeroAnticipo());
+                anticipoEntity.setSerieAnticipo(anticipo.getSerieAnticipo());
+                anticipoEntity.setTipoDocumentoAnticipo(anticipo.getTipoDocumentoAnticipo());
+                anticipoEntityList.add(anticipoEntity);
+            }
+            entity.setAnticipoEntityList(anticipoEntityList);
+        }
 
         /*INFORMACION DE CAMPOS ADICIONALES*/
         if (comprobante.getCamposAdicionales() != null && !comprobante.getCamposAdicionales().isEmpty()) {
+            List<ComprobanteCampoAdicionalEntity> comprobanteCampoAdicionalEntityList = new ArrayList<>();
             for (CampoAdicional campoAdicional : comprobante.getCamposAdicionales()) {
                 Integer campoAdicionalId = comprobanteFeign.obtenerCampoAdicionalIdPorNombre(campoAdicional.getNombreCampo());
-                campoAdicional.setId(campoAdicionalId);
+                ComprobanteCampoAdicionalEntity comprobanteCampoAdicionalEntity = ComprobanteCampoAdicionalEntity.builder()
+                        .valorCampo(campoAdicional.getValorCampo())
+                        .campoAdicionalEntityId(campoAdicionalId)
+                        .build();
+                comprobanteCampoAdicionalEntityList.add(comprobanteCampoAdicionalEntity);
             }
+            entity.setComprobanteCampoAdicionalEntityList(comprobanteCampoAdicionalEntityList);
         }
 
-        /*INFORMACION DE CUOTAS - SUPONEMOS QUE LA DATA VIENE DESDE EL FRONT*/
+        /*INFORMACION DE CUOTAS*/
+        if (comprobante.getCuotas() != null && !comprobante.getCuotas().isEmpty()) {
+            List<ComprobanteCuotaEntity> comprobanteCuotaEntityList = new ArrayList<>();
+            for (ComprobanteCuota cuota : comprobante.getCuotas()) {
+                ComprobanteCuotaEntity centity = ComprobanteCuotaEntity.builder()
+                        .numero(cuota.getNumero())
+                        .monto(cuota.getMonto())
+                        .fecha(cuota.getFecha())
+                        .build();
+                comprobanteCuotaEntityList.add(centity);
+            }
+            entity.setCuotasEntityList(comprobanteCuotaEntityList);
+        }
 
         boolean existGuiaRelacionada = false;
         if (comprobante.getGuiasRelacionadas() != null && !comprobante.getGuiasRelacionadas().isEmpty()) {
@@ -344,10 +557,11 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                 }
             }
         }
-/*
-        for (PaymentVoucherLine item : voucher.getItems()) {
 
-            DetailsPaymentVoucherEntity detailEntity = new DetailsPaymentVoucherEntity();
+        List<ComprobanteDetalleEntity> comprobanteDetalleEntityList = new ArrayList<>();
+        for (ComprobanteItem item : comprobante.getItems()) {
+
+            ComprobanteDetalleEntity detailEntity = new ComprobanteDetalleEntity();
 
             detailEntity.setNumeroItem(item.getNumeroItem());
             detailEntity.setCantidad(item.getCantidad());
@@ -390,7 +604,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             detailEntity.setCodigoDescuento(item.getCodigoDescuento());
             detailEntity.setValorVenta(item.getValorVenta());
 
-            detailEntity.setEstado(ConstantesParameter.REGISTRO_ACTIVO);
+            detailEntity.setEstado(ConstantesParametro.REGISTRO_ACTIVO);
             detailEntity.setDetalleViajeDetraccion(item.getDetalleViajeDetraccion());
             detailEntity.setUbigeoOrigenDetraccion(item.getUbigeoOrigenDetraccion());
             detailEntity.setDireccionOrigenDetraccion(item.getDireccionOrigenDetraccion());
@@ -414,13 +628,45 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             detailEntity.setInstruccionesEspeciales(item.getInstruccionesEspeciales());
             detailEntity.setMarca(item.getMarca());
             detailEntity.setAdicional(item.getAdicional());
-            entity.addDetailsPaymentVoucher(detailEntity);
-
+            comprobanteDetalleEntityList.add(detailEntity);
         }
-        * */
-        return facturaComprobanteFeign.registrarComprobante(comprobante);
+        entity.setComprobanteDetalleEntityList(comprobanteDetalleEntityList);
+
+        return facturaComprobanteFeign.registrarComprobante(entity);
     }
 
-    private void transformarUrlsAResponse(ResponsePSE response, ComprobanteEntity comprobanteEntity) {
+    private void transformarUrlsAResponse(ResponsePSE response, PaymentVoucherEntity paymentVoucher) {
+        if (paymentVoucher != null) {
+            String urlTicket = urlServiceDownload + "descargapdfuuid/" + paymentVoucher.getIdPaymentVoucher() + "/" + paymentVoucher.getUuid() + "/ticket/" + paymentVoucher.getIdentificadorDocumento();
+            String urlA4 = urlServiceDownload + "descargapdfuuid/" + paymentVoucher.getIdPaymentVoucher() + "/" + paymentVoucher.getUuid() + "/a4/" + paymentVoucher.getIdentificadorDocumento();
+            String urlXml = urlServiceDownload + "descargaxmluuid/" + paymentVoucher.getIdPaymentVoucher() + "/" + paymentVoucher.getUuid() + "/" + paymentVoucher.getIdentificadorDocumento();
+            response.setUrlPdfTicket(urlTicket);
+            response.setUrlPdfA4(urlA4);
+            response.setUrlXml(urlXml);
+            response.setCodigoHash(paymentVoucher.getCodigoHash());
+        }
+    }
+
+    private void registerVoucherTemporal(Long idPaymentVoucher, String nombreCompletoDocumento, String uuidSaved,
+                                         String tipoComprobante, Boolean isEdit) {
+
+        TmpVoucherSendBillEntity tmpEntity = null;
+
+        if (!isEdit) {
+            tmpEntity = new TmpVoucherSendBillEntity();
+        } else {
+            tmpEntity = facturaComprobanteFeign.findTmpVoucherByIdPaymentVoucher(idPaymentVoucher);
+        }
+        if (tmpEntity == null) {
+            tmpEntity = new TmpVoucherSendBillEntity();
+        }
+        tmpEntity.setEstado(EstadoVoucherTmpEnum.PENDIENTE.getEstado());
+        tmpEntity.setIdPaymentVoucher(idPaymentVoucher);
+        tmpEntity.setNombreDocumento(nombreCompletoDocumento);
+        tmpEntity.setUuidSaved(uuidSaved);
+        tmpEntity.setTipoComprobante(tipoComprobante);
+
+        //tmpVoucherSendBillRepository.save(tmpEntity);
+
     }
 }

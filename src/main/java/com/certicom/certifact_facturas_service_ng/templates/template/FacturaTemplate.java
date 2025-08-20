@@ -5,7 +5,7 @@ import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
 import com.certicom.certifact_facturas_service_ng.dto.others.GuiaRelacionada;
 import com.certicom.certifact_facturas_service_ng.dto.others.Tipo;
-import com.certicom.certifact_facturas_service_ng.exceptions.PlantillaException;
+import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
 import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ import static com.certicom.certifact_facturas_service_ng.util.UtilXml.formatXML;
 @Slf4j
 public class FacturaTemplate {
 
-    public String construirFactura(ComprobanteDto factura) throws PlantillaException {
+    public String construirFactura(ComprobanteDto factura) throws TemplateException {
         String xml;
         DOMSource source;
         StringWriter writer;
@@ -337,7 +337,7 @@ public class FacturaTemplate {
             xml = formatXML(writer.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw new PlantillaException(ex.getMessage());
+            throw new TemplateException(ex.getMessage());
         }
         return xml;
     }

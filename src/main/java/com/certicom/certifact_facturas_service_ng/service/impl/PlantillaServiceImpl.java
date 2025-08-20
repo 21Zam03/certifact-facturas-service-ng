@@ -2,8 +2,8 @@ package com.certicom.certifact_facturas_service_ng.service.impl;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.ComprobanteDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.FirmaResp;
-import com.certicom.certifact_facturas_service_ng.exceptions.FirmaException;
-import com.certicom.certifact_facturas_service_ng.exceptions.PlantillaException;
+import com.certicom.certifact_facturas_service_ng.exceptions.SignedException;
+import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
 import com.certicom.certifact_facturas_service_ng.service.PlantillaService;
 import com.certicom.certifact_facturas_service_ng.signed.Firmado;
 import com.certicom.certifact_facturas_service_ng.templates.template.FacturaTemplate;
@@ -85,7 +85,7 @@ public class PlantillaServiceImpl implements PlantillaService {
     }
 
     @Override
-    public Map<String, String> buildPaymentVoucherSignCerti(ComprobanteDto comprobanteDto) throws PlantillaException, FirmaException, IOException, NoSuchAlgorithmException {
+    public Map<String, String> buildPaymentVoucherSignCerti(ComprobanteDto comprobanteDto) throws TemplateException, SignedException, IOException, NoSuchAlgorithmException {
         /*FACTURA, NOTA DE CREDITO Y DEBITO*/
         String xmlGenerado = null;
         String idFirma;
@@ -134,7 +134,7 @@ public class PlantillaServiceImpl implements PlantillaService {
         return null;
     }
 
-    private Map<String, String> buildDataTemplate(FirmaResp firmaResp, String nombreDocumento) throws FirmaException, IOException, NoSuchAlgorithmException {
+    private Map<String, String> buildDataTemplate(FirmaResp firmaResp, String nombreDocumento) throws SignedException, IOException, NoSuchAlgorithmException {
 
         Map<String, String> resp;
         File zipeado;
@@ -154,7 +154,7 @@ public class PlantillaServiceImpl implements PlantillaService {
             resp.put(ConstantesParametro.PARAM_FILE_XML_BASE64, xmlBase64);
             resp.put(ConstantesParametro.PARAM_STRING_HASH, shaChecksum);
         } catch (IOException e) {
-            throw new FirmaException(e.getMessage());
+            throw new SignedException(e.getMessage());
         }
 
         return resp;

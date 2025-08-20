@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CuotaComprobanteEntity {
+public class ComprobanteCuotaEntity {
 
     private Long id;
     private Integer numero;

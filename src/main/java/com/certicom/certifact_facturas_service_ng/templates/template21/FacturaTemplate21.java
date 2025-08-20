@@ -3,7 +3,7 @@ package com.certicom.certifact_facturas_service_ng.templates.template21;
 import com.certicom.certifact_facturas_service_ng.dto.model.ComprobanteDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.enums.AfectacionIgvEnum;
-import com.certicom.certifact_facturas_service_ng.exceptions.PlantillaException;
+import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
 import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
 import com.certicom.certifact_facturas_service_ng.util.UtilGenerateLetraNumber;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
@@ -63,7 +63,7 @@ public class FacturaTemplate21 {
         this.mapTransaccion.put(2,"Credito");
     }
 
-    public String construirFactura(ComprobanteDto factura) throws PlantillaException {
+    public String construirFactura(ComprobanteDto factura) throws TemplateException {
         String xml = "";
         DOMSource source;
         StringWriter writer;
@@ -630,7 +630,7 @@ public class FacturaTemplate21 {
             xml = formatXML(writer.toString());
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw new PlantillaException(ex.getMessage());
+            throw new TemplateException(ex.getMessage());
         }
         return xml;
     }

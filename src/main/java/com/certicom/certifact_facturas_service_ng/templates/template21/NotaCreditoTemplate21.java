@@ -3,7 +3,7 @@ package com.certicom.certifact_facturas_service_ng.templates.template21;
 import com.certicom.certifact_facturas_service_ng.dto.model.ComprobanteDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.enums.AfectacionIgvEnum;
-import com.certicom.certifact_facturas_service_ng.exceptions.PlantillaException;
+import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
 import com.certicom.certifact_facturas_service_ng.templates.sunat.SunatTemplate;
 import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
@@ -31,7 +31,7 @@ public class NotaCreditoTemplate21 extends SunatTemplate {
         this.mapTransaccion.put(2,"Credito");
     }
 
-    public String construirNotaCredito(ComprobanteDto creditNote) throws PlantillaException {
+    public String construirNotaCredito(ComprobanteDto creditNote) throws TemplateException {
 
         Firma signature = buildSignature(creditNote);
         String templateBuilt = buildTemplateInXML(creditNote, signature);
@@ -52,7 +52,7 @@ public class NotaCreditoTemplate21 extends SunatTemplate {
     }
 
     private void appendCreditNoteLine(Document document, Element elementRoot,
-                                      List<ComprobanteItem> creditNotelines, String codigoMoneda, ComprobanteDto notaCredito) throws PlantillaException {
+                                      List<ComprobanteItem> creditNotelines, String codigoMoneda, ComprobanteDto notaCredito) throws TemplateException {
 
         int correlativoItem = 1;
         Map<String, String> attributes = new HashMap<>();
@@ -576,7 +576,7 @@ public class NotaCreditoTemplate21 extends SunatTemplate {
         }
     }
 
-    private String buildTemplateInXML(ComprobanteDto notaCredito, Firma signature) throws PlantillaException {
+    private String buildTemplateInXML(ComprobanteDto notaCredito, Firma signature) throws TemplateException {
 
         String stringXMLGenerate = null;
         Document document;
@@ -750,7 +750,7 @@ public class NotaCreditoTemplate21 extends SunatTemplate {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new PlantillaException("Error al generar plantilla para Nota de Credito:" + e.getMessage());
+            throw new TemplateException("Error al generar plantilla para Nota de Credito:" + e.getMessage());
         }
         return stringXMLGenerate;
     }

@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.signed;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.FirmaResp;
-import com.certicom.certifact_facturas_service_ng.exceptions.FirmaException;
+import com.certicom.certifact_facturas_service_ng.exceptions.SignedException;
 import com.certicom.certifact_facturas_service_ng.util.UtilConversion;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -62,7 +62,7 @@ public class Firmado {
     @Value("${apifact.isProduction}")
     private Boolean isProduction;
 
-    public FirmaResp signCerticom(String xml, String id) throws FirmaException {
+    public FirmaResp signCerticom(String xml, String id) throws SignedException {
         String keystoreFile;
         String keystorePassword;
 
@@ -124,7 +124,7 @@ public class Firmado {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            throw new FirmaException("Error al firmar documento xml: " + (ex == null ? "" : ex.getMessage()));
+            throw new SignedException("Error al firmar documento xml: " + (ex == null ? "" : ex.getMessage()));
         }
         return response;
     }

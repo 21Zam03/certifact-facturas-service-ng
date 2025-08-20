@@ -88,12 +88,18 @@ public class ComprobanteDto {
 
     private String idpay;
 
+    /**/
+    private String estado;
+    private String estadoAnterior;
+    private Integer estadoItem;
+    private String estadoSunat;
+    private String mensajeRespuesta;
     private Timestamp fechaRegistro;
-    private Timestamp fechaModificacion;
     private String userName;
+    private Timestamp fechaModificacion;
+    private String userNameModificacion;
     private String codigoTipoDocumentoRelacionado;
     private String serieNumeroDocumentoRelacionado;
-
     private List<ComprobanteArchivo> comprobanteArchivoList;
 
 }

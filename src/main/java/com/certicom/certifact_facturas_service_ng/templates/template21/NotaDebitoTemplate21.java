@@ -3,7 +3,7 @@ package com.certicom.certifact_facturas_service_ng.templates.template21;
 import com.certicom.certifact_facturas_service_ng.dto.model.ComprobanteDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.enums.AfectacionIgvEnum;
-import com.certicom.certifact_facturas_service_ng.exceptions.PlantillaException;
+import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
 import com.certicom.certifact_facturas_service_ng.templates.sunat.SunatTemplate;
 import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
@@ -22,7 +22,7 @@ import static com.certicom.certifact_facturas_service_ng.util.UtilXml.*;
 @Component
 public class NotaDebitoTemplate21 extends SunatTemplate {
 
-    public String buildDebitNote(ComprobanteDto debitNote) throws PlantillaException {
+    public String buildDebitNote(ComprobanteDto debitNote) throws TemplateException {
         Firma signature = buildSignature(debitNote);
         String templateBuilt = buildTemplateInXML(debitNote, signature);
         return templateBuilt;
@@ -39,7 +39,7 @@ public class NotaDebitoTemplate21 extends SunatTemplate {
         return signature;
     }
 
-    private String buildTemplateInXML(ComprobanteDto debitNote, Firma signature) throws PlantillaException {
+    private String buildTemplateInXML(ComprobanteDto debitNote, Firma signature) throws TemplateException {
 
         String stringXMLGenerate = null;
         Document document;
@@ -167,7 +167,7 @@ public class NotaDebitoTemplate21 extends SunatTemplate {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new PlantillaException("Error al generar plantilla para Nota de Credito:" + e.getMessage());
+            throw new TemplateException("Error al generar plantilla para Nota de Credito:" + e.getMessage());
         }
 
         return stringXMLGenerate;
@@ -175,7 +175,7 @@ public class NotaDebitoTemplate21 extends SunatTemplate {
 
 
     private void appendDebitNoteLine(Document document, Element elementRoot,
-                                     List<ComprobanteItem> debitNotelines, String codigoMoneda) throws PlantillaException {
+                                     List<ComprobanteItem> debitNotelines, String codigoMoneda) throws TemplateException {
 
         int correlativoItem = 1;
         Map<String, String> attributes = new HashMap<>();

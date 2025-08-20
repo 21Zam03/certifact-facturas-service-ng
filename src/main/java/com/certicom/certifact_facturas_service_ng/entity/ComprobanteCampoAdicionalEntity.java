@@ -9,13 +9,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CampoAdicionalEntity {
+public class ComprobanteCampoAdicionalEntity {
 
-    private Long id;
+    private Integer id;
     private String nombreCampo;
     private String valorCampo;
-    //private PaymentVoucherEntity paymentVoucher;
-    //private TypeFieldEntity typeField;
-
+    private Integer campoAdicionalEntityId;
+    private Long comprobanteEntityId;
 
 }
