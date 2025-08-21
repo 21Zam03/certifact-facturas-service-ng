@@ -12,8 +12,9 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @ToString
-public class ComprobanteDto {
+public class PaymentVoucherDto {
 
+    private Long idPaymentVoucher;
     private String tipoComprobante;
     private String serie;
     private Integer numero;

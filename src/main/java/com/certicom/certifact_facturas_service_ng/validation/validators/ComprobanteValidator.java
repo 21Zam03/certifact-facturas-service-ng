@@ -2,7 +2,7 @@ package com.certicom.certifact_facturas_service_ng.validation.validators;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
-import com.certicom.certifact_facturas_service_ng.dto.request.ComprobanteRequest;
+import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
@@ -20,7 +20,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.springframework.stereotype.Component;
 
-import javax.print.DocFlavor;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -31,84 +30,84 @@ import java.util.List;
 
 @Component
 public class ComprobanteValidator extends CamposEntrada<Object>
-        implements ConstraintValidator<ComprobanteValidation, ComprobanteRequest> {
+        implements ConstraintValidator<ComprobanteValidation, PaymentVoucherRequest> {
 
     private final Boolean datosReceptorObligatorio = true;
 
     @Override
-    public boolean isValid(ComprobanteRequest comprobanteRequest, ConstraintValidatorContext context) {
+    public boolean isValid(PaymentVoucherRequest paymentVoucherRequest, ConstraintValidatorContext context) {
         Pair<Boolean, String> resultado;
-        resultado = validarTipoComprobante(comprobanteRequest.getTipoComprobante());
+        resultado = validarTipoComprobante(paymentVoucherRequest.getTipoComprobante());
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
-        resultado = validarSerie(comprobanteRequest.getSerie());
+        resultado = validarSerie(paymentVoucherRequest.getSerie());
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
-        resultado = validarNumero(comprobanteRequest.getNumero());
+        resultado = validarNumero(paymentVoucherRequest.getNumero());
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
-        resultado = validarFechaEmision(comprobanteRequest.getFechaEmision());
+        resultado = validarFechaEmision(paymentVoucherRequest.getFechaEmision());
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
-        resultado = validarHoraEmision(comprobanteRequest.getHoraEmision(), comprobanteRequest.getFechaEmision());
+        resultado = validarHoraEmision(paymentVoucherRequest.getHoraEmision(), paymentVoucherRequest.getFechaEmision());
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
-        resultado = validarTipoMoneda(comprobanteRequest.getCodigoMoneda());
+        resultado = validarTipoMoneda(paymentVoucherRequest.getCodigoMoneda());
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
-        resultado = validarImportaTotal(comprobanteRequest.getImporteTotalVenta());
+        resultado = validarImportaTotal(paymentVoucherRequest.getImporteTotalVenta());
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
-        resultado = validarTipoDocumentoReceptor(comprobanteRequest.getTipoDocumentoReceptor(), datosReceptorObligatorio);
+        resultado = validarTipoDocumentoReceptor(paymentVoucherRequest.getTipoDocumentoReceptor(), datosReceptorObligatorio);
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
         resultado = validarNumeroDocumentoReceptor(
-                comprobanteRequest.getNumeroDocumentoReceptor(), comprobanteRequest.getTipoDocumentoReceptor(),
+                paymentVoucherRequest.getNumeroDocumentoReceptor(), paymentVoucherRequest.getTipoDocumentoReceptor(),
                 datosReceptorObligatorio);
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
-        resultado = validarDenominacionReceptor(comprobanteRequest.getDenominacionReceptor(), datosReceptorObligatorio);
+        resultado = validarDenominacionReceptor(paymentVoucherRequest.getDenominacionReceptor(), datosReceptorObligatorio);
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
 
-        resultado = validarDomicilioFiscalEmisor(comprobanteRequest.getCodigoLocalAnexoEmisor());
+        resultado = validarDomicilioFiscalEmisor(paymentVoucherRequest.getCodigoLocalAnexoEmisor());
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
 
-        resultado = validarTipoDocumentoRelacionado(comprobanteRequest.getCodigoTipoOtroDocumentoRelacionado());
+        resultado = validarTipoDocumentoRelacionado(paymentVoucherRequest.getCodigoTipoOtroDocumentoRelacionado());
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
@@ -116,13 +115,13 @@ public class ComprobanteValidator extends CamposEntrada<Object>
         }
 
         resultado = validarNumeroDocumentoRelacionado(
-                comprobanteRequest.getSerieNumeroOtroDocumentoRelacionado(), comprobanteRequest.getCodigoTipoOtroDocumentoRelacionado());
+                paymentVoucherRequest.getSerieNumeroOtroDocumentoRelacionado(), paymentVoucherRequest.getCodigoTipoOtroDocumentoRelacionado());
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
-        resultado = validarAnticipos(comprobanteRequest.getAnticipos());
+        resultado = validarAnticipos(paymentVoucherRequest.getAnticipos());
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();

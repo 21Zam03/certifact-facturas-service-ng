@@ -101,7 +101,9 @@ public class PaymentVoucherEntity {
     private Boolean pagado;
     private String identificadorBaja;
 
-    private OficinaEntity oficinaEntity;
+    private Integer oficinaId;
+    //Entidades relacionadas
+    private BranchOfficeEntity branchOfficeEntity;
     private List<ComprobanteArchivoEntity> comprobanteArchivoEntityList;
     private List<ComprobanteDetalleEntity> comprobanteDetalleEntityList;
     private List<AnticipoEntity> anticipoEntityList;

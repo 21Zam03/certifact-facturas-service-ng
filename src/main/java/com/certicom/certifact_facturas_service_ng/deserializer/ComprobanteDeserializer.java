@@ -1,8 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.deserializer;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
-import com.certicom.certifact_facturas_service_ng.dto.request.AnticipoRequest;
-import com.certicom.certifact_facturas_service_ng.dto.request.ComprobanteRequest;
+import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.exceptions.DeserializadorException;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
@@ -21,7 +20,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ComprobanteDeserializer extends CamposEntrada<ComprobanteRequest> {
+public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest> {
 
     private final AnticipoDeserializer anticipoDeserializer;
     private final CampoAdicionalDeserializer campoAdicionalDeserializer;
@@ -30,7 +29,7 @@ public class ComprobanteDeserializer extends CamposEntrada<ComprobanteRequest> {
     private final ComprobanteItemDeserializer  comprobanteItemDeserializer;
 
     @Override
-    public ComprobanteRequest deserialize(JsonParser jsonParser, DeserializationContext context) throws IOException, JacksonException {
+    public PaymentVoucherRequest deserialize(JsonParser jsonParser, DeserializationContext context) throws IOException, JacksonException {
 
         Iterator<JsonNode> iteratorItems;
         Iterator<JsonNode> iteratorAnticipos;
@@ -44,7 +43,7 @@ public class ComprobanteDeserializer extends CamposEntrada<ComprobanteRequest> {
         List<ComprobanteCuota> cuotas;
         List<GuiaRelacionada> guiaRelacionadas;
 
-        ComprobanteRequest objectResult;
+        PaymentVoucherRequest objectResult;
         ComprobanteItem item;
         Anticipo anticipo;
         CampoAdicional campoAdicional;
@@ -615,7 +614,7 @@ public class ComprobanteDeserializer extends CamposEntrada<ComprobanteRequest> {
         campoTrama = trama.get(retencionLabel);
         retencion = (campoTrama != null) ? campoTrama.intValue() : null;
 
-        objectResult = new ComprobanteRequest();
+        objectResult = new PaymentVoucherRequest();
         objectResult.setTipoComprobante(tipoComprobante);
         objectResult.setSerie(serieDocumento);
         objectResult.setNumero(numeroDocumento);

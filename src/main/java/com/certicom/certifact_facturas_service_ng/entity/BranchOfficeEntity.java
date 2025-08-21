@@ -9,13 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ComprobanteArchivoEntity {
+public class BranchOfficeEntity {
 
-    private Long id;
-    private String tipoArchivo;
-    private String estadoArchivo;
-    private Long idPaymentVoucher;
-    private Long idRegisterFileSend;
-    private String orden;
+    private Integer id;
 
 }

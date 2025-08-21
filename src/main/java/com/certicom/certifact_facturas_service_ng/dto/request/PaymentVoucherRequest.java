@@ -4,7 +4,6 @@ import com.certicom.certifact_facturas_service_ng.deserializer.ComprobanteDeseri
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.validation.anottations.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import jakarta.validation.Valid;
 import lombok.*;
 
 import java.io.Serializable;
@@ -18,7 +17,7 @@ import java.util.List;
 @ToString
 @JsonDeserialize(using = ComprobanteDeserializer.class)
 @ComprobanteValidation
-public class ComprobanteRequest implements Serializable {
+public class PaymentVoucherRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -97,5 +96,6 @@ public class ComprobanteRequest implements Serializable {
 
     private String idpay;
     private String fechaRegistro;
+
 
 }

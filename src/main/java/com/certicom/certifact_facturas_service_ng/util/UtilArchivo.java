@@ -74,4 +74,17 @@ public class UtilArchivo {
         }
     }
 
+    public static String binToB64(ByteArrayInputStream in){
+        int n = in.available();
+        byte[] bytes = new byte[n];
+        try {
+            in.read(bytes);
+            Base64.Encoder encoder = Base64.getEncoder();
+            return encoder.encodeToString(bytes);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
 }

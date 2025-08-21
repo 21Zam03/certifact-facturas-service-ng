@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.templates.template;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.ComprobanteDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
 import com.certicom.certifact_facturas_service_ng.dto.others.GuiaRelacionada;
@@ -33,7 +33,7 @@ import static com.certicom.certifact_facturas_service_ng.util.UtilXml.formatXML;
 @Slf4j
 public class FacturaTemplate {
 
-    public String construirFactura(ComprobanteDto factura) throws TemplateException {
+    public String construirFactura(PaymentVoucherDto factura) throws TemplateException {
         String xml;
         DOMSource source;
         StringWriter writer;

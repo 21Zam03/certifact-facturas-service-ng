@@ -1,5 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
+import com.certicom.certifact_facturas_service_ng.converter.PaymentVoucherConverter;
 import com.certicom.certifact_facturas_service_ng.dto.model.*;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
@@ -8,16 +9,18 @@ import com.certicom.certifact_facturas_service_ng.enums.*;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
 import com.certicom.certifact_facturas_service_ng.exceptions.SignedException;
 import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
+import com.certicom.certifact_facturas_service_ng.formatter.PaymentVoucherFormatter;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.PlantillaService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
+import com.certicom.certifact_facturas_service_ng.util.UUIDGen;
 import com.certicom.certifact_facturas_service_ng.util.UtilArchivo;
 import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import com.google.common.collect.ImmutableMap;
 import com.certicom.certifact_facturas_service_ng.exceptions.ExcepcionNegocio;
 import com.certicom.certifact_facturas_service_ng.feign.FacturaComprobanteFeign;
-import com.certicom.certifact_facturas_service_ng.service.ComprobanteService;
+import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +34,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class ComprobanteServiceImpl implements ComprobanteService {
+public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
     private static final String CODSOLES = "PEN";
     private static final String CODDOLAR = "USD";
@@ -107,22 +110,71 @@ public class ComprobanteServiceImpl implements ComprobanteService {
     }
 
     @Override
-    public Map<String, Object> generarComprobante(ComprobanteDto comprobante, Boolean isEdit, Long idUsuario) {
-        if(comprobante.getCodigoTipoOperacion() != null) {
-            if(comprobante.getCodigoTipoOperacion().equals("1001") ||  comprobante.getCodigoTipoOperacion().equals("1002") ||
-            comprobante.getCodigoTipoOperacion().equals("1003") ||  comprobante.getCodigoTipoOperacion().equals("1004")) {
+    public Map<String, Object> generatePaymentVoucher(PaymentVoucherDto paymentVoucherDto, boolean isEdit, Long idUsuario) {
+        /*if(paymentVoucherDto.getCodigoTipoOperacion() != null) {
+            if(paymentVoucherDto.getCodigoTipoOperacion().equals("1001") ||  paymentVoucherDto.getCodigoTipoOperacion().equals("1002") ||
+            paymentVoucherDto.getCodigoTipoOperacion().equals("1003") ||  paymentVoucherDto.getCodigoTipoOperacion().equals("1004")) {
                 Leyenda leyendaDto = Leyenda.builder()
                         .descripcion("Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central")
                         .codigo("2006")
                         .build();
-                comprobante.setLeyendas(new ArrayList<>());
-                comprobante.getLeyendas().add(leyendaDto);
+                paymentVoucherDto.setLeyendas(new ArrayList<>());
+                paymentVoucherDto.getLeyendas().add(leyendaDto);
             }
+        }*/
+        if (paymentVoucherDto.getCodigoTipoOperacion() != null) {
+            if (paymentVoucherDto.getCodigoTipoOperacion().trim().length() == 4) {
+                paymentVoucherDto.setCodigoTipoOperacionCatalogo51(paymentVoucherDto.getCodigoTipoOperacion());
+            } else {
+                switch (paymentVoucherDto.getCodigoTipoOperacion()) {
+                    case "01":
+                    case "04":
+                        paymentVoucherDto.setCodigoTipoOperacionCatalogo51("0101");
+                        break;
+                    case "02":
+                        paymentVoucherDto.setCodigoTipoOperacionCatalogo51("0200");
+                        break;
+                    default:
+                        paymentVoucherDto.setCodigoTipoOperacionCatalogo51("0101");
+                        break;
+                }
+            }
+        } else {
+            paymentVoucherDto.setCodigoTipoOperacionCatalogo51("0101");
         }
-        return generarDocumento(comprobante, isEdit, idUsuario);
+        return generateDocument(paymentVoucherDto, isEdit, idUsuario);
     }
 
-    Map<String, Object> generarDocumento(ComprobanteDto comprobante, Boolean isEdit, Long idUsuario) {
+    @Override
+    public PaymentVoucherDto prepareComprobanteForEnvioSunatInter(String finalRucEmisor, String tipoComprobante, String serieDocumento, Integer numeroDocumento) throws ServiceException {
+        PaymentVoucherDto paymentVoucherDto = comprobanteFeign.
+                findPaymentVoucherByRucAndTipoComprobanteAndSerieDocumentoAndNumeroDocumento(finalRucEmisor, tipoComprobante, serieDocumento, numeroDocumento);
+
+        if (paymentVoucherDto == null)
+            throw new ServiceException(String.format("%s [%s-%s-%s-%s]", "El comprobante que desea enviar a la Sunat, no existe: ", finalRucEmisor, tipoComprobante, serieDocumento, numeroDocumento != null ? numeroDocumento.toString() : ""));
+
+        if (paymentVoucherDto.getEstadoSunat().equals(EstadoSunatEnum.ACEPTADO.getAbreviado()))
+            throw new ServiceException("Este comprobante ya se encuentra aceptado en Sunat.");
+
+        if (paymentVoucherDto.getEstadoSunat().equals(EstadoSunatEnum.ANULADO.getAbreviado()))
+            throw new ServiceException("Este comprobante se encuentra anulado en Sunat.");
+
+        if (paymentVoucherDto.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_BOLETA))
+            throw new ServiceException("Por este metodo solo se permite enviar Facturas, Notas de crédito y Débito.");
+
+
+        if (paymentVoucherDto.getTipoComprobanteAfectado() != null) {
+            if (
+                    (paymentVoucherDto.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO) || paymentVoucherDto.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_DEBITO))
+                            && paymentVoucherDto.getTipoComprobanteAfectado().equals(ConstantesSunat.TIPO_DOCUMENTO_BOLETA)
+            ) {
+                throw new ServiceException("Por este metodo solo se permite enviar Notas de crédito y Débito asociadas a Facturas, las notas asociadas a boletas se deben enviar por resumen diario.");
+            }
+        }
+        return paymentVoucherDto;
+    }
+
+    Map<String, Object> generateDocument(PaymentVoucherDto comprobante, Boolean isEdit, Long idUsuario) {
 
         Map<String, Object> resultado = new HashMap<>();
         ResponsePSE response = new ResponsePSE();
@@ -140,6 +192,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         String estadoRegistro;
         String estadoEnSunat;
         Integer estadoItem = null;
+        SendBillDto dataSendBill;
 
         Long idPaymentVoucher;
         Date fechaActual;
@@ -148,17 +201,13 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             /*PREPARAMOS LOS DATOS NECESARIOS DEL COMPROBANTE*/
             log.info("GENERANDO COMPROBANTE - {} - {}", comprobante.getSerie(), comprobante.getNumero());
 
-            formatearComprobante(comprobante);
+            PaymentVoucherFormatter.formatPaymentVoucher(comprobante);
             EmpresaDto empresaDto = completarDatosEmisor(comprobante, isEdit);
 
             //FLAG DE ENVIO POR SENDBILL O RESUMEN
             if (comprobante.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO)
                     || comprobante.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_DEBITO)) {
                 isFacturaOrNoteAssociated = false;
-            }
-
-            if (comprobante.getTipoTransaccion() == null) {
-                comprobante.setTipoTransaccion(BigDecimal.ONE);
             }
 
             if(isEdit) {
@@ -199,9 +248,6 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                 }
             }
 
-            //log.info("COMPROBANTE: {}", comprobante);
-            //log.info("EMPRESA: {}", empresaDto);
-
             if (Boolean.TRUE.equals(empresaDto.getAllowSaveOficina()) && comprobante.getOficinaId() == null) {
                 OficinaDto oficinaDto = comprobanteFeign.obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
                         empresaDto.getId(), comprobante.getSerie(), comprobante.getTipoComprobante());
@@ -210,9 +256,8 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                         comprobante.setOficinaId(oficinaDto.getId());
                     }
                 }
-                log.info("OFICINA: {}", oficinaDto);
             }
-
+            log.info("VOUCHER: {}",comprobante);
             /*GENERAMOS PLANTILLA XML DE ACUERDO A SU OSE*/
             if (empresaDto.getOseId() != null && empresaDto.getOseId() == 1) {
                 plantillaGenerado = plantillaService.buildPaymentVoucherSignOse(comprobante);
@@ -235,7 +280,6 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                     ConstantesParametro.REGISTRO_STATUS_NUEVO, fileXMLZipBase64);
             log.info("ARVHIVO SUBIDO: {}", archivoSubido.toString());
 
-
             fechaActual = Calendar.getInstance().getTime();
             estadoRegistro = EstadoComprobanteEnum.REGISTRADO.getCodigo();
             estadoEnSunat = EstadoSunatEnum.NO_ENVIADO.getAbreviado();
@@ -246,11 +290,24 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                     estadoRegistro, estadoEnSunat, estadoItem, messageResponse, "", null,
                     new Timestamp(fechaActual.getTime()), null, OperacionLogEnum.REGISTER_PAYMENT_VOUCHER
             );
-            log.info("COMPROBANTE: {}", comprobanteCreado);
+            log.info("COMPROBANTE CREADO: {}", comprobanteCreado);
 
             idPaymentVoucher = comprobanteCreado.getIdPaymentVoucher();
-            resultado.put("idPaymentVoucher", idPaymentVoucher);
+
+            if(isFacturaOrNoteAssociated) {
+                registerVoucherTemporal(idPaymentVoucher, nombreDocumento, UUIDGen.generate(), comprobante.getTipoComprobante(), isEdit);
+                dataSendBill = new SendBillDto();
+                dataSendBill.setRuc(comprobante.getRucEmisor());
+                dataSendBill.setIdPaymentVoucher(idPaymentVoucher);
+                dataSendBill.setNameDocument(nombreDocumento);
+                dataSendBill.setEnvioAutomaticoSunat(empresaDto.getEnvioAutomaticoSunat() == null || empresaDto.getEnvioAutomaticoSunat());
+                resultado.put(ConstantesParametro.PARAM_BEAN_SEND_BILL, dataSendBill);
+            }
+
             status = true;
+
+            resultado.put("idPaymentVoucher", idPaymentVoucher);
+
         } catch (TemplateException | SignedException e) {
             status = false;
             messageResponse = "Error al generar plantilla del documento[" + comprobante.getIdentificadorDocumento() + "] " + e.getMessage();
@@ -275,46 +332,58 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         transformarUrlsAResponse(response, comprobanteCreado);
         resultado.put(ConstantesParametro.PARAM_BEAN_RESPONSE_PSE, response);
 
+        validateAutomaticDelivery(resultado);
+        //ResponsePSE resp = (ResponsePSE) resultado.get(ConstantesParametro.PARAM_BEAN_RESPONSE_PSE);
         return resultado;
     }
 
-    private void formatearComprobante(ComprobanteDto comprobanteDto) {
-        if (comprobanteDto.getTotalValorVentaGravada() != null && comprobanteDto.getTotalValorVentaGravada().compareTo(new BigDecimal(0)) == 0) {
-            comprobanteDto.setTotalValorVentaGravada(null);
-        }
-        if (comprobanteDto.getTotalValorVentaGratuita() != null && comprobanteDto.getTotalValorVentaGratuita().compareTo(new BigDecimal(0)) == 0) {
-            comprobanteDto.setTotalValorVentaGratuita(null);
-        }
-        if (comprobanteDto.getTotalValorVentaExonerada() != null && comprobanteDto.getTotalValorVentaExonerada().compareTo(new BigDecimal(0)) == 0) {
-            comprobanteDto.setTotalValorVentaExonerada(null);
-        }
-        if (comprobanteDto.getTotalValorVentaExportacion() != null && comprobanteDto.getTotalValorVentaExportacion().compareTo(new BigDecimal(0)) == 0) {
-            comprobanteDto.setTotalValorVentaExportacion(null);
-        }
-        if (comprobanteDto.getTotalValorVentaInafecta() != null && comprobanteDto.getTotalValorVentaInafecta().compareTo(new BigDecimal(0)) == 0) {
-            comprobanteDto.setTotalValorVentaInafecta(null);
-        }
-        if (comprobanteDto.getTotalIgv() != null && comprobanteDto.getTotalIgv().compareTo(new BigDecimal(0)) == 0) {
-            comprobanteDto.setTotalIgv(null);
-        }
-        if (comprobanteDto.getMontoDetraccion() != null) {
-            comprobanteDto.setMontoDetraccion(comprobanteDto.getMontoDetraccion().setScale(2, RoundingMode.CEILING));
+    private void validateAutomaticDelivery(Map<String, Object> result) {
+        if (result.get(ConstantesParametro.PARAM_BEAN_SEND_BILL) != null) {
+            SendBillDto dataSendBill = (SendBillDto) result.get(ConstantesParametro.PARAM_BEAN_SEND_BILL);
+            if (dataSendBill.getEnvioAutomaticoSunat()) {
+                System.out.println("Enviar mensaje");
+                //messageProducer.produceSendBill(dataSendBill);
+            }
         }
     }
 
-    private EmpresaDto completarDatosEmisor(ComprobanteDto comprobanteDto, boolean isEdit) {
-        EmpresaDto empresaDto = comprobanteFeign.obtenerEmpresaPorRuc(comprobanteDto.getRucEmisor());
-        comprobanteDto.setRucEmisor(empresaDto.getRuc());
-        comprobanteDto.setDenominacionEmisor(empresaDto.getRazon());
-        comprobanteDto.setTipoDocumentoEmisor(ConstantesSunat.TIPO_DOCUMENTO_IDENTIDAD_RUC);
-        comprobanteDto.setNombreComercialEmisor(empresaDto.getNombreComer());
-        comprobanteDto.setUblVersion(empresaDto.getUblVersion() != null ? empresaDto.getUblVersion() : ConstantesSunat.UBL_VERSION_2_0);
+    private void formatPaymentVoucher(PaymentVoucherDto paymentVoucherDto) {
+        if (paymentVoucherDto.getTotalValorVentaGravada() != null && paymentVoucherDto.getTotalValorVentaGravada().compareTo(new BigDecimal(0)) == 0) {
+            paymentVoucherDto.setTotalValorVentaGravada(null);
+        }
+        if (paymentVoucherDto.getTotalValorVentaGratuita() != null && paymentVoucherDto.getTotalValorVentaGratuita().compareTo(new BigDecimal(0)) == 0) {
+            paymentVoucherDto.setTotalValorVentaGratuita(null);
+        }
+        if (paymentVoucherDto.getTotalValorVentaExonerada() != null && paymentVoucherDto.getTotalValorVentaExonerada().compareTo(new BigDecimal(0)) == 0) {
+            paymentVoucherDto.setTotalValorVentaExonerada(null);
+        }
+        if (paymentVoucherDto.getTotalValorVentaExportacion() != null && paymentVoucherDto.getTotalValorVentaExportacion().compareTo(new BigDecimal(0)) == 0) {
+            paymentVoucherDto.setTotalValorVentaExportacion(null);
+        }
+        if (paymentVoucherDto.getTotalValorVentaInafecta() != null && paymentVoucherDto.getTotalValorVentaInafecta().compareTo(new BigDecimal(0)) == 0) {
+            paymentVoucherDto.setTotalValorVentaInafecta(null);
+        }
+        if (paymentVoucherDto.getTotalIgv() != null && paymentVoucherDto.getTotalIgv().compareTo(new BigDecimal(0)) == 0) {
+            paymentVoucherDto.setTotalIgv(null);
+        }
+        if (paymentVoucherDto.getMontoDetraccion() != null) {
+            paymentVoucherDto.setMontoDetraccion(paymentVoucherDto.getMontoDetraccion().setScale(2, RoundingMode.CEILING));
+        }
+    }
+
+    private EmpresaDto completarDatosEmisor(PaymentVoucherDto paymentVoucherDto, boolean isEdit) {
+        EmpresaDto empresaDto = comprobanteFeign.obtenerEmpresaPorRuc(paymentVoucherDto.getRucEmisor());
+        paymentVoucherDto.setRucEmisor(empresaDto.getRuc());
+        paymentVoucherDto.setDenominacionEmisor(empresaDto.getRazon());
+        paymentVoucherDto.setTipoDocumentoEmisor(ConstantesSunat.TIPO_DOCUMENTO_IDENTIDAD_RUC);
+        paymentVoucherDto.setNombreComercialEmisor(empresaDto.getNombreComer());
+        paymentVoucherDto.setUblVersion(empresaDto.getUblVersion() != null ? empresaDto.getUblVersion() : ConstantesSunat.UBL_VERSION_2_0);
 
         if (!isEdit && (empresaDto.getSimultaneo() != null && empresaDto.getSimultaneo())) {
             Integer proximoNumero;
-            proximoNumero = getProximoNumero(comprobanteDto.getTipoComprobante(), comprobanteDto.getSerie(), comprobanteDto.getRucEmisor());
-            if (proximoNumero > comprobanteDto.getNumero()) {
-                comprobanteDto.setNumero(proximoNumero);
+            proximoNumero = getProximoNumero(paymentVoucherDto.getTipoComprobante(), paymentVoucherDto.getSerie(), paymentVoucherDto.getRucEmisor());
+            if (proximoNumero > paymentVoucherDto.getNumero()) {
+                paymentVoucherDto.setNumero(proximoNumero);
             }
         }
         return empresaDto;
@@ -338,19 +407,10 @@ public class ComprobanteServiceImpl implements ComprobanteService {
     }
 
     private PaymentVoucherEntity registrarComprobante(
-            ComprobanteDto comprobante, Long idArchivoRegistro, Boolean isEdit,
+            PaymentVoucherDto comprobante, Long idArchivoRegistro, Boolean isEdit,
             PaymentVoucherEntity antiguoComprobante, String estado, String estadoAnterior, String estadoEnSunat,
             Integer estadoItem, String mensajeRespuesta, String registroUsuario, String usuarioModificacion,
             Timestamp fechaRegistro, Timestamp fechaModificacion, OperacionLogEnum operacionLogEnum) {
-
-        /*
-        ComprobanteEntity comprobanteAcrear = new ComprobanteEntity();
-        EmpresaDto empresa = comprobanteFeign.obtenerEmpresaPorRuc(comprobante.getRucEmisor());
-        if(empresa == null) {
-            throw new ServicioException("Error al momento de obtener la empresa");
-        }
-
-        * */
 
         PaymentVoucherEntity entity = new PaymentVoucherEntity();
 
@@ -397,7 +457,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
                     System.out.println("Eliminar guias relacionadas del comprobante");
                 }
             }
-            entity.setOficinaEntity(antiguoComprobante.getOficinaEntity());
+            entity.setBranchOfficeEntity(antiguoComprobante.getBranchOfficeEntity());
             entity.setIdPaymentVoucher(antiguoComprobante.getIdPaymentVoucher());
             entity.setUuid(antiguoComprobante.getUuid());
             entity.setComprobanteArchivoEntityList(antiguoComprobante.getComprobanteArchivoEntityList());
@@ -499,7 +559,7 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             List<ComprobanteArchivoEntity> comprobantesArchivosList = new ArrayList<>();
             ComprobanteArchivoEntity comprobanteArchivo = ComprobanteArchivoEntity.builder()
                     .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
-                    .subidaRegistroArchivoId(idArchivoRegistro)
+                    .idRegisterFileSend(idArchivoRegistro)
                     .tipoArchivo(TipoArchivoEnum.XML.name())
                     .build();
             comprobantesArchivosList.add(comprobanteArchivo);
@@ -631,7 +691,15 @@ public class ComprobanteServiceImpl implements ComprobanteService {
             comprobanteDetalleEntityList.add(detailEntity);
         }
         entity.setComprobanteDetalleEntityList(comprobanteDetalleEntityList);
+        entity.setOficinaId(comprobante.getOficinaId());
 
+        if (registroUsuario != null && entity.getOficinaId() == null) {
+            if (!registroUsuario.equals(ConstantesSunat.SUPERADMIN)) {
+                UserEntity user = facturaComprobanteFeign.findByUserByUsername(registroUsuario);
+                entity.setOficinaId(user.getOficinaId());
+            }
+        }
+        entity.setUuid(UUIDGen.generate());
         return facturaComprobanteFeign.registrarComprobante(entity);
     }
 
@@ -666,7 +734,6 @@ public class ComprobanteServiceImpl implements ComprobanteService {
         tmpEntity.setUuidSaved(uuidSaved);
         tmpEntity.setTipoComprobante(tipoComprobante);
 
-        //tmpVoucherSendBillRepository.save(tmpEntity);
-
+        facturaComprobanteFeign.saveTmpVoucher(tmpEntity);
     }
 }

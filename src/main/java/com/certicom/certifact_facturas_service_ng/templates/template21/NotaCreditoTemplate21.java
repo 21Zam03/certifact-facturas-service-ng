@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.templates.template21;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.ComprobanteDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.enums.AfectacionIgvEnum;
 import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
@@ -31,7 +31,7 @@ public class NotaCreditoTemplate21 extends SunatTemplate {
         this.mapTransaccion.put(2,"Credito");
     }
 
-    public String construirNotaCredito(ComprobanteDto creditNote) throws TemplateException {
+    public String construirNotaCredito(PaymentVoucherDto creditNote) throws TemplateException {
 
         Firma signature = buildSignature(creditNote);
         String templateBuilt = buildTemplateInXML(creditNote, signature);
@@ -39,7 +39,7 @@ public class NotaCreditoTemplate21 extends SunatTemplate {
         return templateBuilt;
     }
 
-    protected Firma buildSignature(ComprobanteDto creditNote) {
+    protected Firma buildSignature(PaymentVoucherDto creditNote) {
 
         Firma signature = new Firma();
 
@@ -52,7 +52,7 @@ public class NotaCreditoTemplate21 extends SunatTemplate {
     }
 
     private void appendCreditNoteLine(Document document, Element elementRoot,
-                                      List<ComprobanteItem> creditNotelines, String codigoMoneda, ComprobanteDto notaCredito) throws TemplateException {
+                                      List<ComprobanteItem> creditNotelines, String codigoMoneda, PaymentVoucherDto notaCredito) throws TemplateException {
 
         int correlativoItem = 1;
         Map<String, String> attributes = new HashMap<>();
@@ -576,7 +576,7 @@ public class NotaCreditoTemplate21 extends SunatTemplate {
         }
     }
 
-    private String buildTemplateInXML(ComprobanteDto notaCredito, Firma signature) throws TemplateException {
+    private String buildTemplateInXML(PaymentVoucherDto notaCredito, Firma signature) throws TemplateException {
 
         String stringXMLGenerate = null;
         Document document;

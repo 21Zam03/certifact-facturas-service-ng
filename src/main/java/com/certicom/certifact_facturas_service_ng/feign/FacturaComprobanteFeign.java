@@ -4,6 +4,7 @@ import com.certicom.certifact_facturas_service_ng.dto.model.*;
 import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
 import com.certicom.certifact_facturas_service_ng.entity.SubidaRegistroArchivoEntity;
 import com.certicom.certifact_facturas_service_ng.entity.TmpVoucherSendBillEntity;
+import com.certicom.certifact_facturas_service_ng.entity.UserEntity;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,6 +30,9 @@ public interface FacturaComprobanteFeign {
 
     @GetMapping("/api/invoice-sp/user/{idUsuario}")
     UserInterDto obtenerUsuario(@PathVariable Long idUsuario);
+
+    @GetMapping("/api/invoice-sp/user/{username}")
+    public UserEntity findByUserByUsername(@PathVariable String username);
 
     @GetMapping("/api/invoice-sp/count-total")
     Integer contarComprobantes(
@@ -77,7 +81,7 @@ public interface FacturaComprobanteFeign {
     );
 
     @PostMapping("/api/invoice-sp/file")
-    public SubidaRegistroArchivoEntity regitrarSubidaArchivo(@RequestBody SubidaRegistroArchivoDto subidaRegistroArchivoDto);
+    public SubidaRegistroArchivoEntity regitrarSubidaArchivo(@RequestBody RegisterFileUploadDto registerFileUploadDto);
 
     @PostMapping("/api/invoice-sp")
     public PaymentVoucherEntity registrarComprobante(@RequestBody PaymentVoucherEntity entity);
@@ -92,5 +96,19 @@ public interface FacturaComprobanteFeign {
 
     @GetMapping("/api/invoice-sp/tmpVoucher/{id}")
     public TmpVoucherSendBillEntity findTmpVoucherByIdPaymentVoucher(@PathVariable Long id);
+
+    @PostMapping("/api/invoice-sp/tmpVoucher")
+    public int saveTmpVoucher(@RequestBody TmpVoucherSendBillEntity tmpVoucherSendBillEntity);
+
+    @GetMapping("/api/invoice-sp/payment-voucher")
+    public PaymentVoucherDto findPaymentVoucherByRucAndTipoComprobanteAndSerieDocumentoAndNumeroDocumento
+            (String finalRucEmisor, String tipoComprobante, String serieDocumento, Integer numeroDocumento);
+
+    @PutMapping("/api/invoice-sp/tmpVoucher/status")
+    public int updateStatusVoucherTmp(@RequestParam Long identificador, @RequestParam String estado);
+
+    @GetMapping("/api/invoice-sp/register-file-upload/")
+    public RegisterFileUploadDto findFirst1ByPaymentVoucherIdPaymentVoucherAndTipoArchivoAndEstadoArchivoOrderByOrdenDesc
+            (@RequestParam Long idPayment, @RequestParam String tipoArchivo, @RequestParam String estadoArchivo);
 
 }
