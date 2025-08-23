@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @Builder
 @ToString
-public class EmpresaDto {
+public class CompanyDto {
 
     private Integer Id;
 

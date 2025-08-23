@@ -3,7 +3,7 @@ package com.certicom.certifact_facturas_service_ng.deserializer;
 import com.certicom.certifact_facturas_service_ng.dto.others.GuiaRelacionada;
 import com.certicom.certifact_facturas_service_ng.exceptions.DeserializadorException;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
-import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
+import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -32,7 +32,7 @@ public class GuiaRelacionadaDeserializer extends CamposEntrada<GuiaRelacionada> 
         campoTrama = trama.get(codigoTipoGuiaLabel);
         if (campoTrama != null) {
             if (!campoTrama.isTextual()) {
-                mensajeError = ConstantesParametro.MSG_RESP_ERROR_DESERIALIZACION_STRING + "24[" + codigoTipoGuiaLabel + "]";
+                mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + "24[" + codigoTipoGuiaLabel + "]";
                 throw new DeserializadorException(mensajeError);
             } else {
                 codigoTipoGuia = campoTrama.textValue();
@@ -41,7 +41,7 @@ public class GuiaRelacionadaDeserializer extends CamposEntrada<GuiaRelacionada> 
         campoTrama = trama.get(serieNumeroGuiaLabel);
         if (campoTrama != null && !campoTrama.isNull()) {
             if (!campoTrama.isTextual()) {
-                mensajeError = ConstantesParametro.MSG_RESP_ERROR_DESERIALIZACION_STRING + "25[" + serieNumeroGuiaLabel + "]";
+                mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + "25[" + serieNumeroGuiaLabel + "]";
                 throw new DeserializadorException(mensajeError);
             } else {
                 serieNumeroGuia = campoTrama.textValue();
@@ -52,7 +52,7 @@ public class GuiaRelacionadaDeserializer extends CamposEntrada<GuiaRelacionada> 
             if (campoTrama.isNumber()) {
                 idguiaremision = campoTrama.longValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_RESP_ERROR_DESERIALIZACION_STRING + "26[" + idguiaremisionLabel + "]";
+                mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + "26[" + idguiaremisionLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }

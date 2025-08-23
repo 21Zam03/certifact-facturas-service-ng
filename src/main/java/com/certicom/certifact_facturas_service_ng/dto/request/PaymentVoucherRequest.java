@@ -97,5 +97,4 @@ public class PaymentVoucherRequest implements Serializable {
     private String idpay;
     private String fechaRegistro;
 
-
 }

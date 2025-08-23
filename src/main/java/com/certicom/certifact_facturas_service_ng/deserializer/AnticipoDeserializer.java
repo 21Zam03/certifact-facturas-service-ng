@@ -1,10 +1,9 @@
 package com.certicom.certifact_facturas_service_ng.deserializer;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
-import com.certicom.certifact_facturas_service_ng.dto.request.AnticipoRequest;
 import com.certicom.certifact_facturas_service_ng.exceptions.DeserializadorException;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
-import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
+import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -35,7 +34,7 @@ public class AnticipoDeserializer extends CamposEntrada<Anticipo> {
         campoTrama = trama.get(serieAnticipoLabel);
         if (campoTrama != null) {
             if (!campoTrama.isTextual()) {
-                mensajeError = ConstantesParametro.MSG_RESP_ERROR_DESERIALIZACION_STRING + "3[" + serieAnticipoLabel + "]";
+                mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + "3[" + serieAnticipoLabel + "]";
                 throw new DeserializadorException(mensajeError);
             } else {
                 serieAnticipo = campoTrama.textValue();
@@ -46,14 +45,14 @@ public class AnticipoDeserializer extends CamposEntrada<Anticipo> {
             if (campoTrama.canConvertToInt()) {
                 numeroAnticipo = campoTrama.intValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_RESP_ERROR_DESERIALIZACION_INTEGER + "[" + numeroAnticipoLabel + "]";
+                mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_INTEGER + "[" + numeroAnticipoLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
         campoTrama = trama.get(tipoDocumentoAnticipoLabel);
         if (campoTrama != null) {
             if (!campoTrama.isTextual()) {
-                mensajeError = ConstantesParametro.MSG_RESP_ERROR_DESERIALIZACION_STRING + "4[" + tipoDocumentoAnticipoLabel + "]";
+                mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + "4[" + tipoDocumentoAnticipoLabel + "]";
                 throw new DeserializadorException(mensajeError);
             } else {
                 tipoDocumentoAnticipo = campoTrama.textValue();
@@ -64,7 +63,7 @@ public class AnticipoDeserializer extends CamposEntrada<Anticipo> {
             if (campoTrama.isNumber()) {
                 montoAnticipado = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoAnticipadoLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoAnticipadoLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }

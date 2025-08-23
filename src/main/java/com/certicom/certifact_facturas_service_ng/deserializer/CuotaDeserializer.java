@@ -3,7 +3,7 @@ package com.certicom.certifact_facturas_service_ng.deserializer;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteCuota;
 import com.certicom.certifact_facturas_service_ng.exceptions.DeserializadorException;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
-import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
+import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -34,7 +34,7 @@ public class CuotaDeserializer extends CamposEntrada<ComprobanteCuota> {
         campoTrama = trama.get(numeroCuotaLabel);
         if (campoTrama != null) {
             if (!campoTrama.isNumber()) {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "5[" + numeroCuotaLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "5[" + numeroCuotaLabel + "]";
                 throw new DeserializadorException(mensajeError);
             } else {
                 numero = campoTrama.intValue();
@@ -44,7 +44,7 @@ public class CuotaDeserializer extends CamposEntrada<ComprobanteCuota> {
         campoTrama = trama.get(montoCuotaLabel);
         if (campoTrama != null) {
             if (!campoTrama.isNumber()) {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "6[" + montoCuotaLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "6[" + montoCuotaLabel + "]";
                 throw new DeserializadorException(mensajeError);
             } else {
                 monto = campoTrama.decimalValue();
@@ -53,7 +53,7 @@ public class CuotaDeserializer extends CamposEntrada<ComprobanteCuota> {
         campoTrama = trama.get(fechaCuotaLabel);
         if (campoTrama != null) {
             if (!campoTrama.isTextual()) {
-                mensajeError = ConstantesParametro.MSG_RESP_ERROR_DESERIALIZACION_STRING + "6[" + fechaCuotaLabel + "]";
+                mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + "6[" + fechaCuotaLabel + "]";
                 throw new DeserializadorException(mensajeError);
             } else {
                 fecha = campoTrama.textValue();

@@ -1,10 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.*;
-import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
-import com.certicom.certifact_facturas_service_ng.entity.SubidaRegistroArchivoEntity;
-import com.certicom.certifact_facturas_service_ng.entity.TmpVoucherSendBillEntity;
-import com.certicom.certifact_facturas_service_ng.entity.UserEntity;
+import com.certicom.certifact_facturas_service_ng.entity.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,7 +65,7 @@ public interface FacturaComprobanteFeign {
     public String obtenerEstadoEmpresaPorRuc(@RequestParam String rucEmisor);
 
     @GetMapping("/api/invoice-sp/company/{ruc}")
-    public EmpresaDto obtenerEmpresaPorRuc(@PathVariable String ruc);
+    public CompanyDto findCompanyByRuc(@PathVariable String ruc);
 
     @GetMapping("/api/invoice-sp/number")
     public Integer obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(
@@ -81,10 +78,10 @@ public interface FacturaComprobanteFeign {
     );
 
     @PostMapping("/api/invoice-sp/file")
-    public SubidaRegistroArchivoEntity regitrarSubidaArchivo(@RequestBody RegisterFileUploadDto registerFileUploadDto);
+    public RegisterFileUploadEntity saveRegisterFileUpload(@RequestBody RegisterFileUploadDto registerFileUploadDto);
 
     @PostMapping("/api/invoice-sp")
-    public PaymentVoucherEntity registrarComprobante(@RequestBody PaymentVoucherEntity entity);
+    public PaymentVoucherEntity savePaymentVoucher(@RequestBody PaymentVoucherEntity entity);
 
     @GetMapping("/api/invoice-sp/additional-field")
     public Integer obtenerCampoAdicionalIdPorNombre(@RequestParam String nombreCampo);
@@ -93,6 +90,9 @@ public interface FacturaComprobanteFeign {
     public PaymentVoucherEntity findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
             @RequestParam String rucEmisor, @RequestParam String tipoComprobante,
             @RequestParam String serie, @RequestParam Integer numero);
+
+    @GetMapping("/api/invoice-sp/payment-voucher/{id}")
+    public PaymentVoucherEntity findPaymentVoucherById(@PathVariable Long id);
 
     @GetMapping("/api/invoice-sp/tmpVoucher/{id}")
     public TmpVoucherSendBillEntity findTmpVoucherByIdPaymentVoucher(@PathVariable Long id);
@@ -110,5 +110,26 @@ public interface FacturaComprobanteFeign {
     @GetMapping("/api/invoice-sp/register-file-upload/")
     public RegisterFileUploadDto findFirst1ByPaymentVoucherIdPaymentVoucherAndTipoArchivoAndEstadoArchivoOrderByOrdenDesc
             (@RequestParam Long idPayment, @RequestParam String tipoArchivo, @RequestParam String estadoArchivo);
+
+    @GetMapping("/api/invoice-sp/ose")
+    public OseDto findOseByRucInter(@RequestParam String ruc);
+
+    @GetMapping("/api/invoice-sp/error-catalog")
+    public ErrorEntity findFirst1ByCodeAndDocument(String codigoRespuesta, String tipoDocumento);
+
+    @DeleteMapping("/api/invoice-sp/tmpVoucher")
+    public int deleteTmpVoucherById(@RequestParam Long tmpVoucherId);
+
+    @PutMapping("/api/invoice-sp/payment-voucher")
+    public int updateStatePaymentVoucher(
+            Long idPaymentVoucher, String codigo, String messageResponse,
+            String codesResponse
+    );
+
+    @PutMapping("/api/invoice-sp/payment-voucher")
+    public int updateStatePaymentVoucher(
+            Long idPaymentVoucher, String codigo, String estadoEnSunat,
+            String messageResponse, String codesResponse
+    );
 
 }

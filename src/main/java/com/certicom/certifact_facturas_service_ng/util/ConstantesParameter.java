@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.util;
 
-public class ConstantesParametro {
+public class ConstantesParameter {
 
     public static final String RANGO_DIAS_BAJA_DOCUMENTOS = "RANGO_DIAS_BAJA_DOCUMENTOS";
     public static final String RANGO_DIAS_RESUMEN_BOLETAS = "RANGO_DIAS_RESUMEN_BOLETAS";

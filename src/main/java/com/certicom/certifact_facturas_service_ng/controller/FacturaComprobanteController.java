@@ -6,7 +6,7 @@ import com.certicom.certifact_facturas_service_ng.dto.request.IdentificadorPayme
 import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.service.ComunicationSunatService;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
-import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
+import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +52,7 @@ public class FacturaComprobanteController {
         log.info("ComprobanteController - registrarComprobante - [comprobanteRequest={}]", paymentVoucherRequest.toString());
         PaymentVoucherDto paymentVoucherDto = PaymentVoucherConverter.requestToDto(paymentVoucherRequest);
         Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucherDto, false, 2L);
-        return new ResponseEntity<>(result.get(ConstantesParametro.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
+        return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
     }
 
     @PutMapping("/payment-voucher")
@@ -66,6 +66,7 @@ public class FacturaComprobanteController {
             ) {
         PaymentVoucherDto paymentVoucherDto = paymentVoucherService.prepareComprobanteForEnvioSunatInter("20204040303", paymentVoucher.getTipo(), paymentVoucher.getSerie(), paymentVoucher.getNumero());
         Map<String, Object> result = comunicationSunatService.sendDocumentBill(paymentVoucherDto.getRucEmisor(), paymentVoucherDto.getIdPaymentVoucher());
+
 
         return new ResponseEntity<>("", HttpStatus.OK);
     }

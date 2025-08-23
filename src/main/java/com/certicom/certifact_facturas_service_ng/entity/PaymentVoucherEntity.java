@@ -1,12 +1,12 @@
 package com.certicom.certifact_facturas_service_ng.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.certicom.certifact_facturas_service_ng.enums.EstadoArchivoEnum;
+import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@ToString
 public class PaymentVoucherEntity {
 
     private Long idPaymentVoucher;
@@ -102,9 +103,9 @@ public class PaymentVoucherEntity {
     private String identificadorBaja;
 
     private Integer oficinaId;
-    //Entidades relacionadas
+
     private BranchOfficeEntity branchOfficeEntity;
-    private List<ComprobanteArchivoEntity> comprobanteArchivoEntityList;
+    private List<PaymentVoucherFileEntity> paymentVoucherFileEntityList;
     private List<ComprobanteDetalleEntity> comprobanteDetalleEntityList;
     private List<AnticipoEntity> anticipoEntityList;
     private List<ComprobanteCuotaEntity> cuotasEntityList;

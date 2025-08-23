@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Builder
 @ToString
-public class SubidaRegistroArchivoEntity {
+public class RegisterFileUploadEntity {
 
     private static final long serialVersionUID = 1L;
 

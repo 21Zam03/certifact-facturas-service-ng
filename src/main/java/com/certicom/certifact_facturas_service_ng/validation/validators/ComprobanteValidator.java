@@ -36,6 +36,8 @@ public class ComprobanteValidator extends CamposEntrada<Object>
 
     @Override
     public boolean isValid(PaymentVoucherRequest paymentVoucherRequest, ConstraintValidatorContext context) {
+        /*BOOLEAN -> true o false, si es true quiere decir que la validacion es exitosa, si es false quiere decir que hubo error en la validacion*/
+        /*STRING -> representa el mensaje de validacion indicando la razon por la cual no paso la validacion*/
         Pair<Boolean, String> resultado;
         resultado = validarTipoComprobante(paymentVoucherRequest.getTipoComprobante());
         if(!resultado.getLeft()) {

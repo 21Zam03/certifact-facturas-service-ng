@@ -3,7 +3,7 @@ package com.certicom.certifact_facturas_service_ng.deserializer;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
 import com.certicom.certifact_facturas_service_ng.exceptions.DeserializadorException;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
-import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
+import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -94,7 +94,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 cantidad = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + cantidadLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + cantidadLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -133,7 +133,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 valorUnitario = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorUnitarioLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorUnitarioLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -143,7 +143,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 valorVenta = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorVentaLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorVentaLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -153,7 +153,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 descuento = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + descuentoLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + descuentoLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -166,7 +166,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 precioVentaUnitario = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + precioVentaUnitarioLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + precioVentaUnitarioLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -176,7 +176,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 valorReferencialUnitario = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorReferencialUnitarioLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorReferencialUnitarioLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -186,7 +186,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 montoBaseIgv = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIgvLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIgvLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -195,7 +195,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 montoBaseIvap = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIvapLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIvapLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -204,7 +204,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 montoBaseExportacion = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseExportacionLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseExportacionLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -213,7 +213,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 montoBaseExonerado = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseExoneradoLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseExoneradoLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -222,7 +222,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 montoBaseInafecto = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseInafectoLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseInafectoLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -231,7 +231,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 montoBaseGratuito = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseGratuitoLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseGratuitoLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -240,7 +240,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 montoBaseIsc = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIscLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIscLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -249,7 +249,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 montoBaseIcbper = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIscLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIscLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -258,7 +258,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 montoIcbper = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIscLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIscLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -267,7 +267,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 montoBaseOtrosTributos = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseOtrosTributosLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseOtrosTributosLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -277,7 +277,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 igv = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + igvLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + igvLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -286,7 +286,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 ivap = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + ivapLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + ivapLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -295,7 +295,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 impuestoVentaGratuita = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + impuestoVentaGratuitaLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + impuestoVentaGratuitaLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -304,7 +304,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 otrosTributos = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + otrosTributosLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + otrosTributosLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -314,7 +314,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 porcentajeIgv = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeIgvLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeIgvLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -323,7 +323,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 porcentajeIvap = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeIvapLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeIvapLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -332,7 +332,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 porcentajeIsc = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeIscLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeIscLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -341,7 +341,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 porcentajeOtrosTributos = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeOtrosTributosLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeOtrosTributosLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -350,7 +350,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 porcentajeTributoVentaGratuita = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeTributoVentaGratuitaLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeTributoVentaGratuitaLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -360,7 +360,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 isc = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + iscLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + iscLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -392,7 +392,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 valorServicioTransporte = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorServicioTransporteLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorServicioTransporteLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -402,7 +402,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 valorCargaEfectiva = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorCargaEfectivaLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorCargaEfectivaLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }
@@ -412,7 +412,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
             if (campoTrama.isNumber()) {
                 valorCargaUtil = campoTrama.decimalValue();
             } else {
-                mensajeError = ConstantesParametro.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorCargaUtilLabel + "]";
+                mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorCargaUtilLabel + "]";
                 throw new DeserializadorException(mensajeError);
             }
         }

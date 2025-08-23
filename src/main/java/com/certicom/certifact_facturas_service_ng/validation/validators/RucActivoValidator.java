@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.validation.validators;
 
 import com.certicom.certifact_facturas_service_ng.feign.FacturaComprobanteFeign;
-import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
+import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.certicom.certifact_facturas_service_ng.validation.anottations.RucActivo;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -38,7 +38,7 @@ public class RucActivoValidator implements ConstraintValidator<RucActivo, String
             return false;
         }
 
-        boolean esActivo = ConstantesParametro.REGISTRO_ACTIVO.equals(estado);
+        boolean esActivo = ConstantesParameter.REGISTRO_ACTIVO.equals(estado);
         if(!esActivo) {
             context.disableDefaultConstraintViolation();
             context.buildConstraintViolationWithTemplate(

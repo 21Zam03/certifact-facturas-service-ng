@@ -12,7 +12,7 @@ import com.certicom.certifact_facturas_service_ng.templates.template.NotaDebitoT
 import com.certicom.certifact_facturas_service_ng.templates.template21.FacturaTemplate21;
 import com.certicom.certifact_facturas_service_ng.templates.template21.NotaCreditoTemplate21;
 import com.certicom.certifact_facturas_service_ng.templates.template21.NotaDebitoTemplate21;
-import com.certicom.certifact_facturas_service_ng.util.ConstantesParametro;
+import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.certicom.certifact_facturas_service_ng.util.UtilArchivo;
 import com.certicom.certifact_facturas_service_ng.util.UtilConversion;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
@@ -124,7 +124,7 @@ public class PlantillaServiceImpl implements PlantillaService {
                 paymentVoucherDto.getSerie() + "-" + paymentVoucherDto.getNumero();
 
         resp = buildDataTemplate(firmaResp, nombreDocumento);
-        resp.put(ConstantesParametro.CODIGO_HASH, UtilArchivo.generarCodigoHash(firmaResp.toString()));
+        resp.put(ConstantesParameter.CODIGO_HASH, UtilArchivo.generarCodigoHash(firmaResp.toString()));
 
         return resp;
     }
@@ -140,19 +140,19 @@ public class PlantillaServiceImpl implements PlantillaService {
         File zipeado;
 
         zipeado = UtilArchivo.comprimir(firmaResp.getSignatureFile(),
-                ConstantesParametro.TYPE_FILE_XML, nombreDocumento);
+                ConstantesParameter.TYPE_FILE_XML, nombreDocumento);
         MessageDigest shaDigest = MessageDigest.getInstance("SHA-256");
         String shaChecksum = getFileChecksum(shaDigest, zipeado);
         resp = new HashMap<>();
-        resp.put(ConstantesParametro.PARAM_NAME_DOCUMENT, nombreDocumento);
+        resp.put(ConstantesParameter.PARAM_NAME_DOCUMENT, nombreDocumento);
         try {
 
             byte encoded[] = Base64.getEncoder().encode(firmaResp.getSignatureFile().toByteArray());
             String xmlBase64 = new String(encoded);
 
-            resp.put(ConstantesParametro.PARAM_FILE_ZIP_BASE64, UtilConversion.encodeFileToBase64(zipeado));
-            resp.put(ConstantesParametro.PARAM_FILE_XML_BASE64, xmlBase64);
-            resp.put(ConstantesParametro.PARAM_STRING_HASH, shaChecksum);
+            resp.put(ConstantesParameter.PARAM_FILE_ZIP_BASE64, UtilConversion.encodeFileToBase64(zipeado));
+            resp.put(ConstantesParameter.PARAM_FILE_XML_BASE64, xmlBase64);
+            resp.put(ConstantesParameter.PARAM_STRING_HASH, shaChecksum);
         } catch (IOException e) {
             throw new SignedException(e.getMessage());
         }
