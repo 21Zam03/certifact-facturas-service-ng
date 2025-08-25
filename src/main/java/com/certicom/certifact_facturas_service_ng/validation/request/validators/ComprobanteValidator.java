@@ -1,4 +1,4 @@
-package com.certicom.certifact_facturas_service_ng.validation.validators;
+package com.certicom.certifact_facturas_service_ng.validation.request.validators;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
@@ -6,7 +6,7 @@ import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequ
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
-import com.certicom.certifact_facturas_service_ng.validation.anottations.ComprobanteValidation;
+import com.certicom.certifact_facturas_service_ng.validation.request.anottations.ComprobanteValidation;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -123,6 +123,7 @@ public class ComprobanteValidator extends CamposEntrada<Object>
             context.buildConstraintViolationWithTemplate(resultado.getRight()).addConstraintViolation();
             return resultado.getLeft();
         }
+
         resultado = validarAnticipos(paymentVoucherRequest.getAnticipos());
         if(!resultado.getLeft()) {
             context.disableDefaultConstraintViolation();
@@ -151,18 +152,10 @@ public class ComprobanteValidator extends CamposEntrada<Object>
     }
 
     private Pair<Boolean, String> validarTipoComprobante(String tipoComprobante) {
-        String mensaje = "";
         if(tipoComprobante == null || tipoComprobante.isEmpty()) {
-            mensaje = "El campo ["+tipoComprobanteLabel+"] es obligatorio";
-            return Pair.of(false, mensaje);
+            return Pair.of(false, "El campo ["+tipoComprobanteLabel+"] es obligatorio");
         }
-        if(!tipoComprobante.equals(ConstantesSunat.TIPO_DOCUMENTO_FACTURA) &&
-                !tipoComprobante.equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO) &&
-        !tipoComprobante.equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_DEBITO)) {
-            mensaje = "El campo ["+tipoComprobanteLabel+"] contiene un valor no valido o no es de tipo factura, nota de credito, nota de debito - ["+tipoComprobante+"]";
-            return Pair.of(false, mensaje);
-        }
-        return Pair.of(true, mensaje);
+        return Pair.of(true, "");
     }
 
     private Pair<Boolean, String> validarSerie(String serie) {

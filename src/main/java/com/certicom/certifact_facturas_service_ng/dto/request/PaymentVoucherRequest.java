@@ -2,8 +2,8 @@ package com.certicom.certifact_facturas_service_ng.dto.request;
 
 import com.certicom.certifact_facturas_service_ng.deserializer.ComprobanteDeserializer;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
-import com.certicom.certifact_facturas_service_ng.validation.anottations.*;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.io.Serializable;
@@ -16,7 +16,6 @@ import java.util.List;
 @Builder
 @ToString
 @JsonDeserialize(using = ComprobanteDeserializer.class)
-@ComprobanteValidation
 public class PaymentVoucherRequest implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -29,6 +28,7 @@ public class PaymentVoucherRequest implements Serializable {
     private String fechaVencimiento;
     private String codigoMoneda;
     private String codigoTipoOperacion;
+
     private String codigoTipoOperacionCatalogo51;
     private String rucEmisor;
     private String direccionOficinaEmisor;
@@ -60,14 +60,18 @@ public class PaymentVoucherRequest implements Serializable {
     private BigDecimal descuentoGlobales;
     private BigDecimal sumatoriaOtrosCargos;
     private BigDecimal totalAnticipos;
+
     private BigDecimal importeTotalVenta;
+
     private String serieAfectado;
     private Integer numeroAfectado;
     private String tipoComprobanteAfectado;
     private String codigoTipoNotaCredito;
     private String codigoTipoNotaDebito;
     private String motivoNota;
+
     private List<ComprobanteItem> items;
+
     private String denominacionEmisor;
     private String nombreComercialEmisor;
     private String tipoDocumentoEmisor;
@@ -89,6 +93,7 @@ public class PaymentVoucherRequest implements Serializable {
     private String codigoHash;
     private Integer oficinaId;
     private Integer retencion;
+
     private BigDecimal tipoTransaccion;
     private BigDecimal montoPendiente;
     private BigDecimal cantidadCuotas;

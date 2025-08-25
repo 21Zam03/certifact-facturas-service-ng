@@ -1,7 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.dto.request;
 
 import com.certicom.certifact_facturas_service_ng.deserializer.AnticipoDeserializer;
-import com.certicom.certifact_facturas_service_ng.validation.anottations.AnticipoValidation;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,6 +1,6 @@
-package com.certicom.certifact_facturas_service_ng.validation.anottations;
+package com.certicom.certifact_facturas_service_ng.validation.request.anottations;
 
-import com.certicom.certifact_facturas_service_ng.validation.validators.ComprobanteValidator;
+import com.certicom.certifact_facturas_service_ng.validation.request.validators.ComprobanteValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 

@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @FeignClient(name = "facturas-service-sp", url = "http://localhost:8090")
-public interface FacturaComprobanteFeign {
+public interface InvoicePaymentVoucherFeign {
 
-    @GetMapping("/api/invoice-sp")
+    @GetMapping("/api/invoice-sp/payment-voucher/")
     List<ComprobanteInterDto> listarComprobantesConFiltros(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
@@ -25,13 +25,7 @@ public interface FacturaComprobanteFeign {
             @RequestParam(name = "perPage", required = true) Integer perPage
     );
 
-    @GetMapping("/api/invoice-sp/user/{idUsuario}")
-    UserInterDto obtenerUsuario(@PathVariable Long idUsuario);
-
-    @GetMapping("/api/invoice-sp/user/{username}")
-    public UserEntity findByUserByUsername(@PathVariable String username);
-
-    @GetMapping("/api/invoice-sp/count-total")
+    @GetMapping("/api/invoice-sp/payment-voucher/count-total")
     Integer contarComprobantes(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
@@ -46,7 +40,7 @@ public interface FacturaComprobanteFeign {
             @RequestParam(name = "perPage", required = true) Integer perPage
     );
 
-    @GetMapping("/api/invoice-sp/cash-total")
+    @GetMapping("/api/invoice-sp/payment-voucher/cash-total")
     List<ComprobanteInterDto> obtenerTotalSolesGeneral(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
@@ -61,16 +55,48 @@ public interface FacturaComprobanteFeign {
             @RequestParam(name = "perPage", required = true) Integer perPage
     );
 
-    @GetMapping("/api/invoice-sp/company/state")
-    public String obtenerEstadoEmpresaPorRuc(@RequestParam String rucEmisor);
+    @PutMapping("/api/invoice-sp/payment-voucher/state-1")
+    public int updateStatePaymentVoucher(
+            @RequestParam Long idPaymentVoucher, @RequestParam String codigo, @RequestParam String messageResponse,
+            @RequestParam String codesResponse
+    );
 
-    @GetMapping("/api/invoice-sp/company/{ruc}")
-    public CompanyDto findCompanyByRuc(@PathVariable String ruc);
+    @PutMapping("/api/invoice-sp/payment-voucher/state-2")
+    public int updateStatePaymentVoucher(
+            @RequestParam Long idPaymentVoucher, @RequestParam String codigo, @RequestParam String estadoEnSunat,
+            @RequestParam String messageResponse, @RequestParam String codesResponse
+    );
 
-    @GetMapping("/api/invoice-sp/number")
+    @GetMapping("/api/invoice-sp/payment-voucher/document")
+    public PaymentVoucherEntity getPaymentVoucherByIdentificadorDocumento(@RequestParam String identificadorDocumento);
+
+    @GetMapping("/api/invoice-sp/payment-voucher/number")
     public Integer obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(
             @RequestParam String tipoComprobante, @RequestParam String serie, @RequestParam String ruc
     );
+
+    @PostMapping("/api/invoice-sp/payment-voucher")
+    public PaymentVoucherEntity savePaymentVoucher(@RequestBody PaymentVoucherEntity entity);
+
+    @GetMapping("/api/invoice-sp/payment-voucher/basic")
+    public PaymentVoucherEntity findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
+            @RequestParam String rucEmisor, @RequestParam String tipoComprobante,
+            @RequestParam String serie, @RequestParam Integer numero);
+
+    @GetMapping("/api/invoice-sp/payment-voucher/{id}")
+    public PaymentVoucherEntity findPaymentVoucherById(@PathVariable Long id);
+
+    @GetMapping("/api/invoice-sp/user/{idUsuario}")
+    UserInterDto obtenerUsuario(@PathVariable Long idUsuario);
+
+    @GetMapping("/api/invoice-sp/user/{username}")
+    public UserEntity findByUserByUsername(@PathVariable String username);
+
+    @GetMapping("/api/invoice-sp/company/state")
+    public String getStateFromCompanyByRuc(@RequestParam String rucEmisor);
+
+    @GetMapping("/api/invoice-sp/company/{ruc}")
+    public CompanyDto findCompanyByRuc(@PathVariable String ruc);
 
     @GetMapping("/api/invoice-sp/office")
     public OficinaDto obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
@@ -80,19 +106,8 @@ public interface FacturaComprobanteFeign {
     @PostMapping("/api/invoice-sp/file")
     public RegisterFileUploadEntity saveRegisterFileUpload(@RequestBody RegisterFileUploadDto registerFileUploadDto);
 
-    @PostMapping("/api/invoice-sp")
-    public PaymentVoucherEntity savePaymentVoucher(@RequestBody PaymentVoucherEntity entity);
-
     @GetMapping("/api/invoice-sp/additional-field")
     public Integer obtenerCampoAdicionalIdPorNombre(@RequestParam String nombreCampo);
-
-    @GetMapping("/api/invoice-sp/payment-voucher")
-    public PaymentVoucherEntity findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
-            @RequestParam String rucEmisor, @RequestParam String tipoComprobante,
-            @RequestParam String serie, @RequestParam Integer numero);
-
-    @GetMapping("/api/invoice-sp/payment-voucher/{id}")
-    public PaymentVoucherEntity findPaymentVoucherById(@PathVariable Long id);
 
     @GetMapping("/api/invoice-sp/tmpVoucher/{id}")
     public TmpVoucherSendBillEntity findTmpVoucherByIdPaymentVoucher(@PathVariable Long id);
@@ -100,9 +115,10 @@ public interface FacturaComprobanteFeign {
     @PostMapping("/api/invoice-sp/tmpVoucher")
     public int saveTmpVoucher(@RequestBody TmpVoucherSendBillEntity tmpVoucherSendBillEntity);
 
-    @GetMapping("/api/invoice-sp/payment-voucher")
+    @GetMapping("/api/invoice-sp/payment-voucher/extended")
     public PaymentVoucherDto findPaymentVoucherByRucAndTipoComprobanteAndSerieDocumentoAndNumeroDocumento
-            (String finalRucEmisor, String tipoComprobante, String serieDocumento, Integer numeroDocumento);
+            (@RequestParam String finalRucEmisor, @RequestParam String tipoComprobante,
+             @RequestParam String serieDocumento, @RequestParam Integer numeroDocumento);
 
     @PutMapping("/api/invoice-sp/tmpVoucher/status")
     public int updateStatusVoucherTmp(@RequestParam Long identificador, @RequestParam String estado);
@@ -115,21 +131,9 @@ public interface FacturaComprobanteFeign {
     public OseDto findOseByRucInter(@RequestParam String ruc);
 
     @GetMapping("/api/invoice-sp/error-catalog")
-    public ErrorEntity findFirst1ByCodeAndDocument(String codigoRespuesta, String tipoDocumento);
+    public ErrorEntity findFirst1ByCodeAndDocument(@RequestParam String codigoRespuesta, @RequestParam String tipoDocumento);
 
     @DeleteMapping("/api/invoice-sp/tmpVoucher")
     public int deleteTmpVoucherById(@RequestParam Long tmpVoucherId);
-
-    @PutMapping("/api/invoice-sp/payment-voucher")
-    public int updateStatePaymentVoucher(
-            Long idPaymentVoucher, String codigo, String messageResponse,
-            String codesResponse
-    );
-
-    @PutMapping("/api/invoice-sp/payment-voucher")
-    public int updateStatePaymentVoucher(
-            Long idPaymentVoucher, String codigo, String estadoEnSunat,
-            String messageResponse, String codesResponse
-    );
 
 }

@@ -1,8 +1,11 @@
 package com.certicom.certifact_facturas_service_ng.config;
 
 import com.certicom.certifact_facturas_service_ng.dto.response.ErrorResponse;
+import com.certicom.certifact_facturas_service_ng.exceptions.BusinessValidationException;
+import com.certicom.certifact_facturas_service_ng.exceptions.DeserializadorException;
 import com.certicom.certifact_facturas_service_ng.exceptions.ExcepcionInterno;
 import com.certicom.certifact_facturas_service_ng.exceptions.ExcepcionNegocio;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -17,30 +20,21 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, Object>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, Object> errors = new HashMap<>();
-        errors.put("estado", false);
+    @ExceptionHandler(DeserializadorException.class)
+    public ResponseEntity<ErrorResponse> handleDeserializadorException(DeserializadorException ex) {
+        return ResponseEntity.badRequest().body(ErrorResponse.builder()
+                        .code("DESERIALIZATION_ERROR")
+                        .message(ex.getMessage())
+                .build());
+    }
 
-        List<String> mensajes = new ArrayList<>();
-
-        // Errores de campo (ej. @NotNull, @Size, @Valid en anticipo.serieAnticipo, etc.)
-        ex.getBindingResult().getFieldErrors().forEach(error -> {
-            mensajes.add(String.format("Campo [%s]: %s", error.getField(), error.getDefaultMessage()));
-        });
-
-        // Errores de clase (ej. validaciones cruzadas en ComprobanteRequest)
-        ex.getBindingResult().getGlobalErrors().forEach(error -> {
-            String mensaje = error.getDefaultMessage();
-            if (mensaje == null || mensaje.isEmpty()) {
-                mensaje = "El comprobante tiene campos mal formateados"; // fallback
-            }
-            mensajes.add(String.format("Objeto [%s]: %s", error.getObjectName(), mensaje));
-        });
-
-        errors.put("mensajes", mensajes);
-
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(BusinessValidationException.class)
+    public ResponseEntity<ErrorResponse> handleBusinessValidationException(BusinessValidationException ex) {
+        ErrorResponse response = ErrorResponse.builder()
+                .code(ex.getErrorCode() != null ? ex.getErrorCode() : "BUSINESS_VALIDATION_ERROR")
+                .message(ex.getMessage())
+                .build();
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ExcepcionNegocio.class)

@@ -6,7 +6,7 @@ import com.certicom.certifact_facturas_service_ng.dto.request.IdentificadorPayme
 import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.service.ComunicationSunatService;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
-import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
+import com.certicom.certifact_facturas_service_ng.validation.business.PaymentVoucherValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,14 +17,15 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping(FacturaComprobanteController.API_PATH)
+@RequestMapping(InvoicePaymentVoucherController.API_PATH)
 @RequiredArgsConstructor
 @Slf4j
-public class FacturaComprobanteController {
+public class InvoicePaymentVoucherController {
 
     public static final String API_PATH = "/api/invoice-ng";
     private final PaymentVoucherService paymentVoucherService;
     private final ComunicationSunatService comunicationSunatService;
+    private final PaymentVoucherValidator paymentVoucherValidator;
 
     @GetMapping("/payment-voucher")
     public ResponseEntity<?> listarComprobantesConFiltros(
@@ -51,8 +52,10 @@ public class FacturaComprobanteController {
     public ResponseEntity<?> savePaymentVoucher(@RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest) {
         log.info("ComprobanteController - registrarComprobante - [comprobanteRequest={}]", paymentVoucherRequest.toString());
         PaymentVoucherDto paymentVoucherDto = PaymentVoucherConverter.requestToDto(paymentVoucherRequest);
-        Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucherDto, false, 2L);
-        return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
+        paymentVoucherValidator.validate(paymentVoucherDto, false);
+        //Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucherDto, false, 2L);
+        //return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
+        return new ResponseEntity<>("TEST", HttpStatus.OK);
     }
 
     @PutMapping("/payment-voucher")
