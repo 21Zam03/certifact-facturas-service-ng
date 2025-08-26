@@ -1,7 +1,5 @@
 package com.certicom.certifact_facturas_service_ng.entity;
 
-import com.certicom.certifact_facturas_service_ng.enums.EstadoArchivoEnum;
-import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import lombok.*;
 
 import java.math.BigDecimal;

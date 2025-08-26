@@ -5,7 +5,8 @@ import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
 import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
 import com.certicom.certifact_facturas_service_ng.exceptions.BusinessValidationException;
-import com.certicom.certifact_facturas_service_ng.feign.InvoicePaymentVoucherFeign;
+import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
+import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
@@ -57,7 +58,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PaymentVoucherValidator extends CamposEntrada<Object> {
 
-    private final InvoicePaymentVoucherFeign invoicePaymentVoucherFeign;
+    private final PaymentVoucherFeign paymentVoucherFeign;
+    private final CompanyFeign companyFeign;
+
     private final PaymentVoucherDetailValidator paymentVoucherDetailValidator;
     private final AnticipoValidator anticipoValidator;
 
@@ -512,7 +515,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
      */
     private void validateRucAtivo(String rucEmisor) {
         try {
-            String estado = invoicePaymentVoucherFeign.getStateFromCompanyByRuc(rucEmisor);
+            String estado = companyFeign.getStateFromCompanyByRuc(rucEmisor);
             if(!estado.equals(ConstantesParameter.REGISTRO_ACTIVO)) {
                 throw new BusinessValidationException(
                         "El ruc emisor [" + rucEmisor + "] No se encuentra habilitado para ejecutar operaciones al API-REST."
@@ -660,13 +663,14 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
      */
     private void validateNumeracion(String tipoComprobante, String serie, String rucEmisor, Integer numero) {
         try {
-            int proximo = invoicePaymentVoucherFeign.
+            int proximo = paymentVoucherFeign.
                     obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(tipoComprobante, serie, rucEmisor);
+            System.out.println("PROXIMO: "+proximo);
             if (proximo > 1){
                 int diferencia = numero - proximo;
                 if (diferencia > 120){
                     throw new BusinessValidationException(
-                            "El numero [" + numero + "] difiere de su antecesor en " + proximo + "posiciones."
+                            "El numero [" + numero + "] difiere de su antecesor en " + proximo + " posiciones."
                     );
                 }
             }
@@ -684,7 +688,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
     private void validateIdentificadorDocumento(String rucEmisor, String tipoComprobante, String serie, Integer numero, boolean isEdit) {
         try {
             String idDocumento = rucEmisor + "-" + tipoComprobante + "-" + serie + "-" + numero;
-            PaymentVoucherEntity identificadorEntity = invoicePaymentVoucherFeign.getPaymentVoucherByIdentificadorDocumento(idDocumento);
+            PaymentVoucherEntity identificadorEntity = paymentVoucherFeign.getPaymentVoucherByIdentificadorDocumento(idDocumento);
             if (identificadorEntity != null && !isEdit) {
                 throw new BusinessValidationException(
                         "El comprobante ya ha sido registrado [" + rucEmisorLabel + ":" + rucEmisor + "; "
@@ -700,8 +704,6 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
             }
         } catch (FeignException fe) {
             throw new BusinessValidationException("No se pudo validar si el comprobante ya ha sido registrado. Error al comunicarse con el servicio de validación: " + fe.getMessage());
-        } catch (Exception e) {
-            throw new BusinessValidationException("Error inesperado al validar si el comprobante ya ha sido registrado" + e.getMessage());
         }
     }
 

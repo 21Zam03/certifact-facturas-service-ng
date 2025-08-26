@@ -7,10 +7,31 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "facturas-service-sp", url = "http://localhost:8090")
-public interface InvoicePaymentVoucherFeign {
+@FeignClient(name = "facturas-service-sp", url = "http://localhost:8090", contextId = "paymentVoucher")
+public interface PaymentVoucherFeign {
 
-    @GetMapping("/api/invoice-sp/payment-voucher/")
+    /**
+     * Obtiene la lista de comprobantes electrónicos emitidos por un emisor,
+     * permitiendo aplicar filtros de búsqueda y paginación.
+     *
+     * <p>Los filtros disponibles permiten consultar por rango de fechas de emisión,
+     * tipo de comprobante, datos del receptor, serie, número, oficina y estado en SUNAT.</p>
+     *
+     * @param rucEmisor              RUC del emisor (obligatorio).
+     * @param filtroDesde            Fecha de inicio del rango de búsqueda en formato {@code yyyy-MM-dd} (obligatorio).
+     * @param filtroHasta            Fecha de fin del rango de búsqueda en formato {@code yyyy-MM-dd} (obligatorio).
+     * @param filtroTipoComprobante  Código del tipo de comprobante (opcional).
+     * @param filtroRuc              RUC del receptor (opcional).
+     * @param filtroSerie            Serie del comprobante (opcional).
+     * @param filtroNumero           Número del comprobante (opcional).
+     * @param idOficina              Identificador de la oficina asociada al comprobante (opcional).
+     * @param estadoSunat            Estado en SUNAT del comprobante (ej. ACEPTADO, RECHAZADO, PENDIENTE) (opcional).
+     * @param pageNumber             Número de página para la paginación (obligatorio).
+     * @param perPage                Cantidad de registros por página (obligatorio).
+     *
+     * @return Lista paginada de comprobantes que cumplen con los filtros aplicados.
+     */
+    @GetMapping("/api/invoice-sp/payment-voucher")
     List<ComprobanteInterDto> listarComprobantesConFiltros(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
@@ -25,6 +46,27 @@ public interface InvoicePaymentVoucherFeign {
             @RequestParam(name = "perPage", required = true) Integer perPage
     );
 
+    /**
+     * Obtiene el número total de comprobantes electrónicos registrados
+     * por un emisor, aplicando filtros de búsqueda específicos.
+     *
+     * <p>Este método consume el servicio remoto de facturación a través de Feign
+     * y retorna únicamente la cantidad de comprobantes que cumplen las condiciones.</p>
+     *
+     * @param rucEmisor              RUC del emisor (obligatorio).
+     * @param filtroDesde            Fecha de inicio del rango de búsqueda en formato {@code yyyy-MM-dd} (obligatorio).
+     * @param filtroHasta            Fecha de fin del rango de búsqueda en formato {@code yyyy-MM-dd} (obligatorio).
+     * @param filtroTipoComprobante  Código del tipo de comprobante (opcional).
+     * @param filtroRuc              RUC del receptor (opcional).
+     * @param filtroSerie            Serie del comprobante (opcional).
+     * @param filtroNumero           Número del comprobante (opcional).
+     * @param idOficina              Identificador de la oficina asociada al comprobante (opcional).
+     * @param estadoSunat            Estado en SUNAT del comprobante (ej. ACEPTADO, RECHAZADO, PENDIENTE) (opcional).
+     * @param pageNumber             Número de página para la paginación (obligatorio).
+     * @param perPage                Cantidad de registros por página (obligatorio).
+     *
+     * @return Cantidad total de comprobantes que cumplen con los filtros aplicados.
+     */
     @GetMapping("/api/invoice-sp/payment-voucher/count-total")
     Integer contarComprobantes(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
@@ -39,6 +81,7 @@ public interface InvoicePaymentVoucherFeign {
             @RequestParam(name = "pageNumber", required = true) Integer pageNumber,
             @RequestParam(name = "perPage", required = true) Integer perPage
     );
+
 
     @GetMapping("/api/invoice-sp/payment-voucher/cash-total")
     List<ComprobanteInterDto> obtenerTotalSolesGeneral(
@@ -67,7 +110,7 @@ public interface InvoicePaymentVoucherFeign {
             @RequestParam String messageResponse, @RequestParam String codesResponse
     );
 
-    @GetMapping("/api/invoice-sp/payment-voucher/document")
+    @GetMapping("/api/invoice-sp/payment-voucher/id-document")
     public PaymentVoucherEntity getPaymentVoucherByIdentificadorDocumento(@RequestParam String identificadorDocumento);
 
     @GetMapping("/api/invoice-sp/payment-voucher/number")
@@ -78,7 +121,7 @@ public interface InvoicePaymentVoucherFeign {
     @PostMapping("/api/invoice-sp/payment-voucher")
     public PaymentVoucherEntity savePaymentVoucher(@RequestBody PaymentVoucherEntity entity);
 
-    @GetMapping("/api/invoice-sp/payment-voucher/basic")
+    @GetMapping("/api/invoice-sp/payment-voucher/parameters")
     public PaymentVoucherEntity findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
             @RequestParam String rucEmisor, @RequestParam String tipoComprobante,
             @RequestParam String serie, @RequestParam Integer numero);
@@ -86,54 +129,12 @@ public interface InvoicePaymentVoucherFeign {
     @GetMapping("/api/invoice-sp/payment-voucher/{id}")
     public PaymentVoucherEntity findPaymentVoucherById(@PathVariable Long id);
 
-    @GetMapping("/api/invoice-sp/user/{idUsuario}")
-    UserInterDto obtenerUsuario(@PathVariable Long idUsuario);
-
-    @GetMapping("/api/invoice-sp/user/{username}")
-    public UserEntity findByUserByUsername(@PathVariable String username);
-
-    @GetMapping("/api/invoice-sp/company/state")
-    public String getStateFromCompanyByRuc(@RequestParam String rucEmisor);
-
-    @GetMapping("/api/invoice-sp/company/{ruc}")
-    public CompanyDto findCompanyByRuc(@PathVariable String ruc);
-
-    @GetMapping("/api/invoice-sp/office")
-    public OficinaDto obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
-            @RequestParam Integer empresaId, @RequestParam String serie, @RequestParam String tipoComprobante
-    );
-
-    @PostMapping("/api/invoice-sp/file")
-    public RegisterFileUploadEntity saveRegisterFileUpload(@RequestBody RegisterFileUploadDto registerFileUploadDto);
-
-    @GetMapping("/api/invoice-sp/additional-field")
-    public Integer obtenerCampoAdicionalIdPorNombre(@RequestParam String nombreCampo);
-
-    @GetMapping("/api/invoice-sp/tmpVoucher/{id}")
-    public TmpVoucherSendBillEntity findTmpVoucherByIdPaymentVoucher(@PathVariable Long id);
-
-    @PostMapping("/api/invoice-sp/tmpVoucher")
-    public int saveTmpVoucher(@RequestBody TmpVoucherSendBillEntity tmpVoucherSendBillEntity);
-
-    @GetMapping("/api/invoice-sp/payment-voucher/extended")
+    @GetMapping("/api/invoice-sp/payment-voucher/parameters-dto")
     public PaymentVoucherDto findPaymentVoucherByRucAndTipoComprobanteAndSerieDocumentoAndNumeroDocumento
             (@RequestParam String finalRucEmisor, @RequestParam String tipoComprobante,
              @RequestParam String serieDocumento, @RequestParam Integer numeroDocumento);
 
-    @PutMapping("/api/invoice-sp/tmpVoucher/status")
-    public int updateStatusVoucherTmp(@RequestParam Long identificador, @RequestParam String estado);
-
-    @GetMapping("/api/invoice-sp/register-file-upload/")
-    public RegisterFileUploadDto findFirst1ByPaymentVoucherIdPaymentVoucherAndTipoArchivoAndEstadoArchivoOrderByOrdenDesc
-            (@RequestParam Long idPayment, @RequestParam String tipoArchivo, @RequestParam String estadoArchivo);
-
-    @GetMapping("/api/invoice-sp/ose")
-    public OseDto findOseByRucInter(@RequestParam String ruc);
-
     @GetMapping("/api/invoice-sp/error-catalog")
     public ErrorEntity findFirst1ByCodeAndDocument(@RequestParam String codigoRespuesta, @RequestParam String tipoDocumento);
-
-    @DeleteMapping("/api/invoice-sp/tmpVoucher")
-    public int deleteTmpVoucherById(@RequestParam Long tmpVoucherId);
 
 }

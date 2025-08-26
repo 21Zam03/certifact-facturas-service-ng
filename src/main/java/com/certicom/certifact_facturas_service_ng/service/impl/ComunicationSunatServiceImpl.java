@@ -12,7 +12,10 @@ import com.certicom.certifact_facturas_service_ng.entity.RegisterFileUploadEntit
 import com.certicom.certifact_facturas_service_ng.entity.TmpVoucherSendBillEntity;
 import com.certicom.certifact_facturas_service_ng.enums.*;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
-import com.certicom.certifact_facturas_service_ng.feign.InvoicePaymentVoucherFeign;
+import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
+import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
+import com.certicom.certifact_facturas_service_ng.feign.RegisterFileUploadFeign;
+import com.certicom.certifact_facturas_service_ng.feign.TmpVoucherFeign;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.ComunicationSunatService;
 import com.certicom.certifact_facturas_service_ng.service.SendSunatService;
@@ -32,7 +35,11 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
 
     private static final String RECHA = "RECHA";
 
-    private final InvoicePaymentVoucherFeign invoicePaymentVoucherFeign;
+    private final PaymentVoucherFeign paymentVoucherFeign;
+    private final CompanyFeign companyFeign;
+    private final TmpVoucherFeign tmpVoucherFeign;
+    private final RegisterFileUploadFeign registerFileUploadFeign;
+
     private final AmazonS3ClientService amazonS3ClientService;
     private final SendSunatService sendSunatService;
 
@@ -50,16 +57,16 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
         StringBuilder msgLog = new StringBuilder();
 
         try {
-            voucherPendiente = invoicePaymentVoucherFeign.findTmpVoucherByIdPaymentVoucher(idPaymentVoucher);
+            voucherPendiente = tmpVoucherFeign.findTmpVoucherByIdPaymentVoucher(idPaymentVoucher);
 
             if (voucherPendiente != null) {
 
-                invoicePaymentVoucherFeign.updateStatusVoucherTmp(
+                tmpVoucherFeign.updateStatusVoucherTmp(
                         voucherPendiente.getIdTmpSendBill(),
                         EstadoVoucherTmpEnum.BLOQUEO.getEstado()
                 );
 
-                RegisterFileUploadDto registerFileUploadDto = invoicePaymentVoucherFeign
+                RegisterFileUploadDto registerFileUploadDto = registerFileUploadFeign
                         .findFirst1ByPaymentVoucherIdPaymentVoucherAndTipoArchivoAndEstadoArchivoOrderByOrdenDesc(idPaymentVoucher, TipoArchivoEnum.XML.name(),
                                 EstadoArchivoEnum.ACTIVO.name());
 
@@ -123,7 +130,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                         break;
                     case SUCCESS_WITH_ERROR_CONTENT:
                         if(Integer.parseInt(responseSunat.getStatusCode())==1033){
-                            PaymentVoucherEntity paymentVoucherEntity = invoicePaymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
+                            PaymentVoucherEntity paymentVoucherEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
                             GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc,paymentVoucherEntity.getTipoComprobante(),paymentVoucherEntity.getSerie(),paymentVoucherEntity.getNumero(),idPaymentVoucher);
                             responseSunatCdr = sendSunatService.getStatusCDR(statusCdrDTO, ruc);
 
@@ -146,7 +153,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                                                 .build()
                                 );
                             }
-                            invoicePaymentVoucherFeign.savePaymentVoucher(paymentVoucherEntity);
+                            paymentVoucherFeign.savePaymentVoucher(paymentVoucherEntity);
 
                             status = true;
                         }else if(Integer.parseInt(responseSunat.getStatusCode())==140){
@@ -206,7 +213,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                         break;
                     case WITHOUT_CONNECTION:
                         if(responseSunat.getMessage().contains("1033")){
-                            PaymentVoucherEntity paymentVoucherEntity = invoicePaymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
+                            PaymentVoucherEntity paymentVoucherEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
 
                             GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc,paymentVoucherEntity.getTipoComprobante(),paymentVoucherEntity.getSerie(),paymentVoucherEntity.getNumero(),idPaymentVoucher);
 
@@ -232,7 +239,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                                             .build()
                                 );
                             }
-                            invoicePaymentVoucherFeign.savePaymentVoucher(paymentVoucherEntity);
+                            paymentVoucherFeign.savePaymentVoucher(paymentVoucherEntity);
                             status = true;
                         }else{
                             System.out.println("Error: Dio error al reenviar");
@@ -278,9 +285,9 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
         RegisterFileUploadEntity responseStorage = uploadFileCdr(ruc, nombreDocumento, tipoComprobante, ConstantesParameter.REGISTRO_STATUS_NUEVO,
                 contenidoBase64);
 
-        invoicePaymentVoucherFeign.deleteTmpVoucherById(idTmpVoucher);
+        tmpVoucherFeign.deleteTmpVoucherById(idTmpVoucher);
 
-        PaymentVoucherEntity paymentVoucher = invoicePaymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
+        PaymentVoucherEntity paymentVoucher = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
         paymentVoucher.setEstado(estadoComprobante);
         paymentVoucher.setEstadoSunat(EstadoSunatEnum.ACEPTADO.getAbreviado());
         paymentVoucher.setMensajeRespuesta(mensajeRespuesta);
@@ -296,7 +303,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
             );
         }
         //paymentVoucherRepository.save(paymentVoucher);
-        invoicePaymentVoucherFeign.savePaymentVoucher(paymentVoucher);
+        paymentVoucherFeign.savePaymentVoucher(paymentVoucher);
         //AJUSTE DE STOCK
         //************
 
@@ -305,7 +312,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
     public RegisterFileUploadEntity uploadFileCdr(String rucEmisor, String nameDocument, String tipoComprobante, String estadoRegistro,
                                                   String fileXMLZipBase64) throws Exception {
 
-        CompanyDto companyEntity = invoicePaymentVoucherFeign.findCompanyByRuc(rucEmisor);
+        CompanyDto companyEntity = companyFeign.findCompanyByRuc(rucEmisor);
         RegisterFileUploadEntity file = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(fileXMLZipBase64),
                 nameDocument, "cdr", companyEntity);
         return file;
@@ -324,10 +331,10 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
         String serie;
         Integer numero;
 
-        invoicePaymentVoucherFeign.updateStatusVoucherTmp(
+        tmpVoucherFeign.updateStatusVoucherTmp(
                 idTmpSendBill,
                 EstadoVoucherTmpEnum.VERIFICAR.getEstado());
-        invoicePaymentVoucherFeign.updateStatePaymentVoucher(
+        paymentVoucherFeign.updateStatePaymentVoucher(
                 idPaymentVoucher,
                 EstadoComprobanteEnum.ACEPTADO_POR_VERIFICAR.getCodigo(),
                 messageResponse,
@@ -355,10 +362,10 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
             String messageResponse,
             String codesResponse) {
 
-        invoicePaymentVoucherFeign.updateStatusVoucherTmp(
+        tmpVoucherFeign.updateStatusVoucherTmp(
                 idTmpSendBill,
                 EstadoVoucherTmpEnum.PENDIENTE.getEstado());
-        invoicePaymentVoucherFeign.updateStatePaymentVoucher(
+        paymentVoucherFeign.updateStatePaymentVoucher(
                 idPaymentVoucher,
                 EstadoComprobanteEnum.REGISTRADO.getCodigo(),
                 messageResponse,
@@ -366,10 +373,10 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
     }
 
     private void comunicacionReceptorSendBill(Long idPaymentVoucher, Long idTmpSendBill, String message, String statusCode) {
-        invoicePaymentVoucherFeign.updateStatusVoucherTmp(
+        tmpVoucherFeign.updateStatusVoucherTmp(
                 idTmpSendBill,
                 EstadoVoucherTmpEnum.ERROR.getEstado());
-        invoicePaymentVoucherFeign.updateStatePaymentVoucher(
+        paymentVoucherFeign.updateStatePaymentVoucher(
                 idPaymentVoucher,
                 EstadoComprobanteEnum.RECHAZADO.getCodigo(),
                 RECHA,
@@ -384,10 +391,10 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
             String messageResponse,
             String codesResponse) {
 
-        invoicePaymentVoucherFeign.updateStatusVoucherTmp(
+        tmpVoucherFeign.updateStatusVoucherTmp(
                 idTmpSendBill,
                 EstadoVoucherTmpEnum.ERROR.getEstado());
-        invoicePaymentVoucherFeign.updateStatePaymentVoucher(
+        paymentVoucherFeign.updateStatePaymentVoucher(
                 idPaymentVoucher,
                 EstadoComprobanteEnum.ERROR.getCodigo(),
                 messageResponse,
@@ -396,7 +403,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
 
     private void comunicacionWithoutConnectionSendBill(Long idTmpSendBill) {
 
-        invoicePaymentVoucherFeign.updateStatusVoucherTmp(
+        tmpVoucherFeign.updateStatusVoucherTmp(
                 idTmpSendBill,
                 EstadoVoucherTmpEnum.PENDIENTE.getEstado()
         );

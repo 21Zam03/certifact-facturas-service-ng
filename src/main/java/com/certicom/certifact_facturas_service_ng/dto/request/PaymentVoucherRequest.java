@@ -89,7 +89,7 @@ public class PaymentVoucherRequest implements Serializable {
     private BigDecimal montoDetraccion;
     private BigDecimal montoRetencion;
     private String detraccion;
-    private String UblVersion;
+    private String ublVersion;
     private String codigoHash;
     private Integer oficinaId;
     private Integer retencion;

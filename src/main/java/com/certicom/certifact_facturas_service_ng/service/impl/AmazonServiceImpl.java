@@ -9,7 +9,8 @@ import com.certicom.certifact_facturas_service_ng.dto.model.CompanyDto;
 import com.certicom.certifact_facturas_service_ng.dto.model.RegisterFileUploadDto;
 import com.certicom.certifact_facturas_service_ng.entity.RegisterFileUploadEntity;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
-import com.certicom.certifact_facturas_service_ng.feign.InvoicePaymentVoucherFeign;
+import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
+import com.certicom.certifact_facturas_service_ng.feign.RegisterFileUploadFeign;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.util.UtilArchivo;
 import com.certicom.certifact_facturas_service_ng.util.UtilDate;
@@ -32,7 +33,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AmazonServiceImpl implements AmazonS3ClientService {
 
-    private final InvoicePaymentVoucherFeign invoicePaymentVoucherFeign;
+    private final PaymentVoucherFeign paymentVoucherFeign;
+    private final RegisterFileUploadFeign registerFileUploadFeign;
 
     private final AmazonS3 s3client;
 
@@ -70,7 +72,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
 
             this.s3client.putObject(putObjectRequest);
 
-            RegisterFileUploadEntity resp = invoicePaymentVoucherFeign.saveRegisterFileUpload(RegisterFileUploadDto.builder()
+            RegisterFileUploadEntity resp = registerFileUploadFeign.saveRegisterFileUpload(RegisterFileUploadDto.builder()
                     .bucket(bucket)
                     .nombreGenerado(fileNameKey)
                     .nombreOriginal(nameFile)
@@ -143,7 +145,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, fileNameKey, inputStream, metadata);
 
             this.s3client.putObject(putObjectRequest);
-            RegisterFileUploadEntity resp = invoicePaymentVoucherFeign.saveRegisterFileUpload(
+            RegisterFileUploadEntity resp = registerFileUploadFeign.saveRegisterFileUpload(
                     RegisterFileUploadDto.builder()
                             .bucket(bucket)
                             .nombreGenerado(fileNameKey)

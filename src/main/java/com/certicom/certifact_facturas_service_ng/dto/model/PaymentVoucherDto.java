@@ -78,7 +78,7 @@ public class PaymentVoucherDto {
     private BigDecimal montoDetraccion;
     private BigDecimal montoRetencion;
     private String detraccion;
-    private String UblVersion;
+    private String ublVersion;
     private String codigoHash;
     private Integer oficinaId;
     private Integer retencion;

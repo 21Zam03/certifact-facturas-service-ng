@@ -2,11 +2,13 @@ package com.certicom.certifact_facturas_service_ng.converter;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
+import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
 
 public class PaymentVoucherConverter {
 
     public static PaymentVoucherDto requestToDto(PaymentVoucherRequest paymentVoucherRequest) {
         return PaymentVoucherDto.builder()
+                .ublVersion("2.1")
                 .rucEmisor(paymentVoucherRequest.getRucEmisor())
                 .tipoComprobante(paymentVoucherRequest.getTipoComprobante())
                 .serie(paymentVoucherRequest.getSerie())
@@ -17,7 +19,7 @@ public class PaymentVoucherConverter {
                 .codigoMoneda(paymentVoucherRequest.getCodigoMoneda())
                 .fechaVencimiento(paymentVoucherRequest.getFechaVencimiento())
                 .codigoTipoOperacion(paymentVoucherRequest.getCodigoTipoOperacion())
-                .tipoDocumentoEmisor(paymentVoucherRequest.getTipoDocumentoReceptor())
+                .tipoDocumentoEmisor(paymentVoucherRequest.getTipoDocumentoEmisor())
                 .tipoDocumentoReceptor(paymentVoucherRequest.getTipoDocumentoReceptor())
                 .numeroDocumentoReceptor(paymentVoucherRequest.getNumeroDocumentoReceptor())
                 .denominacionReceptor(paymentVoucherRequest.getDenominacionReceptor())
@@ -33,5 +35,34 @@ public class PaymentVoucherConverter {
                 .guiasRelacionadas(paymentVoucherRequest.getGuiasRelacionadas())
                 .build();
     }
-
+/*
+    public static PaymentVoucherDto EntityToDto(PaymentVoucherEntity paymentVoucherEntity) {
+        return PaymentVoucherDto.builder()
+                .ublVersion("2.1")
+                .rucEmisor(paymentVoucherEntity.getRucEmisor())
+                .tipoComprobante(paymentVoucherEntity.getTipoComprobante())
+                .serie(paymentVoucherEntity.getSerie())
+                .numero(paymentVoucherEntity.getNumero())
+                .fechaEmision(paymentVoucherEntity.getFechaEmision())
+                .horaEmision(paymentVoucherEntity.getHoraEmision())
+                .fechaEmision(paymentVoucherEntity.getFechaEmision())
+                .codigoMoneda(paymentVoucherEntity.getCodigoMoneda())
+                .fechaVencimiento(paymentVoucherEntity.getFechaVencimiento())
+                .codigoTipoOperacion(paymentVoucherEntity.getTipoOperacion())
+                //.tipoDocumentoEmisor("")
+                .tipoDocumentoReceptor(paymentVoucherEntity.getTipoDocumentoReceptor())
+                .numeroDocumentoReceptor(paymentVoucherEntity.getNumeroDocumentoReceptor())
+                .denominacionReceptor(paymentVoucherEntity.getDenominacionReceptor())
+                .direccionReceptor(paymentVoucherEntity.getDireccionReceptor())
+                .emailReceptor(paymentVoucherEntity.getEmailReceptor())
+                .totalValorVentaGravada(paymentVoucherEntity.getTotalValorVentaGravada())
+                .totalIgv(paymentVoucherEntity.getTotalIgv())
+                .importeTotalVenta(paymentVoucherEntity.getImporteTotalVenta())
+                .anticipos(paymentVoucherEntity.getAnticipos())
+                .camposAdicionales(paymentVoucherEntity.getCamposAdicionales())
+                .cuotas(paymentVoucherEntity.getCuotas())
+                .items(paymentVoucherEntity.getItems())
+                .guiasRelacionadas(paymentVoucherEntity.getGuiasRelacionadas())
+                .build();
+    }*/
 }
