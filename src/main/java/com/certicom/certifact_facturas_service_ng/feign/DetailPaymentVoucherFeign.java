@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface DetailPaymentVoucherFeign {
 
     @DeleteMapping("/api/detail-payment-voucher/{id}")
-    public int deleteDetailPaymentVoucherById(@PathVariable("id") Long tmpVoucherId);
+    public int deleteDetailPaymentVoucherById(@PathVariable("id") Long detailPaymentVoucherId);
 
 
 }

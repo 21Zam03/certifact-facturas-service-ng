@@ -2,8 +2,11 @@ package com.certicom.certifact_facturas_service_ng.controller;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.request.IdentificadorPaymentVoucherRequest;
+import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.service.ComunicationSunatService;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
+import com.certicom.certifact_facturas_service_ng.service.SendSunatService;
+import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,17 +25,26 @@ public class SunatController {
 
     public static final String API_PATH = "/api/sunat";
     private final ComunicationSunatService comunicationSunatService;
-    private final PaymentVoucherService paymentVoucherService;
+    private final SendSunatService sendSunatService;
 
 
     @PostMapping("send")
     public ResponseEntity<?> sendPaymentVoucherToSunat(
             @RequestBody @Valid IdentificadorPaymentVoucherRequest paymentVoucher
     ) {
-        PaymentVoucherDto paymentVoucherDto = paymentVoucherService.prepareComprobanteForEnvioSunatInter("20204040303", paymentVoucher.getTipo(), paymentVoucher.getSerie(), paymentVoucher.getNumero());
+        PaymentVoucherDto paymentVoucherDto = sendSunatService.prepareComprobanteForEnvioSunatInter("20204040303", paymentVoucher.getTipo(), paymentVoucher.getSerie(), paymentVoucher.getNumero());
         Map<String, Object> result = comunicationSunatService.sendDocumentBill(paymentVoucherDto.getRucEmisor(), paymentVoucherDto.getIdPaymentVoucher());
-
-        return new ResponseEntity<>("TEST", HttpStatus.OK);
+        ResponsePSE resp = (ResponsePSE) result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE);
+        if (resp.getEstado()) {
+            System.out.println("ENVIAR correo");
+            //messageProducer.produceEnviarCorreo(EmailSendDTO.builder().id(paymentVoucherEntity.getIdPaymentVoucher()).build());
+        }
+        if (result.get(ConstantesParameter.PARAM_BEAN_GET_STATUS_CDR) != null) {
+            System.out.println("producir la cdr");
+            //GetStatusCdrDTO dataGetStatusCDR = (GetStatusCdrDTO) result.get(ConstantesParameter.PARAM_BEAN_GET_STATUS_CDR);
+            //messageProducer.produceGetStatusCDR(dataGetStatusCDR);
+        }
+        return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
     @PostMapping("/avoid")

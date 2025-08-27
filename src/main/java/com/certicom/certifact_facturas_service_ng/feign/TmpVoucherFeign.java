@@ -16,8 +16,8 @@ public interface TmpVoucherFeign {
     @PutMapping("/api/tmp-voucher/status")
     public int updateStatusVoucherTmp(@RequestParam Long identificador, @RequestParam String estado);
 
-    @DeleteMapping("/api/tmp-voucher")
-    public int deleteTmpVoucherById(@RequestParam Long tmpVoucherId);
+    @DeleteMapping("/api/tmp-voucher/{id}")
+    public int deleteTmpVoucherById(@PathVariable("id") Long tmpVoucherId);
 
 
 }

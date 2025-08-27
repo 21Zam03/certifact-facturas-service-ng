@@ -135,34 +135,6 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         return generateDocument(paymentVoucherDto, isEdit, idUsuario);
     }
 
-    @Override
-    public PaymentVoucherDto prepareComprobanteForEnvioSunatInter(String finalRucEmisor, String tipoComprobante, String serieDocumento, Integer numeroDocumento) throws ServiceException {
-        PaymentVoucherDto paymentVoucherDto = paymentVoucherFeign.
-                findPaymentVoucherByRucAndTipoComprobanteAndSerieDocumentoAndNumeroDocumento(finalRucEmisor, tipoComprobante, serieDocumento, numeroDocumento);
-
-        if (paymentVoucherDto == null)
-            throw new ServiceException(String.format("%s [%s-%s-%s-%s]", "El comprobante que desea enviar a la Sunat, no existe: ", finalRucEmisor, tipoComprobante, serieDocumento, numeroDocumento != null ? numeroDocumento.toString() : ""));
-        System.out.println("RESULTA: "+paymentVoucherDto.toString());
-        if (paymentVoucherDto.getEstadoSunat().equals(EstadoSunatEnum.ACEPTADO.getAbreviado()))
-            throw new ServiceException("Este comprobante ya se encuentra aceptado en Sunat.");
-
-        if (paymentVoucherDto.getEstadoSunat().equals(EstadoSunatEnum.ANULADO.getAbreviado()))
-            throw new ServiceException("Este comprobante se encuentra anulado en Sunat.");
-
-        if (paymentVoucherDto.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_BOLETA))
-            throw new ServiceException("Por este metodo solo se permite enviar Facturas, Notas de crédito y Débito.");
-
-
-        if (paymentVoucherDto.getTipoComprobanteAfectado() != null) {
-            if (
-                    (paymentVoucherDto.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO))
-            ) {
-                throw new ServiceException("Por este metodo solo se permite enviar Notas de crédito y Débito asociadas a Facturas, las notas asociadas a boletas se deben enviar por resumen diario.");
-            }
-        }
-        return paymentVoucherDto;
-    }
-
     Map<String, Object> generateDocument(PaymentVoucherDto comprobante, Boolean isEdit, Long idUsuario) {
         Map<String, Object> resultado = new HashMap<>();
         ResponsePSE response;
@@ -283,7 +255,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             messageResponse = ConstantesParameter.MSG_EDICION_DOCUMENTO_OK;
             paymentVoucherOld = paymentVoucherFeign.findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
                     comprobante.getRucEmisor(), comprobante.getTipoComprobante(), comprobante.getSerie(), comprobante.getNumero());
-
+            System.out.println("PAYMENTVOUCHER OLD: "+paymentVoucherOld);
             if (paymentVoucherOld == null)
                 throw new ServiceException("Este comprobante que desea editar, no existe en la base de datos del PSE");
 
@@ -411,7 +383,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
                     System.out.println("Eliminar items - stock del comprobante");
                 }
                 for (ComprobanteItem item : items) {
-                    detailPaymentVoucherFeign.deleteDetailPaymentVoucherById(item.getIdDetailsPayment());
+                    detailPaymentVoucherFeign.deleteDetailPaymentVoucherById(item.getIdComprobanteDetalle());
                     System.out.println("Eliminar items del comprobante");
                 }
             }

@@ -16,7 +16,7 @@ public class ComprobanteItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private Long idDetailsPayment;
+    private Long idComprobanteDetalle;
     private Integer numeroItem;
     private String codigoUnidadMedida;
 

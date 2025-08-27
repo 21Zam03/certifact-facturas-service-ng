@@ -2,11 +2,14 @@ package com.certicom.certifact_facturas_service_ng.service.impl;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.GetStatusCdrDto;
 import com.certicom.certifact_facturas_service_ng.dto.model.OseDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.ResponseServer;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
 import com.certicom.certifact_facturas_service_ng.entity.ErrorEntity;
 import com.certicom.certifact_facturas_service_ng.enums.ComunicationSunatEnum;
+import com.certicom.certifact_facturas_service_ng.enums.EstadoSunatEnum;
 import com.certicom.certifact_facturas_service_ng.enums.TyperErrorEnum;
+import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
 import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
 import com.certicom.certifact_facturas_service_ng.feign.ErrorCatalogFeign;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
@@ -15,6 +18,7 @@ import com.certicom.certifact_facturas_service_ng.templates.sunat.RequestSunatTe
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.certicom.certifact_facturas_service_ng.util.RebuildFile;
 import com.certicom.certifact_facturas_service_ng.util.UtilXml;
+import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -60,6 +64,34 @@ public class SendSunatServiceImpl implements SendSunatService {
     private String endPointSunatGuiaRemisionRest;
     @Value("${sunat.endpointConsultaCDR}")
     private String endPointConsultaCDR;
+
+    @Override
+    public PaymentVoucherDto prepareComprobanteForEnvioSunatInter(String finalRucEmisor, String tipoComprobante, String serieDocumento, Integer numeroDocumento) throws ServiceException {
+        PaymentVoucherDto paymentVoucherDto = paymentVoucherFeign.
+                findPaymentVoucherByRucAndTipoComprobanteAndSerieDocumentoAndNumeroDocumento(finalRucEmisor, tipoComprobante, serieDocumento, numeroDocumento);
+
+        if (paymentVoucherDto == null)
+            throw new ServiceException(String.format("%s [%s-%s-%s-%s]", "El comprobante que desea enviar a la Sunat, no existe: ", finalRucEmisor, tipoComprobante, serieDocumento, numeroDocumento != null ? numeroDocumento.toString() : ""));
+        System.out.println("RESULTA: "+paymentVoucherDto.toString());
+        if (paymentVoucherDto.getEstadoSunat().equals(EstadoSunatEnum.ACEPTADO.getAbreviado()))
+            throw new ServiceException("Este comprobante ya se encuentra aceptado en Sunat.");
+
+        if (paymentVoucherDto.getEstadoSunat().equals(EstadoSunatEnum.ANULADO.getAbreviado()))
+            throw new ServiceException("Este comprobante se encuentra anulado en Sunat.");
+
+        if (paymentVoucherDto.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_BOLETA))
+            throw new ServiceException("Por este metodo solo se permite enviar Facturas, Notas de crédito y Débito.");
+
+
+        if (paymentVoucherDto.getTipoComprobanteAfectado() != null) {
+            if (
+                    (paymentVoucherDto.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO))
+            ) {
+                throw new ServiceException("Por este metodo solo se permite enviar Notas de crédito y Débito asociadas a Facturas, las notas asociadas a boletas se deben enviar por resumen diario.");
+            }
+        }
+        return paymentVoucherDto;
+    }
 
     @Override
     public ResponseSunat sendBillPaymentVoucher(String fileName, String contentFileBase64, String rucEmisor) {

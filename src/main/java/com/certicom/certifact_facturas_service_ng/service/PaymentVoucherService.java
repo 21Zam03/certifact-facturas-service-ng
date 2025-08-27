@@ -17,8 +17,4 @@ public interface PaymentVoucherService {
             PaymentVoucherDto paymentVoucherDto, boolean isEdit, Long idUsuario
     );
 
-    /*NO DEBERIA ESTAR - solo por ahora*/
-    PaymentVoucherDto prepareComprobanteForEnvioSunatInter(String ruc, String tipo, String serie, Integer numero) throws ServiceException;
-
-
 }
