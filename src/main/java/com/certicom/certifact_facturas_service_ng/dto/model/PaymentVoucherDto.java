@@ -1,10 +1,12 @@
 package com.certicom.certifact_facturas_service_ng.dto.model;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
+import com.certicom.certifact_facturas_service_ng.entity.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -101,6 +103,9 @@ public class PaymentVoucherDto {
     private String userNameModificacion;
     private String codigoTipoDocumentoRelacionado;
     private String serieNumeroDocumentoRelacionado;
-    private List<ComprobanteArchivo> comprobanteArchivoList;
+    private String Uuid;
+    private Date fechaEmisionDate;
+
+    private List<PaymentVoucherFileEntity> paymentVoucherFileEntityList;
 
 }

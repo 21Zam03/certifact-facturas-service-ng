@@ -16,6 +16,7 @@ public class ComprobanteItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    private Long idDetailsPayment;
     private Integer numeroItem;
     private String codigoUnidadMedida;
 
@@ -78,6 +79,7 @@ public class ComprobanteItem implements Serializable {
     private String marca;
     private String adicional;
 
+    private String estado;
 /*
     public static List<ComprobanteItem> transformarAListaBean(List<ComprobanteDetalleEntity> lines) {
         List<ComprobanteItem> items = new ArrayList<>();

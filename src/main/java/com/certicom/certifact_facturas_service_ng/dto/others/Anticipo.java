@@ -11,6 +11,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class Anticipo {
 
+    private Long idAnticipoPayment;
+    private Long idPaymentVoucher;
     private String identificadorPago;
     private String serieAnticipo;
     private Integer numeroAnticipo;

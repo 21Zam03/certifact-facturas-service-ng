@@ -7,16 +7,16 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = "facturas-service-sp", url = "http://localhost:8090", contextId = "tmpVoucher")
 public interface TmpVoucherFeign {
 
-    @GetMapping("/api/invoice-sp/tmpVoucher/{id}")
+    @GetMapping("/api/tmp-voucher/{id}")
     public TmpVoucherSendBillEntity findTmpVoucherByIdPaymentVoucher(@PathVariable Long id);
 
-    @PostMapping("/api/invoice-sp/tmpVoucher")
+    @PostMapping("/api/tmp-voucher")
     public int saveTmpVoucher(@RequestBody TmpVoucherSendBillEntity tmpVoucherSendBillEntity);
 
-    @PutMapping("/api/invoice-sp/tmpVoucher/status")
+    @PutMapping("/api/tmp-voucher/status")
     public int updateStatusVoucherTmp(@RequestParam Long identificador, @RequestParam String estado);
 
-    @DeleteMapping("/api/invoice-sp/tmpVoucher")
+    @DeleteMapping("/api/tmp-voucher")
     public int deleteTmpVoucherById(@RequestParam Long tmpVoucherId);
 
 

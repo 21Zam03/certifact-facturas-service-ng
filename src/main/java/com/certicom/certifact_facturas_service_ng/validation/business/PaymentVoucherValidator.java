@@ -4,7 +4,7 @@ import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
 import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
-import com.certicom.certifact_facturas_service_ng.exceptions.BusinessValidationException;
+import com.certicom.certifact_facturas_service_ng.exceptions.ValidationException;
 import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
@@ -108,10 +108,10 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
 
     private void validateTipoDocumentoReceptorFactura(String tipoDocumentoReceptor) {
         if (StringUtils.isBlank(tipoDocumentoReceptor)) {
-            throw new BusinessValidationException("El campo [" + tipoDocumentoReceptorLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + tipoDocumentoReceptorLabel + "] es obligatorio.");
         }
         if (tipoDocumentoReceptor.equals(ConstantesSunat.TIPO_DOCUMENTO_IDENTIDAD_DNI)) {
-            throw new BusinessValidationException("EL campo [" + tipoDocumentoReceptorLabel + "] no esta permitido para Factura, ");
+            throw new ValidationException("EL campo [" + tipoDocumentoReceptorLabel + "] no esta permitido para Factura, ");
         }
     }
 
@@ -125,64 +125,64 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
             if (existeCodigoBien) {
                 if (paymentVoucher.getCodigoTipoOperacion().equals("1001") || paymentVoucher.getCodigoTipoOperacion().equals("1004")) {
                     if (StringUtils.length(StringUtils.trim(paymentVoucher.getCodigoBienDetraccion())) != 3) {
-                        throw new BusinessValidationException("El campo [" + codigoBienDetraccionLabel + "] debe tener 3 digitos.");
+                        throw new ValidationException("El campo [" + codigoBienDetraccionLabel + "] debe tener 3 digitos.");
                     }
                     if (paymentVoucher.getCuentaFinancieraBeneficiario() == null) {
-                        throw new BusinessValidationException("El campo [" + cuentaFinancieraBeneficiarioLabel + "] es obligatorio.");
+                        throw new ValidationException("El campo [" + cuentaFinancieraBeneficiarioLabel + "] es obligatorio.");
                     }
                     if (StringUtils.length(StringUtils.trim(paymentVoucher.getCuentaFinancieraBeneficiario())) > 100) {
-                        throw new BusinessValidationException("El campo [" + cuentaFinancieraBeneficiarioLabel
+                        throw new ValidationException("El campo [" + cuentaFinancieraBeneficiarioLabel
                                 + "] debe tener como maximo 100 digitos.");
                     }
                     if (paymentVoucher.getMontoDetraccion() == null) {
-                        throw new BusinessValidationException("El campo [" + montoDetraccionLabel + "] es obligarorio.");
+                        throw new ValidationException("El campo [" + montoDetraccionLabel + "] es obligarorio.");
                     }
                     if (!StringUtils.isAlphanumeric(paymentVoucher.getCodigoMedioPago())) {
-                        throw new BusinessValidationException("El campo [" + codigoMedioPagoLabel
+                        throw new ValidationException("El campo [" + codigoMedioPagoLabel
                                 + "] recibe caracteres alfabeticos y numericos.");
                     }
                     if (StringUtils.length(StringUtils.trim(paymentVoucher.getCodigoMedioPago())) != 3) {
-                        throw new BusinessValidationException("El campo [" + codigoMedioPagoLabel + "] debe tener 3 digitos.");
+                        throw new ValidationException("El campo [" + codigoMedioPagoLabel + "] debe tener 3 digitos.");
                     }
                     if (paymentVoucher.getPorcentajeDetraccion() == null) {
-                        throw new BusinessValidationException("El campo [" + porcentajeDetraccionLabel + "] es obligarorio.");
+                        throw new ValidationException("El campo [" + porcentajeDetraccionLabel + "] es obligarorio.");
                     }
                     if (paymentVoucher.getCodigoBienDetraccion().equals("027")) {
                         for (ComprobanteItem item : paymentVoucher.getItems()) {
                             if (StringUtils.isBlank(item.getDetalleViajeDetraccion())) {
-                                throw new BusinessValidationException("El campo [" + detalleViajeDetraccionLabel + "] es obligarorio, para codigo bien 027.");
+                                throw new ValidationException("El campo [" + detalleViajeDetraccionLabel + "] es obligarorio, para codigo bien 027.");
                             }
                             if (StringUtils.isBlank(item.getUbigeoOrigenDetraccion())) {
-                                throw new BusinessValidationException("El campo [" + ubigeoOrigenDetraccionLabel + "] es obligarorio, para codigo bien 027.");
+                                throw new ValidationException("El campo [" + ubigeoOrigenDetraccionLabel + "] es obligarorio, para codigo bien 027.");
                             }
                             if (StringUtils.isBlank(item.getDireccionOrigenDetraccion())) {
-                                throw new BusinessValidationException("El campo [" + direccionOrigenDetraccionLabel + "] es obligarorio, para codigo bien 027.");
+                                throw new ValidationException("El campo [" + direccionOrigenDetraccionLabel + "] es obligarorio, para codigo bien 027.");
                             }
                             if (StringUtils.isBlank(item.getUbigeoDestinoDetraccion())) {
-                                throw new BusinessValidationException("El campo [" + ubigeoDestinoDetraccionLabel + "] es obligarorio, para codigo bien 027.");
+                                throw new ValidationException("El campo [" + ubigeoDestinoDetraccionLabel + "] es obligarorio, para codigo bien 027.");
                             }
                             if (StringUtils.isBlank(item.getDireccionDestinoDetraccion())) {
-                                throw new BusinessValidationException("El campo [" + direccionDestinoDetraccionLabel + "] es obligarorio, para codigo bien 027.");
+                                throw new ValidationException("El campo [" + direccionDestinoDetraccionLabel + "] es obligarorio, para codigo bien 027.");
                             }
                             if (item.getUbigeoOrigenDetraccion().length() != 6) {
-                                throw new BusinessValidationException("El campo [" + ubigeoOrigenDetraccionLabel + "] debe tener 6 caracteres.");
+                                throw new ValidationException("El campo [" + ubigeoOrigenDetraccionLabel + "] debe tener 6 caracteres.");
                             }
                             if (item.getUbigeoDestinoDetraccion().length() != 6) {
-                                throw new BusinessValidationException("El campo [" + ubigeoDestinoDetraccionLabel + "] debe tener 6 caracteres.");
+                                throw new ValidationException("El campo [" + ubigeoDestinoDetraccionLabel + "] debe tener 6 caracteres.");
                             }
                             if (item.getValorServicioTransporte() == null) {
-                                throw new BusinessValidationException("El campo [" + valorServicioTransporteLabel + "] es obligarorio, para codigo bien 027.");
+                                throw new ValidationException("El campo [" + valorServicioTransporteLabel + "] es obligarorio, para codigo bien 027.");
                             }
                             if (item.getValorCargaEfectiva() == null) {
-                                throw new BusinessValidationException("El campo [" + valorCargaEfectivaLabel + "] es obligarorio, para codigo bien 027.");
+                                throw new ValidationException("El campo [" + valorCargaEfectivaLabel + "] es obligarorio, para codigo bien 027.");
                             }
                             if (item.getValorCargaUtil() == null) {
-                                throw new BusinessValidationException("El campo [" + valorCargaUtilLabel + "] es obligarorio, para codigo bien 027.");
+                                throw new ValidationException("El campo [" + valorCargaUtilLabel + "] es obligarorio, para codigo bien 027.");
                             }
                         }
                     }
                 } else {
-                    throw new BusinessValidationException("Las Detracciones, no corresponden al valor de Tipo Operacion Ingresado.");
+                    throw new ValidationException("Las Detracciones, no corresponden al valor de Tipo Operacion Ingresado.");
                 }
             }
         }
@@ -192,10 +192,10 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
         boolean existeAlmenosUno = false;
         if (montoBaseOtrosTributos != null || montoOtrosTributos != null) {
             if (montoBaseOtrosTributos == null) {
-                throw new BusinessValidationException("El campo [" + totalValorBaseOtrosTributosLabel + "] es obligatorio, si ingresa valor en [" + totalOtrostributosLabel + "]");
+                throw new ValidationException("El campo [" + totalValorBaseOtrosTributosLabel + "] es obligatorio, si ingresa valor en [" + totalOtrostributosLabel + "]");
             }
             if (montoOtrosTributos == null) {
-                throw new BusinessValidationException("El campo [" + totalOtrostributosLabel + "] es obligatorio, si ingresa valor en [" + totalValorBaseOtrosTributosLabel + "]");
+                throw new ValidationException("El campo [" + totalOtrostributosLabel + "] es obligatorio, si ingresa valor en [" + totalValorBaseOtrosTributosLabel + "]");
             }
             for (ComprobanteItem line : items) {
                 existeAlmenosUno = paymentVoucherDetailValidator.validateOperacionOtrosTributos(line.getMontoBaseOtrosTributos(), line.getOtrosTributos(), line.getPorcentajeOtrosTributos());
@@ -204,7 +204,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
                 }
             }
             if (!existeAlmenosUno) {
-                throw new BusinessValidationException("Debe ingresar al menos un item con datos de Otros tributos.");
+                throw new ValidationException("Debe ingresar al menos un item con datos de Otros tributos.");
             }
         }
     }
@@ -213,10 +213,10 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
         boolean existeAlmenosUno = false;
         if (montoBaseGravada != null || montoIgv != null) {
             if (montoBaseGravada == null) {
-                throw new BusinessValidationException("El campo [" + totalValorVentaGravadaLabel + "] es obligatorio, si ingresa valor en [" + totalIgvLabel + "]");
+                throw new ValidationException("El campo [" + totalValorVentaGravadaLabel + "] es obligatorio, si ingresa valor en [" + totalIgvLabel + "]");
             }
             if (montoIgv == null) {
-                throw new BusinessValidationException("El campo [" + totalIgvLabel + "] es obligatorio, si ingresa valor en [" + totalValorVentaGravadaLabel + "]");
+                throw new ValidationException("El campo [" + totalIgvLabel + "] es obligatorio, si ingresa valor en [" + totalValorVentaGravadaLabel + "]");
             }
             for (ComprobanteItem line : items) {
                 // Agrega lógica para contemplar el tipo de afectación IGV "30" (Inafecto - Operación Onerosa)
@@ -236,7 +236,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
                 }
             }
             if (!existeAlmenosUno) {
-                throw new BusinessValidationException("Debe ingresar al menos un item con datos del tributo con afectación gravada.");
+                throw new ValidationException("Debe ingresar al menos un item con datos del tributo con afectación gravada.");
             }
         }
     }
@@ -247,7 +247,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
         if (montoBaseGratuita != null || montoGratuita != null) {
             if(montoBaseGratuita.doubleValue() > 0){
                 if (montoBaseGratuita == null) {
-                    throw new BusinessValidationException("El campo [" + totalValorVentaGratuitaLabel + "] es obligatorio, si ingresa valor en [" + totalImpOperGratuitaLabel + "]");
+                    throw new ValidationException("El campo [" + totalValorVentaGratuitaLabel + "] es obligatorio, si ingresa valor en [" + totalImpOperGratuitaLabel + "]");
                 }
                 for (ComprobanteItem line : items) {
                     existeProductoGratuito = false;
@@ -260,7 +260,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
                     }
                 }
                 if (!existeAlmenosUno) {
-                    throw new BusinessValidationException("Debe ingresar al menos un item con datos de venta gratuita.");
+                    throw new ValidationException("Debe ingresar al menos un item con datos de venta gratuita.");
                 }
             }
 
@@ -271,10 +271,10 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
         boolean existeAlmenosUno = false;
         if (montoBaseIsc != null || montoIsc != null) {
             if (montoBaseIsc == null) {
-                throw new BusinessValidationException("El campo [" + totalValorBaseIscLabel + "] es obligatorio, si ingresa valor en [" + totalIscLabel + "]");
+                throw new ValidationException("El campo [" + totalValorBaseIscLabel + "] es obligatorio, si ingresa valor en [" + totalIscLabel + "]");
             }
             if (montoIsc == null) {
-                throw new BusinessValidationException("El campo [" + totalIscLabel + "] es obligatorio, si ingresa valor en [" + totalValorBaseIscLabel + "]");
+                throw new ValidationException("El campo [" + totalIscLabel + "] es obligatorio, si ingresa valor en [" + totalValorBaseIscLabel + "]");
             }
             for (ComprobanteItem line : items) {
                 existeAlmenosUno = paymentVoucherDetailValidator.validateOperacionISC(line.getMontoBaseIsc(), line.getIsc(), line.getPorcentajeIsc(), line.getCodigoTipoCalculoISC());
@@ -283,7 +283,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
                 }
             }
             if (!existeAlmenosUno) {
-                throw new BusinessValidationException("Debe ingresar al menos un item con datos del tributo ISC.");
+                throw new ValidationException("Debe ingresar al menos un item con datos del tributo ISC.");
             }
         }
     }
@@ -299,15 +299,15 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
     private void validateNumeroDocumentoRelacionado(String numeroDocumentoRelacionado, String tipoDocumentoRelacionado) {
         if (StringUtils.isNotBlank(numeroDocumentoRelacionado)) {
             if (StringUtils.isBlank(tipoDocumentoRelacionado)) {
-                throw new BusinessValidationException("El campo [" + tipoDocumentoRelacionadoLabel + "] es obligatorio, en el caso de ingresar "
+                throw new ValidationException("El campo [" + tipoDocumentoRelacionadoLabel + "] es obligatorio, en el caso de ingresar "
                         + "el campo [" + numeroDocumentoRelacionadoLabel + "]");
             }
             if (StringUtils.length(numeroDocumentoRelacionado) > 30) {
-                throw new BusinessValidationException("El campo [" + numeroDocumentoRelacionadoLabel + "] debe a lo mas 30 caracteres.");
+                throw new ValidationException("El campo [" + numeroDocumentoRelacionadoLabel + "] debe a lo mas 30 caracteres.");
             }
         } else {
             if (StringUtils.isNotBlank(tipoDocumentoRelacionado)) {
-                throw new BusinessValidationException("Se ha ingresado el campo [" + tipoDocumentoRelacionadoLabel + "] por lo cual tambien "
+                throw new ValidationException("Se ha ingresado el campo [" + tipoDocumentoRelacionadoLabel + "] por lo cual tambien "
                         + "debe ingresar el campo [" + numeroDocumentoRelacionadoLabel + "]");
             }
         }
@@ -316,10 +316,10 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
     private void validateTipoDocumentoRelacionado(String tipoDocumentoRelacionado) {
         if (StringUtils.isNotBlank(tipoDocumentoRelacionado)) {
             if (!StringUtils.isAlphanumeric(tipoDocumentoRelacionado)) {
-                throw new BusinessValidationException("El campo [" + tipoDocumentoRelacionadoLabel + "] debe ser alfanumerico.");
+                throw new ValidationException("El campo [" + tipoDocumentoRelacionadoLabel + "] debe ser alfanumerico.");
             }
             if (StringUtils.length(StringUtils.trim(tipoDocumentoRelacionado)) != 2) {
-                throw new BusinessValidationException("El campo [" + tipoDocumentoRelacionadoLabel + "] debe tener 2 caracteres.");
+                throw new ValidationException("El campo [" + tipoDocumentoRelacionadoLabel + "] debe tener 2 caracteres.");
             }
         }
     }
@@ -327,10 +327,10 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
     private void validateDomicilioFiscalEmisor(String codigoDomicilioFiscal) {
         if (StringUtils.isNotBlank(codigoDomicilioFiscal)) {
             if (!StringUtils.isAlphanumeric(codigoDomicilioFiscal)) {
-                throw new BusinessValidationException("El campo [" + codigoLocalAnexoEmisorLabel + "] debe ser alfanumerico.");
+                throw new ValidationException("El campo [" + codigoLocalAnexoEmisorLabel + "] debe ser alfanumerico.");
             }
             if (StringUtils.length(codigoDomicilioFiscal) != 4) {
-                throw new BusinessValidationException("El campo [" + codigoLocalAnexoEmisorLabel + "] debe tener 4 caracteres.");
+                throw new ValidationException("El campo [" + codigoLocalAnexoEmisorLabel + "] debe tener 4 caracteres.");
             }
         }
     }
@@ -338,26 +338,26 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
     private void validateDenominacionReceptor(String denominacionReceptor, boolean datosReceptorObligatorio) {
         if (datosReceptorObligatorio) {
             if (StringUtils.isBlank(denominacionReceptor)) {
-                throw new BusinessValidationException("El campo [" + denominacionReceptorLabel + "] es obligatorio.");
+                throw new ValidationException("El campo [" + denominacionReceptorLabel + "] es obligatorio.");
             }
         }
         if (StringUtils.isNotBlank(denominacionReceptor) && StringUtils.length(denominacionReceptor) > 1500) {
-            throw new BusinessValidationException("El campo [" + denominacionReceptorLabel + "] debe tener un maximo de 1500 caracteres.");
+            throw new ValidationException("El campo [" + denominacionReceptorLabel + "] debe tener un maximo de 1500 caracteres.");
         }
     }
 
     private void validateNumeroDocumentoReceptor(String numeroDocumentoReceptor, String tipoDocumentoReceptor, boolean datosReceptorObligatorio) {
         if (datosReceptorObligatorio) {
             if (StringUtils.isBlank(numeroDocumentoReceptor)) {
-                throw new BusinessValidationException("El campo [" + numeroDocumentoReceptorLabel + "] es obligatorio.");
+                throw new ValidationException("El campo [" + numeroDocumentoReceptorLabel + "] es obligatorio.");
             }
         } else {
             if (StringUtils.isNotBlank(numeroDocumentoReceptor) || StringUtils.isNotBlank(tipoDocumentoReceptor)) {
                 if (StringUtils.isBlank(numeroDocumentoReceptor)) {
-                    throw new BusinessValidationException("El campo [" + numeroDocumentoReceptorLabel + "] es obligatorio, si ingresa el campo [" + tipoDocumentoReceptorLabel + "]");
+                    throw new ValidationException("El campo [" + numeroDocumentoReceptorLabel + "] es obligatorio, si ingresa el campo [" + tipoDocumentoReceptorLabel + "]");
                 }
                 if (StringUtils.isBlank(tipoDocumentoReceptor)) {
-                    throw new BusinessValidationException("El campo [" + tipoDocumentoReceptorLabel + "] es obligatorio, si ingresa el campo [" + numeroDocumentoReceptorLabel + "]");
+                    throw new ValidationException("El campo [" + tipoDocumentoReceptorLabel + "] es obligatorio, si ingresa el campo [" + numeroDocumentoReceptorLabel + "]");
                 }
             } else {
                 return;
@@ -367,27 +367,27 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
         switch (tipoDocumentoReceptor) {
             case ConstantesSunat.TIPO_DOCUMENTO_IDENTIDAD_DNI:
                 if (!StringUtils.isNumeric(numeroDocumentoReceptor)) {
-                    throw new BusinessValidationException("El campo [" + numeroDocumentoReceptorLabel + "] debe contener solo digitos numericos.");
+                    throw new ValidationException("El campo [" + numeroDocumentoReceptorLabel + "] debe contener solo digitos numericos.");
                 }
                 if (StringUtils.length(numeroDocumentoReceptor) != 8) {
-                    throw new BusinessValidationException("El campo [" + numeroDocumentoReceptorLabel + "] debe tener 8 digitos.");
+                    throw new ValidationException("El campo [" + numeroDocumentoReceptorLabel + "] debe tener 8 digitos.");
                 }
                 break;
             case ConstantesSunat.TIPO_DOCUMENTO_IDENTIDAD_RUC:
                 if (!StringUtils.isNumeric(numeroDocumentoReceptor)) {
-                    throw new BusinessValidationException("El campo [" + numeroDocumentoReceptorLabel + "] debe contener solo digitos numericos.");
+                    throw new ValidationException("El campo [" + numeroDocumentoReceptorLabel + "] debe contener solo digitos numericos.");
                 }
                 if (StringUtils.length(numeroDocumentoReceptor) != 11) {
-                    throw new BusinessValidationException("El campo [" + numeroDocumentoReceptorLabel + "] debe tener 11 digitos.");
+                    throw new ValidationException("El campo [" + numeroDocumentoReceptorLabel + "] debe tener 11 digitos.");
                 }
                 break;
             default:
                 if (!tipoDocumentoReceptor.equals(ConstantesSunat.TIPO_DOCUMENTO_NO_DOMI_SIN_RUC)) {
                     if (!StringUtils.isAlphanumeric(numeroDocumentoReceptor)) {
-                        throw new BusinessValidationException("El campo [" + numeroDocumentoReceptorLabel + "] debe contener digitos alfanumericos.");
+                        throw new ValidationException("El campo [" + numeroDocumentoReceptorLabel + "] debe contener digitos alfanumericos.");
                     }
                     if (StringUtils.length(numeroDocumentoReceptor) > 15) {
-                        throw new BusinessValidationException("El campo [" + numeroDocumentoReceptorLabel + "] debe tener 15 caracteres como maximo.");
+                        throw new ValidationException("El campo [" + numeroDocumentoReceptorLabel + "] debe tener 15 caracteres como maximo.");
                     }
                 }
         }
@@ -395,13 +395,13 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
 
     private void validateTipoDocumentoReceptor(String tipoDocumentoReceptor, boolean datosReceptorObligatorio) {
         if (StringUtils.isBlank(tipoDocumentoReceptor) && datosReceptorObligatorio) {
-            throw new BusinessValidationException("El campo [" + tipoDocumentoReceptorLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + tipoDocumentoReceptorLabel + "] es obligatorio.");
         }
         if (StringUtils.isNotBlank(tipoDocumentoReceptor) && !StringUtils.isAlphanumeric(tipoDocumentoReceptor)) {
-            throw new BusinessValidationException("El campo [" + tipoDocumentoReceptorLabel + "] debe ser alfanumerico.");
+            throw new ValidationException("El campo [" + tipoDocumentoReceptorLabel + "] debe ser alfanumerico.");
         }
         if (StringUtils.isNotBlank(tipoDocumentoReceptor) && StringUtils.length(tipoDocumentoReceptor) > 1) {
-            throw new BusinessValidationException("El campo [" + tipoDocumentoReceptorLabel + "] debe tener un solo caracter.");
+            throw new ValidationException("El campo [" + tipoDocumentoReceptorLabel + "] debe tener un solo caracter.");
         }
     }
 
@@ -411,40 +411,40 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
 
     private void validateImporteTotal(BigDecimal importeTotal) {
         if (importeTotal == null) {
-            throw new BusinessValidationException("El campo [" + importeTotalLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + importeTotalLabel + "] es obligatorio.");
         }
     }
 
     private void validateTipoMoneda(String tipoMoneda) {
         if (StringUtils.isBlank(tipoMoneda)) {
-            throw new BusinessValidationException("El campo [" + codigoMonedaLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + codigoMonedaLabel + "] es obligatorio.");
         }
         if (!StringUtils.isAlphanumeric(tipoMoneda)) {
-            throw new BusinessValidationException("El campo [" + codigoMonedaLabel + "] es alfanumerico.");
+            throw new ValidationException("El campo [" + codigoMonedaLabel + "] es alfanumerico.");
         }
         if (StringUtils.length(tipoMoneda) != 3) {
-            throw new BusinessValidationException("El campo [" + codigoMonedaLabel + "] debe tener 3 caracteres.");
+            throw new ValidationException("El campo [" + codigoMonedaLabel + "] debe tener 3 caracteres.");
         }
     }
 
     private void validateHoraEmision(String horaEmision, String fechaEmision) {
         if (StringUtils.isBlank(horaEmision)) {
-            throw new BusinessValidationException("El campo [" + horaEmisionLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + horaEmisionLabel + "] es obligatorio.");
         }
         if (StringUtils.isBlank(UtilFormat.hora(fechaEmision + " " + horaEmision))) {
-            throw new BusinessValidationException("El campo [" + horaEmisionLabel + "] debe tener el formato hh:mm:ss");
+            throw new ValidationException("El campo [" + horaEmisionLabel + "] debe tener el formato hh:mm:ss");
         }
     }
 
     private void validateNumero(Integer numero) {
         if (numero == null) {
-            throw new BusinessValidationException("El campo [" + numeroLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + numeroLabel + "] es obligatorio.");
         }
         if (numero < 1) {
-            throw new BusinessValidationException("El campo [" + numeroLabel + "] debe ser mayor que cero.");
+            throw new ValidationException("El campo [" + numeroLabel + "] debe ser mayor que cero.");
         }
         if (StringUtils.length(numero.toString()) > 8) {
-            throw new BusinessValidationException("El campo [" + numeroLabel + "] debe tener como maximo 8 digitos.");
+            throw new ValidationException("El campo [" + numeroLabel + "] debe tener como maximo 8 digitos.");
         }
     }
 
@@ -466,13 +466,13 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
 
     private void validateSerie(String serie, String tipoComprobante, String tipoComprobanteAfectado) {
         if (StringUtils.isBlank(serie)) {
-            throw new BusinessValidationException("El campo [" + serieLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + serieLabel + "] es obligatorio.");
         }
         if (!StringUtils.isAlphanumeric(serie)) {
-            throw new BusinessValidationException("El campo [" + serieLabel + "] recibe caracteres del alfabeto y números.");
+            throw new ValidationException("El campo [" + serieLabel + "] recibe caracteres del alfabeto y números.");
         }
         if (StringUtils.length(serie) != 4) {
-            throw new BusinessValidationException("El campo [" + serieLabel + "] debe ser alfanumerico de 4 caracteres.");
+            throw new ValidationException("El campo [" + serieLabel + "] debe ser alfanumerico de 4 caracteres.");
         }
 
         switch (tipoComprobante) {
@@ -491,16 +491,16 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
      * Valida que el tipo de comprobante sea factura, nota de crédito o nota de débito.
      *
      * @param tipoComprobante el tipo de comprobante recibido.
-     * @throws BusinessValidationException si el tipo de comprobante no es válido.
+     * @throws ValidationException si el tipo de comprobante no es válido.
      */
     private void validateTipoComprobante(String tipoComprobante) {
         if (StringUtils.isBlank(tipoComprobante)) {
-            throw new BusinessValidationException("El campo [" + tipoComprobanteLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + tipoComprobanteLabel + "] es obligatorio.");
         }
         if(!tipoComprobante.equals(ConstantesSunat.TIPO_DOCUMENTO_FACTURA) &&
                 !tipoComprobante.equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO) &&
                 !tipoComprobante.equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_DEBITO)) {
-            throw new BusinessValidationException(
+            throw new ValidationException(
                     "El campo ["+tipoComprobanteLabel+"] contiene un valor no valido o no es de tipo factura, nota de credito, nota de debito - ["+tipoComprobante+"]."
             );
         }
@@ -510,23 +510,23 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
      * Valida que el ruc de la empresa que esta emitiendo el comprobante este activo en el sistema.
      *
      * @param rucEmisor el ruc de la empresa emisor del comprobante recibido.
-     * @throws BusinessValidationException si el ruc de la empresa emisor no esta activo.
+     * @throws ValidationException si el ruc de la empresa emisor no esta activo.
      * @throws FeignException si ocurre un error al invocar el microservicio remoto para consultar el estado.
      */
     private void validateRucAtivo(String rucEmisor) {
         try {
             String estado = companyFeign.getStateFromCompanyByRuc(rucEmisor);
             if(!estado.equals(ConstantesParameter.REGISTRO_ACTIVO)) {
-                throw new BusinessValidationException(
+                throw new ValidationException(
                         "El ruc emisor [" + rucEmisor + "] No se encuentra habilitado para ejecutar operaciones al API-REST."
                 );
             }
         } catch (FeignException fe) {
-            throw new BusinessValidationException(
+            throw new ValidationException(
                     "No se pudo validar el estado del RUC emisor [" + rucEmisor + "]. Error al comunicarse con el servicio de validación: " + fe.getMessage()
             );
         } catch (Exception e) {
-            throw new BusinessValidationException(
+            throw new ValidationException(
                     "Error inesperado al validar el estado del RUC emisor [" + rucEmisor + "]: " + e.getMessage()
             );
         }
@@ -534,24 +534,24 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
 
     private void validateMotivoNota(String motivo) {
         if (StringUtils.isBlank(motivo)) {
-            throw new BusinessValidationException("El campo [" + motivoNotaLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + motivoNotaLabel + "] es obligatorio.");
         }
         if (250 < StringUtils.length(motivo)) {
-            throw new BusinessValidationException("El campo [" + motivoNotaLabel + "] debe tener como longitud maxima de 250 caracteres.");
+            throw new ValidationException("El campo [" + motivoNotaLabel + "] debe tener como longitud maxima de 250 caracteres.");
         }
     }
 
     private void validateCodigoTipoNotaDebito(String tipoComprobante, String tipoNotaDebito) {
         if (tipoComprobante.equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_DEBITO)) {
             if (StringUtils.isBlank(tipoNotaDebito)) {
-                throw new BusinessValidationException("El campo [" + tipoNotaDebitoLabel + "] es obligatorio.");
+                throw new ValidationException("El campo [" + tipoNotaDebitoLabel + "] es obligatorio.");
             }
             if (!StringUtils.isNumeric(tipoNotaDebito)) {
-                throw new BusinessValidationException("El campo [" + tipoNotaDebitoLabel + "] debe tener "
+                throw new ValidationException("El campo [" + tipoNotaDebitoLabel + "] debe tener "
                         + "caracteres numericos.");
             }
             if (StringUtils.length(tipoNotaDebito) != 2) {
-                throw new BusinessValidationException("El campo [" + tipoNotaDebitoLabel + "] debe tener 2 caracteres numericos.");
+                throw new ValidationException("El campo [" + tipoNotaDebitoLabel + "] debe tener 2 caracteres numericos.");
             }
         }
     }
@@ -559,33 +559,33 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
     private void validateCodigoTipoNotaCredito(String tipoComprobante, String tipoNotaCredito)  {
         if (tipoComprobante.equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO)) {
             if (StringUtils.isBlank(tipoNotaCredito)) {
-                throw new BusinessValidationException("El campo [" + tipoNotaCreditoLabel + "] es obligatorio.");
+                throw new ValidationException("El campo [" + tipoNotaCreditoLabel + "] es obligatorio.");
             }
             if (!StringUtils.isNumeric(tipoNotaCredito)) {
-                throw new BusinessValidationException("El campo [" + tipoNotaCreditoLabel + "] debe tener "
+                throw new ValidationException("El campo [" + tipoNotaCreditoLabel + "] debe tener "
                         + "caracteres numericos.");
             }
             if (StringUtils.length(tipoNotaCredito) != 2) {
-                throw new BusinessValidationException("El campo [" + tipoNotaCreditoLabel + "] debe tener 2 caracteres numericos.");
+                throw new ValidationException("El campo [" + tipoNotaCreditoLabel + "] debe tener 2 caracteres numericos.");
             }
         }
     }
 
     private void validateNumeroAfectado(Integer numeroAfectado) {
         if (numeroAfectado == null) {
-            throw new BusinessValidationException("El campo [" + numeroAfectadoLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + numeroAfectadoLabel + "] es obligatorio.");
         }
         if (numeroAfectado < 1) {
-            throw new BusinessValidationException("El campo [" + numeroAfectadoLabel + "] debe ser mayor que cero.");
+            throw new ValidationException("El campo [" + numeroAfectadoLabel + "] debe ser mayor que cero.");
         }
     }
 
     private void validateSerieAfectado(String serieAfectado) {
         if (StringUtils.isBlank(serieAfectado)) {
-            throw new BusinessValidationException("El campo [" + serieAfectadoLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + serieAfectadoLabel + "] es obligatorio.");
         }
         if (!StringUtils.isAlphanumeric(serieAfectado)) {
-            throw new BusinessValidationException("El campo [" + serieAfectadoLabel + "] recibe caracteres alfabeticos y numericos.");
+            throw new ValidationException("El campo [" + serieAfectadoLabel + "] recibe caracteres alfabeticos y numericos.");
         }
     }
 
@@ -593,27 +593,27 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
      * Valida que la fecha del comprobante (factura, nota de debito, nota de credito) este dentro del tiempo de 3 dias.
      *
      * @param fechaEmision la fecha de emision del comprobante recibido.
-     * @throws BusinessValidationException si la fecha de emision tiene mas de 3 dias de anterioridad.
+     * @throws ValidationException si la fecha de emision tiene mas de 3 dias de anterioridad.
      */
     private void validateFechaEmision(String fechaEmision) {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         Date fechaEmisionDate;
 
         if (StringUtils.isBlank(fechaEmision)) {
-            throw new BusinessValidationException("El campo [" + fechaEmisionLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + fechaEmisionLabel + "] es obligatorio.");
         }
         if (UtilFormat.fechaDate(fechaEmision) == null) {
-            throw new BusinessValidationException("El campo [" + fechaEmisionLabel + "] debe tener el formato yyyy-MM-dd");
+            throw new ValidationException("El campo [" + fechaEmisionLabel + "] debe tener el formato yyyy-MM-dd");
         }
         try {
             fechaEmisionDate = formatter.parse(fechaEmision);
             Calendar calendar = Calendar.getInstance();
             calendar.add(Calendar.DAY_OF_YEAR, -4);
             if (calendar.getTime().compareTo(fechaEmisionDate) > 0) {
-                throw new BusinessValidationException("El campo [" + fechaEmisionLabel + "] no debe tener más de 3 días de anterioridad");
+                throw new ValidationException("El campo [" + fechaEmisionLabel + "] no debe tener más de 3 días de anterioridad");
             }
         } catch (ParseException e) {
-            throw new BusinessValidationException(e.getMessage());
+            throw new ValidationException(e.getMessage());
         }
     }
 
@@ -621,12 +621,12 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
      * Valida que la serie del comprobante de tipo factura empieze con la letra F.
      *
      * @param serie la serie del comprobante recibido.
-     * @throws BusinessValidationException si la serie del comprobante no es valido.
+     * @throws ValidationException si la serie del comprobante no es valido.
      */
     private void validateSerieFactura(String serie) {
         String primeraLetra = StringUtils.substring(serie, 0, 1).toUpperCase();
         if (!primeraLetra.equals("F") && !StringUtils.isNumeric(serie)) {
-            throw new BusinessValidationException("El campo [" + serieLabel + "] puede ser númerico ó empezar con el caracter F.");
+            throw new ValidationException("El campo [" + serieLabel + "] puede ser númerico ó empezar con el caracter F.");
         }
     }
 
@@ -634,18 +634,18 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
      * Valida que el tipo de comprobante afectado sea una factura.
      *
      * @param tipoComprobanteAfectado el tipo de comprobante afectado recibido.
-     * @throws BusinessValidationException si el tipo de comprobante afectado no es valido.
+     * @throws ValidationException si el tipo de comprobante afectado no es valido.
      */
     private void validateTipoComprobanteAfectado(String tipoComprobanteAfectado) {
         if (StringUtils.isBlank(tipoComprobanteAfectado)) {
-            throw new BusinessValidationException("El campo [" + tipoComprobanteAfectadoLabel + "] es obligatorio.");
+            throw new ValidationException("El campo [" + tipoComprobanteAfectadoLabel + "] es obligatorio.");
         }
         if (!StringUtils.isNumeric(tipoComprobanteAfectado)) {
-            throw new BusinessValidationException("El campo [" + tipoComprobanteAfectadoLabel + "] debe tener "
+            throw new ValidationException("El campo [" + tipoComprobanteAfectadoLabel + "] debe tener "
                     + "caracteres numericos.");
         }
         if (!tipoComprobanteAfectado.equals(ConstantesSunat.TIPO_DOCUMENTO_FACTURA)) {
-            throw new BusinessValidationException(
+            throw new ValidationException(
                     "El campo [" + tipoComprobanteAfectadoLabel + "] debe corresponder al siguiente comprobante: 01 Factura"
             );
         }
@@ -658,7 +658,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
      * @param serie la serie del comprobante recibido.
      * @param rucEmisor el ruc de la empresa emisor del comprobante recibido.
      * @param numero el numero del comprobante recibido.
-     * @throws BusinessValidationException si el numero no coincide con su antecesor.
+     * @throws ValidationException si el numero no coincide con su antecesor.
      * @throws FeignException si ocurre un error al invocar el microservicio remoto para consultar la ultima numeracion.
      */
     private void validateNumeracion(String tipoComprobante, String serie, String rucEmisor, Integer numero) {
@@ -669,17 +669,17 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
             if (proximo > 1){
                 int diferencia = numero - proximo;
                 if (diferencia > 120){
-                    throw new BusinessValidationException(
+                    throw new ValidationException(
                             "El numero [" + numero + "] difiere de su antecesor en " + proximo + " posiciones."
                     );
                 }
             }
         } catch (FeignException fe) {
-            throw new BusinessValidationException(
+            throw new ValidationException(
                     "No se pudo validar la numeracion [" +numero+ "]. Error al comunicarse con el servicio de validación: " + fe.getMessage()
             );
         } catch (Exception e) {
-            throw new BusinessValidationException(
+            throw new ValidationException(
                     "Error inesperado al validar la numeracion [" + numero + "]: " + e.getMessage()
             );
         }
@@ -690,7 +690,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
             String idDocumento = rucEmisor + "-" + tipoComprobante + "-" + serie + "-" + numero;
             PaymentVoucherEntity identificadorEntity = paymentVoucherFeign.getPaymentVoucherByIdentificadorDocumento(idDocumento);
             if (identificadorEntity != null && !isEdit) {
-                throw new BusinessValidationException(
+                throw new ValidationException(
                         "El comprobante ya ha sido registrado [" + rucEmisorLabel + ":" + rucEmisor + "; "
                                 + tipoComprobanteLabel + ":" + tipoComprobante + "; " + serieLabel + ":" + serie + "; " + numeroLabel + ":"
                                 + numero + "; " + fechaEmisionLabel + ":" + identificadorEntity.getFechaEmision() + "; fecha_registro:"
@@ -703,13 +703,13 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
                 );
             }
         } catch (FeignException fe) {
-            throw new BusinessValidationException("No se pudo validar si el comprobante ya ha sido registrado. Error al comunicarse con el servicio de validación: " + fe.getMessage());
+            throw new ValidationException("No se pudo validar si el comprobante ya ha sido registrado. Error al comunicarse con el servicio de validación: " + fe.getMessage());
         }
     }
 
     private void validateItems(List<ComprobanteItem> items, String tipoComprobante, String ublVersion, String ruc) {
         if (items == null || items.isEmpty()) {
-            throw new BusinessValidationException("El campo [" + itemsLabel + "] es obligatorio, debe contener al menos un item.");
+            throw new ValidationException("El campo [" + itemsLabel + "] es obligatorio, debe contener al menos un item.");
         }
         for (ComprobanteItem item : items) {
             paymentVoucherDetailValidator.validate(item, tipoComprobante, ublVersion, ruc);

@@ -15,5 +15,6 @@ public class GuiaRelacionada {
     private Long idguiaremision;
     private String codigoTipoGuia;
     private String serieNumeroGuia;
+    private Long idPaymentVoucher;
 
 }

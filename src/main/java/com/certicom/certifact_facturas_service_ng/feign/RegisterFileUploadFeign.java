@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "facturas-service-sp", url = "http://localhost:8090", contextId = "registerFileUpload")
 public interface RegisterFileUploadFeign {
 
-    @GetMapping("/api/invoice-sp/register-file-upload")
+    @GetMapping("/api/register-file-upload")
     public RegisterFileUploadDto findFirst1ByPaymentVoucherIdPaymentVoucherAndTipoArchivoAndEstadoArchivoOrderByOrdenDesc
             (@RequestParam Long idPayment, @RequestParam String tipoArchivo, @RequestParam String estadoArchivo);
 
-    @PostMapping("/api/invoice-sp/register-file-upload")
+    @PostMapping("/api/register-file-upload")
     public RegisterFileUploadEntity saveRegisterFileUpload(@RequestBody RegisterFileUploadDto registerFileUploadDto);
 
 }

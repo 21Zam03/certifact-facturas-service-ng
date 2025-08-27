@@ -60,6 +60,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
             voucherPendiente = tmpVoucherFeign.findTmpVoucherByIdPaymentVoucher(idPaymentVoucher);
 
             if (voucherPendiente != null) {
+                System.out.println("voucher pendiente existe "+voucherPendiente);
 
                 tmpVoucherFeign.updateStatusVoucherTmp(
                         voucherPendiente.getIdTmpSendBill(),
@@ -69,6 +70,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                 RegisterFileUploadDto registerFileUploadDto = registerFileUploadFeign
                         .findFirst1ByPaymentVoucherIdPaymentVoucherAndTipoArchivoAndEstadoArchivoOrderByOrdenDesc(idPaymentVoucher, TipoArchivoEnum.XML.name(),
                                 EstadoArchivoEnum.ACTIVO.name());
+                System.out.println("REGISTER FILE UPLOAD: "+registerFileUploadDto);
 
                 if (registerFileUploadDto == null)
                     throw new ServiceException("No se encuentra el archivo XML a enviar, por favor edite o regenere el comprobante.");
@@ -77,10 +79,13 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
 
 
                 nombreCompleto = voucherPendiente.getNombreDocumento() + "." + ConstantesParameter.TYPE_FILE_ZIP;
+                System.out.println("VARIABLES: "+fileXMLZipBase64);
+                System.out.println("VARIABLES: "+nombreCompleto);
 
                 responseSunat = sendSunatService.sendBillPaymentVoucher(
                         nombreCompleto,
-                        fileXMLZipBase64,ruc
+                        fileXMLZipBase64,
+                        ruc
                 );
 
                 switch (responseSunat.getEstadoComunicacionSunat()) {
@@ -153,7 +158,8 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                                                 .build()
                                 );
                             }
-                            paymentVoucherFeign.savePaymentVoucher(paymentVoucherEntity);
+                            //ANALIZAR YA QUE SE CAMBIO EL OBJETO PAYMENTCOUCHERENTITY A DTO
+                            //paymentVoucherFeign.savePaymentVoucher(paymentVoucherEntity);
 
                             status = true;
                         }else if(Integer.parseInt(responseSunat.getStatusCode())==140){
@@ -239,7 +245,8 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                                             .build()
                                 );
                             }
-                            paymentVoucherFeign.savePaymentVoucher(paymentVoucherEntity);
+                            //ANALIZAR YA QUE SE CAMBIO EL OBJETO PAYMENTCOUCHERENTITY A DTO
+                            //paymentVoucherFeign.savePaymentVoucher(paymentVoucherEntity);
                             status = true;
                         }else{
                             System.out.println("Error: Dio error al reenviar");
@@ -254,7 +261,6 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                     default:
 
                 }
-
             } else {
                 throw new Exception(
                         "No se pudo entontrar en la tabla temporal id_payment_voucher[" + idPaymentVoucher + "]");
@@ -287,23 +293,23 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
 
         tmpVoucherFeign.deleteTmpVoucherById(idTmpVoucher);
 
-        PaymentVoucherEntity paymentVoucher = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
-        paymentVoucher.setEstado(estadoComprobante);
-        paymentVoucher.setEstadoSunat(EstadoSunatEnum.ACEPTADO.getAbreviado());
-        paymentVoucher.setMensajeRespuesta(mensajeRespuesta);
-        paymentVoucher.setCodigosRespuestaSunat(codigosRespuesta);
+        paymentVoucherFeign.updateStatePaymentVoucher(
+                idPaymentVoucher,
+                estadoComprobante,
+                EstadoSunatEnum.ACEPTADO.getAbreviado(),
+                mensajeRespuesta,
+                codigosRespuesta
+        );
         //AGREGANDO ARCHIVO
         if (responseStorage.getIdRegisterFileSend() != null) {
-            paymentVoucher.getPaymentVoucherFileEntityList().add(
-                    PaymentVoucherFileEntity.builder()
-                            .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
-                            .idRegisterFileSend(responseStorage.getIdRegisterFileSend())
-                            .tipoArchivo(TipoArchivoEnum.CDR.name())
-                            .build()
-            );
+            PaymentVoucherFileEntity.builder()
+                    .orden(2)
+                    .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
+                    .idRegisterFileSend(responseStorage.getIdRegisterFileSend())
+                    .tipoArchivo(TipoArchivoEnum.CDR.name())
+                    .build();
+
         }
-        //paymentVoucherRepository.save(paymentVoucher);
-        paymentVoucherFeign.savePaymentVoucher(paymentVoucher);
         //AJUSTE DE STOCK
         //************
 

@@ -10,13 +10,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "facturas-service-sp", url = "http://localhost:8090", contextId = "company")
 public interface CompanyFeign {
 
-    @GetMapping("/api/invoice-sp/company/state")
+    @GetMapping("/api/company/state")
     public String getStateFromCompanyByRuc(@RequestParam String rucEmisor);
 
-    @GetMapping("/api/invoice-sp/company/{ruc}")
+    @GetMapping("/api/company/{ruc}")
     public CompanyDto findCompanyByRuc(@PathVariable String ruc);
 
-    @GetMapping("/api/invoice-sp/company/ose")
+    @GetMapping("/api/company/ose")
     public OseDto findOseByRucInter(@RequestParam String ruc);
 
 }

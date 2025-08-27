@@ -119,10 +119,10 @@ public interface PaymentVoucherFeign {
     );
 
     @PostMapping("/api/invoice-sp/payment-voucher")
-    public PaymentVoucherEntity savePaymentVoucher(@RequestBody PaymentVoucherEntity entity);
+    public PaymentVoucherEntity savePaymentVoucher(@RequestBody PaymentVoucherDto entity);
 
     @GetMapping("/api/invoice-sp/payment-voucher/parameters")
-    public PaymentVoucherEntity findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
+    public PaymentVoucherDto findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
             @RequestParam String rucEmisor, @RequestParam String tipoComprobante,
             @RequestParam String serie, @RequestParam Integer numero);
 

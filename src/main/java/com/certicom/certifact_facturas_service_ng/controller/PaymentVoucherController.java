@@ -2,9 +2,7 @@ package com.certicom.certifact_facturas_service_ng.controller;
 
 import com.certicom.certifact_facturas_service_ng.converter.PaymentVoucherConverter;
 import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
-import com.certicom.certifact_facturas_service_ng.dto.request.IdentificadorPaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
-import com.certicom.certifact_facturas_service_ng.service.ComunicationSunatService;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.certicom.certifact_facturas_service_ng.validation.business.PaymentVoucherValidator;
@@ -18,18 +16,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping(InvoicePaymentVoucherController.API_PATH)
+@RequestMapping(PaymentVoucherController.API_PATH)
 @RequiredArgsConstructor
 @Slf4j
-public class InvoicePaymentVoucherController {
+public class PaymentVoucherController {
 
-    public static final String API_PATH = "/api/invoice-ng";
+    public static final String API_PATH = "/api/payment-voucher";
     private final PaymentVoucherService paymentVoucherService;
-    private final ComunicationSunatService comunicationSunatService;
     private final PaymentVoucherValidator paymentVoucherValidator;
 
-    @GetMapping("/payment-voucher")
-    public ResponseEntity<?> listarComprobantesConFiltros(
+    @GetMapping
+    public ResponseEntity<?> findPaymentVoucherWithFilter(
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
             @RequestParam(name = "filtroHasta", required = true) String filtroHasta,
             @RequestParam(name = "filtroTipoComprobante", required = false) String filtroTipoComprobante,
@@ -44,12 +41,12 @@ public class InvoicePaymentVoucherController {
         log.info("ComprobanteController - listarComprobantesConfiltros - [filtroDesde={}, filtroHasta={}, filtroTipoComprobante={}, fltroRuc={}, " +
                         "filtroSerie={}, filtroNumero={}, pageNumber={}, perPage={}, estadoSunat={}, idUsuario={}]",
                 filtroDesde, filtroHasta, filtroTipoComprobante, filtroRuc, filtroSerie, filtroNumero, pageNumber, perPage, estadoSunat, idUsuario);
-        Map<String, Object> paginacionComprobantes = paymentVoucherService.obtenerComprobantesEstadoPorFiltro(
+        Map<String, Object> paginacionComprobantes = paymentVoucherService.findPaymentVoucherWithFilter(
                 filtroDesde, filtroHasta, filtroTipoComprobante, filtroRuc, filtroSerie, filtroNumero, pageNumber, perPage, estadoSunat, idUsuario);
         return new ResponseEntity<>(paginacionComprobantes, HttpStatus.OK);
     }
 
-    @PostMapping("/payment-voucher")
+    @PostMapping
     public ResponseEntity<?> savePaymentVoucher(@RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest) {
         log.info("ComprobanteController - registrarComprobante - [comprobanteRequest={}]", paymentVoucherRequest.toString());
         PaymentVoucherDto paymentVoucherDto = PaymentVoucherConverter.requestToDto(paymentVoucherRequest);
@@ -59,20 +56,13 @@ public class InvoicePaymentVoucherController {
         //return new ResponseEntity<>("TEST", HttpStatus.OK);
     }
 
-    @PutMapping("/payment-voucher")
+    @PutMapping
     public ResponseEntity<?> editPaymentVoucher(@RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest) {
-        return new ResponseEntity<>("", HttpStatus.OK);
-    }
-
-    @PostMapping("send-sunat")
-    public ResponseEntity<?> sendPaymentVoucherToSunat(
-            @RequestBody @Valid IdentificadorPaymentVoucherRequest paymentVoucher
-            ) {
-        PaymentVoucherDto paymentVoucherDto = paymentVoucherService.prepareComprobanteForEnvioSunatInter("20204040303", paymentVoucher.getTipo(), paymentVoucher.getSerie(), paymentVoucher.getNumero());
-        //Map<String, Object> result = comunicationSunatService.sendDocumentBill(paymentVoucherDto.getRucEmisor(), paymentVoucherDto.getIdPaymentVoucher());
-
-
-        return new ResponseEntity<>("TEST", HttpStatus.OK);
+        log.info("ComprobanteController - registrarComprobante - [comprobanteRequest={}]", paymentVoucherRequest.toString());
+        PaymentVoucherDto paymentVoucherDto = PaymentVoucherConverter.requestToDto(paymentVoucherRequest);
+        paymentVoucherValidator.validate(paymentVoucherDto, true);
+        Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucherDto, true, 2L);
+        return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
     }
 
 }

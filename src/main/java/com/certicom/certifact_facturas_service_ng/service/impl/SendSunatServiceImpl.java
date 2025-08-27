@@ -72,6 +72,7 @@ public class SendSunatServiceImpl implements SendSunatService {
 
             ResponseServer responseServer = null;
             OseDto ose = companyFeign.findOseByRucInter(rucEmisor);
+            System.out.println("OSE: "+ose);
             if (ose != null) {
                 if (ose.getId() == 1) {
                     responseServer = send(formatSoap, obtenerEndPointSunat(rucEmisor),

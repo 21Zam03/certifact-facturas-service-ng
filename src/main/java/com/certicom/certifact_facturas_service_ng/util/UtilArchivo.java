@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.util;
 
-import com.certicom.certifact_facturas_service_ng.exceptions.ExcepcionNegocio;
+import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
@@ -70,7 +70,7 @@ public class UtilArchivo {
             return new ByteArrayInputStream(decodedByteArray);
         } catch (Exception e) {
             e.printStackTrace();
-            throw new ExcepcionNegocio("Error en el formato del archivo xml");
+            throw new ServiceException("Error en el formato del archivo xml");
         }
     }
 

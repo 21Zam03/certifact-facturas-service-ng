@@ -4,7 +4,6 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -104,10 +103,10 @@ public class PaymentVoucherEntity {
 
     private BranchOfficeEntity branchOfficeEntity;
     private List<PaymentVoucherFileEntity> paymentVoucherFileEntityList;
-    private List<ComprobanteDetalleEntity> comprobanteDetalleEntityList;
+    private List<DetailsPaymentVoucherEntity> detailsPaymentVoucherEntityList;
     private List<AnticipoEntity> anticipoEntityList;
-    private List<ComprobanteCuotaEntity> cuotasEntityList;
-    private List<ComprobanteCampoAdicionalEntity> comprobanteCampoAdicionalEntityList;
+    private List<CuotasPaymentVoucherEntity> cuotasEntityList;
+    private List<AditionalFieldEntity> aditionalFieldEntityList;
     private List<GuiaRelacionadaEntity> guiaRelacionadaEntityList;
 
 }
