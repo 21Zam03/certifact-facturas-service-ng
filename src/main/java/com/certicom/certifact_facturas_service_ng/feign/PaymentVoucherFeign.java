@@ -5,6 +5,7 @@ import com.certicom.certifact_facturas_service_ng.entity.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @FeignClient(name = "facturas-service-sp", url = "http://localhost:8090", contextId = "paymentVoucher")
@@ -137,4 +138,13 @@ public interface PaymentVoucherFeign {
     @GetMapping("/api/invoice-sp/error-catalog")
     public ErrorEntity findFirst1ByCodeAndDocument(@RequestParam String codigoRespuesta, @RequestParam String tipoDocumento);
 
+    @GetMapping("/api/invoice-sp/payment-voucher/id-documento")
+    public PaymentVoucherDto getIdentificadorDocument(@RequestParam String idDocumento);
+
+    @PutMapping("/api/invoice-sp/payment-voucher/state-3")
+    public int updateStateToSendSunatForVoidedDocuments(
+            @RequestParam List<String> identificadorComprobantes,
+            @RequestParam String estadoPendienteAnulacion,
+            @RequestParam String usuario,
+            @RequestParam Timestamp fechaModificacion);
 }

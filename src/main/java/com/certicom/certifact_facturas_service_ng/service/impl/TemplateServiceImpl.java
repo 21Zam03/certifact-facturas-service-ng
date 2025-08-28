@@ -1,17 +1,19 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
-import com.certicom.certifact_facturas_service_ng.dto.others.FirmaResp;
+import com.certicom.certifact_facturas_service_ng.dto.model.Voided;
+import com.certicom.certifact_facturas_service_ng.dto.others.SignatureResp;
 import com.certicom.certifact_facturas_service_ng.exceptions.SignedException;
 import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
-import com.certicom.certifact_facturas_service_ng.service.PlantillaService;
+import com.certicom.certifact_facturas_service_ng.service.TemplateService;
 import com.certicom.certifact_facturas_service_ng.signed.Firmado;
+import com.certicom.certifact_facturas_service_ng.templates.VoidedDocumentsTemplate;
 import com.certicom.certifact_facturas_service_ng.templates.template.FacturaTemplate;
 import com.certicom.certifact_facturas_service_ng.templates.template.NotaCreditoTemplate;
 import com.certicom.certifact_facturas_service_ng.templates.template.NotaDebitoTemplate;
 import com.certicom.certifact_facturas_service_ng.templates.template21.FacturaTemplate21;
-import com.certicom.certifact_facturas_service_ng.templates.template21.NotaCreditoTemplate21;
-import com.certicom.certifact_facturas_service_ng.templates.template21.NotaDebitoTemplate21;
+import com.certicom.certifact_facturas_service_ng.templates.template21.NotaCreditoTemplateSunat21;
+import com.certicom.certifact_facturas_service_ng.templates.template21.NotaDebitoTemplateSunat21;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.certicom.certifact_facturas_service_ng.util.UtilArchivo;
 import com.certicom.certifact_facturas_service_ng.util.UtilConversion;
@@ -26,20 +28,22 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class PlantillaServiceImpl implements PlantillaService {
+public class TemplateServiceImpl implements TemplateService {
 
     private final FacturaTemplate facturaTemplate;
     private final FacturaTemplate21 facturaTemplate21;
     private final NotaCreditoTemplate notaCreditoTemplate;
-    private final NotaCreditoTemplate21 notaCreditoTemplate21;
+    private final NotaCreditoTemplateSunat21 notaCreditoTemplate21;
     private final NotaDebitoTemplate notaDebitoTemplate;
-    private final NotaDebitoTemplate21 notaDebitoTemplate21;
+    private final NotaDebitoTemplateSunat21 notaDebitoTemplate21;
+    private final VoidedDocumentsTemplate voidedDocumentsTemplate;
 
     private final Firmado firma;
 
@@ -91,7 +95,7 @@ public class PlantillaServiceImpl implements PlantillaService {
         String idFirma;
         String nombreDocumento;
         Map<String, String> resp;
-        FirmaResp firmaResp;
+        SignatureResp signatureResp;
 
         switch (paymentVoucherDto.getTipoComprobante()) {
             case ConstantesSunat.TIPO_DOCUMENTO_FACTURA:
@@ -119,12 +123,12 @@ public class PlantillaServiceImpl implements PlantillaService {
         }
 
         idFirma = "S" + paymentVoucherDto.getTipoComprobante() + paymentVoucherDto.getSerie() + "-" + paymentVoucherDto.getNumero();
-        firmaResp = firma.signCerticom(xmlGenerado, idFirma);
+        signatureResp = firma.signCerticom(xmlGenerado, idFirma);
         nombreDocumento = paymentVoucherDto.getRucEmisor() + "-" + paymentVoucherDto.getTipoComprobante() + "-" +
                 paymentVoucherDto.getSerie() + "-" + paymentVoucherDto.getNumero();
 
-        resp = buildDataTemplate(firmaResp, nombreDocumento);
-        resp.put(ConstantesParameter.CODIGO_HASH, UtilArchivo.generarCodigoHash(firmaResp.toString()));
+        resp = buildDataTemplate(signatureResp, nombreDocumento);
+        resp.put(ConstantesParameter.CODIGO_HASH, UtilArchivo.generarCodigoHash(signatureResp.toString()));
 
         return resp;
     }
@@ -134,12 +138,38 @@ public class PlantillaServiceImpl implements PlantillaService {
         return null;
     }
 
-    private Map<String, String> buildDataTemplate(FirmaResp firmaResp, String nombreDocumento) throws SignedException, IOException, NoSuchAlgorithmException {
+    @Override
+    public Map<String, String> buildVoidedDocumentsSign(Voided voided) throws TemplateException, SignedException, IOException, NoSuchAlgorithmException {
+
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Map<String, String> buildVoidedDocumentsSignCerti(Voided voided) throws TemplateException, SignedException, IOException, NoSuchAlgorithmException {
+        String xmlGenerado;
+        String idSignature;
+        String nombreDocumento;
+        Map<String, String> resp;
+        SignatureResp signatureResp;
+
+        xmlGenerado = voidedDocumentsTemplate.buildVoidedDocuments(voided);
+        idSignature = "S" + voided.getId();
+        signatureResp = firma.signCerticom(xmlGenerado, idSignature);
+
+        nombreDocumento = voided.getRucEmisor() + "-" + voided.getId();
+        resp = buildDataTemplate(signatureResp, nombreDocumento);
+
+        return resp;
+    }
+
+
+
+    private Map<String, String> buildDataTemplate(SignatureResp signatureResp, String nombreDocumento) throws SignedException, IOException, NoSuchAlgorithmException {
 
         Map<String, String> resp;
         File zipeado;
 
-        zipeado = UtilArchivo.comprimir(firmaResp.getSignatureFile(),
+        zipeado = UtilArchivo.comprimir(signatureResp.getSignatureFile(),
                 ConstantesParameter.TYPE_FILE_XML, nombreDocumento);
         MessageDigest shaDigest = MessageDigest.getInstance("SHA-256");
         String shaChecksum = getFileChecksum(shaDigest, zipeado);
@@ -147,7 +177,7 @@ public class PlantillaServiceImpl implements PlantillaService {
         resp.put(ConstantesParameter.PARAM_NAME_DOCUMENT, nombreDocumento);
         try {
 
-            byte encoded[] = Base64.getEncoder().encode(firmaResp.getSignatureFile().toByteArray());
+            byte encoded[] = Base64.getEncoder().encode(signatureResp.getSignatureFile().toByteArray());
             String xmlBase64 = new String(encoded);
 
             resp.put(ConstantesParameter.PARAM_FILE_ZIP_BASE64, UtilConversion.encodeFileToBase64(zipeado));

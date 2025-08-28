@@ -11,7 +11,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Firma implements Serializable {
+public class Signature implements Serializable {
 
     private String id;
     private String denominacionEmisor;

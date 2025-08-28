@@ -11,11 +11,10 @@ import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
 import com.certicom.certifact_facturas_service_ng.feign.*;
 import com.certicom.certifact_facturas_service_ng.formatter.PaymentVoucherFormatter;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
-import com.certicom.certifact_facturas_service_ng.service.PlantillaService;
+import com.certicom.certifact_facturas_service_ng.service.TemplateService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.certicom.certifact_facturas_service_ng.util.UUIDGen;
 import com.certicom.certifact_facturas_service_ng.util.UtilArchivo;
-import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import com.google.common.collect.ImmutableMap;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
@@ -57,7 +56,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     @Value("${urlspublicas.descargaComprobante}")
     private String urlServiceDownload;
 
-    private final PlantillaService plantillaService;
+    private final TemplateService templateService;
     private final AmazonS3ClientService amazonS3ClientService;
 
     @Override
@@ -215,13 +214,13 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         Map<String, String> plantillaGenerado = new HashMap<>();
         /*GENERAMOS PLANTILLA XML DE ACUERDO A SU OSE*/
         if (companyDto.getOseId() != null && companyDto.getOseId() == 1) {
-            plantillaGenerado = plantillaService.buildPaymentVoucherSignOse(comprobante);
+            plantillaGenerado = templateService.buildPaymentVoucherSignOse(comprobante);
         } else if (companyDto.getOseId() != null && companyDto.getOseId() == 2) {
-            plantillaGenerado = plantillaService.buildPaymentVoucherSignOseBliz(comprobante);
+            plantillaGenerado = templateService.buildPaymentVoucherSignOseBliz(comprobante);
         } else if (companyDto.getOseId() != null && (companyDto.getOseId() == 10 || companyDto.getOseId() == 12)) {
-            plantillaGenerado = plantillaService.buildPaymentVoucherSignCerti(comprobante);
+            plantillaGenerado = templateService.buildPaymentVoucherSignCerti(comprobante);
         } else {
-            plantillaGenerado = plantillaService.buildPaymentVoucherSign(comprobante);
+            plantillaGenerado = templateService.buildPaymentVoucherSign(comprobante);
         }
         log.info("PLANTILLA GENERADA: {}", plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64));
         return plantillaGenerado;

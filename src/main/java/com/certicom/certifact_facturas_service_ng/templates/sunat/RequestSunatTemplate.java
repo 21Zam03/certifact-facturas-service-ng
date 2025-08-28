@@ -393,4 +393,199 @@ public class RequestSunatTemplate {
         return UtilXml.formatXML(xml.toString());
     }
 
+    public String buildOseSendSummary(String fileName, String contentFileBase64) {
+        StringBuilder xml = new StringBuilder();
+        try {
+            String ruc = rucPseValue;
+            String username = usuarioPseValue;
+            String password = clavePseOseValue;
+            //String rucbliz = "20293093297BIZLINKS";
+            //String passbliz = "UF1TiWZB";
+            xml.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"\n");
+            xml.append("xmlns:ser=\"http://service.sunat.gob.pe\" xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">\n");
+            xml.append("<soapenv:Header>\n");
+            xml.append("<wsse:Security>\n");
+            xml.append("<wsse:UsernameToken>\n");
+
+            /*xml.append("<wsse:Username>").append("20293093297BIZLINKS").append("</wsse:Username>\n");
+            xml.append("<wsse:Password Type=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText\">")
+                    .append("TESTBIZLINKS").append("</wsse:Password>\n");*/
+
+            xml.append("<wsse:Username>").append("20293093297").append("</wsse:Username>\n");
+            xml.append("<wsse:Password>").append("VKU9kR8md6").append("</wsse:Password>\n");
+            xml.append("</wsse:UsernameToken>\n");
+            xml.append("</wsse:Security>\n");
+            xml.append("</soapenv:Header>\n");
+            xml.append("<soapenv:Body>\n");
+            xml.append("<ser:sendSummary>\n");
+            xml.append("<fileName>").append(fileName).append("</fileName>\n");
+            xml.append("<contentFile>").append(contentFileBase64).append("</contentFile>\n");
+            xml.append("</ser:sendSummary>\n");
+            xml.append("</soapenv:Body>\n");
+            xml.append("</soapenv:Envelope>\n");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println((ex.getMessage() == null ? "ERROR en buildSendSummary " : ex.getMessage()) + " en el método buildGetStatus");
+        }
+        return UtilXml.formatXML(xml.toString());
+    }
+    public String buildOseBlizSendSummary(String fileName, String contentFileBase64) {
+        StringBuilder xml = new StringBuilder();
+        try {
+            String ruc = rucPseValue;
+            String username = usuarioPseValue;
+            String password = clavePseOseValue;
+            //String rucbliz = "20293093297BIZLINKS";
+            //String passbliz = "UF1TiWZB";
+            xml.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"\n");
+            xml.append("xmlns:ser=\"http://service.sunat.gob.pe\" xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">\n");
+            xml.append("<soapenv:Header>\n");
+            xml.append("<wsse:Security>\n");
+            xml.append("<wsse:UsernameToken>\n");
+
+
+            if (isProduction) {
+                xml.append("<wsse:Username>").append("20478005017CERTICOM").append("</wsse:Username>\n");
+                xml.append("<wsse:Password Type=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText\">")
+                        .append("VpkjBf1ciqzd5gf1").append("</wsse:Password>\n");
+            }else {
+                xml.append("<wsse:Username>").append("20293093297BIZLINKS").append("</wsse:Username>\n");
+                xml.append("<wsse:Password Type=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText\">")
+                        .append("TESTBIZLINKS").append("</wsse:Password>\n");
+            }
+
+
+            xml.append("</wsse:UsernameToken>\n");
+            xml.append("</wsse:Security>\n");
+            xml.append("</soapenv:Header>\n");
+            xml.append("<soapenv:Body>\n");
+            xml.append("<ser:sendSummary>\n");
+            xml.append("<fileName>").append(fileName).append("</fileName>\n");
+            xml.append("<contentFile>").append(contentFileBase64).append("</contentFile>\n");
+            xml.append("</ser:sendSummary>\n");
+            xml.append("</soapenv:Body>\n");
+            xml.append("</soapenv:Envelope>\n");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println((ex.getMessage() == null ? "ERROR en buildSendSummary " : ex.getMessage()) + " en el método buildGetStatus");
+        }
+        return UtilXml.formatXML(xml.toString());
+    }
+    public String buildOseBlizSendSummary12(String fileName, String contentFileBase64) {
+        StringBuilder xml = new StringBuilder();
+        try {
+            String ruc = rucPseValue;
+            String username = usuarioPseValue;
+            String password = clavePseOseValue;
+            //String rucbliz = "20293093297BIZLINKS";
+            //String passbliz = "UF1TiWZB";
+            xml.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"\n");
+            xml.append("xmlns:ser=\"http://service.sunat.gob.pe\" xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">\n");
+            xml.append("<soapenv:Header>\n");
+            xml.append("<wsse:Security>\n");
+            xml.append("<wsse:UsernameToken>\n");
+
+
+            if (isProduction) {
+                xml.append("<wsse:Username>").append("20293093297CERTICOM").append("</wsse:Username>\n");
+                xml.append("<wsse:Password Type=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText\">")
+                        .append("xAXkZHroJwFifgN9").append("</wsse:Password>\n");
+            }else {
+                xml.append("<wsse:Username>").append("20293093297BIZLINKS").append("</wsse:Username>\n");
+                xml.append("<wsse:Password Type=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#PasswordText\">")
+                        .append("TESTBIZLINKS").append("</wsse:Password>\n");
+            }
+
+
+            xml.append("</wsse:UsernameToken>\n");
+            xml.append("</wsse:Security>\n");
+            xml.append("</soapenv:Header>\n");
+            xml.append("<soapenv:Body>\n");
+            xml.append("<ser:sendSummary>\n");
+            xml.append("<fileName>").append(fileName).append("</fileName>\n");
+            xml.append("<contentFile>").append(contentFileBase64).append("</contentFile>\n");
+            xml.append("</ser:sendSummary>\n");
+            xml.append("</soapenv:Body>\n");
+            xml.append("</soapenv:Envelope>\n");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println((ex.getMessage() == null ? "ERROR en buildSendSummary " : ex.getMessage()) + " en el método buildGetStatus");
+        }
+        return UtilXml.formatXML(xml.toString());
+    }
+    public String buildSendSummaryCerti(String fileName, String contentFileBase64) {
+        StringBuilder xml = new StringBuilder();
+        try {
+            String ruc = rucPseValue;
+            String username = usuarioPseValue;
+            String password = clavePseValue;
+            xml.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"\n");
+            xml.append("xmlns:ser=\"http://service.sunat.gob.pe\" xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">\n");
+            xml.append("<soapenv:Header>\n");
+            xml.append("<wsse:Security>\n");
+            xml.append("<wsse:UsernameToken>\n");
+
+            if (isProduction) {
+                xml.append("<wsse:Username>").append("20293093297").append("JRUIZPIN").append("</wsse:Username>\n");
+                xml.append("<wsse:Password>").append("44Minutos*").append("</wsse:Password>\n");
+            }else{
+                xml.append("<wsse:Username>").append(ruc).append(username).append("</wsse:Username>\n");
+                xml.append("<wsse:Password>").append("44129327").append("</wsse:Password>\n");
+            }
+
+            xml.append("</wsse:UsernameToken>\n");
+            xml.append("</wsse:Security>\n");
+            xml.append("</soapenv:Header>\n");
+            xml.append("<soapenv:Body>\n");
+            xml.append("<ser:sendSummary>\n");
+            xml.append("<fileName>").append(fileName).append("</fileName>\n");
+            xml.append("<contentFile>").append(contentFileBase64).append("</contentFile>\n");
+            xml.append("</ser:sendSummary>\n");
+            xml.append("</soapenv:Body>\n");
+            xml.append("</soapenv:Envelope>\n");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println((ex.getMessage() == null ? "ERROR en buildSendSummary " : ex.getMessage()) + " en el método buildGetStatus");
+        }
+        return UtilXml.formatXML(xml.toString());
+    }
+    public String buildSendSummary(String fileName, String contentFileBase64) {
+        StringBuilder xml = new StringBuilder();
+        try {
+            String ruc = rucPseValue;
+            String username = usuarioPseValue;
+            String password = clavePseValue;
+            xml.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\"\n");
+            xml.append("xmlns:ser=\"http://service.sunat.gob.pe\" xmlns:wsse=\"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd\">\n");
+            xml.append("<soapenv:Header>\n");
+            xml.append("<wsse:Security>\n");
+            xml.append("<wsse:UsernameToken>\n");
+
+
+            if (isProduction) {
+                xml.append("<wsse:Username>").append("20478005017").append("YESSICA1").append("</wsse:Username>\n");
+                xml.append("<wsse:Password>").append("bizlinks2").append("</wsse:Password>\n");
+            }else{
+                xml.append("<wsse:Username>").append(ruc).append(username).append("</wsse:Username>\n");
+                xml.append("<wsse:Password>").append("44129327").append("</wsse:Password>\n");
+            }
+
+
+            xml.append("</wsse:UsernameToken>\n");
+            xml.append("</wsse:Security>\n");
+            xml.append("</soapenv:Header>\n");
+            xml.append("<soapenv:Body>\n");
+            xml.append("<ser:sendSummary>\n");
+            xml.append("<fileName>").append(fileName).append("</fileName>\n");
+            xml.append("<contentFile>").append(contentFileBase64).append("</contentFile>\n");
+            xml.append("</ser:sendSummary>\n");
+            xml.append("</soapenv:Body>\n");
+            xml.append("</soapenv:Envelope>\n");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println((ex.getMessage() == null ? "ERROR en buildSendSummary " : ex.getMessage()) + " en el método buildGetStatus");
+        }
+        return UtilXml.formatXML(xml.toString());
+    }
+
 }

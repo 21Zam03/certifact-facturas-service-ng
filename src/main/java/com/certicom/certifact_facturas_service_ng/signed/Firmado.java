@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.signed;
 
-import com.certicom.certifact_facturas_service_ng.dto.others.FirmaResp;
+import com.certicom.certifact_facturas_service_ng.dto.others.SignatureResp;
 import com.certicom.certifact_facturas_service_ng.exceptions.SignedException;
 import com.certicom.certifact_facturas_service_ng.util.UtilConversion;
 import org.springframework.beans.factory.annotation.Value;
@@ -62,7 +62,7 @@ public class Firmado {
     @Value("${apifact.isProduction}")
     private Boolean isProduction;
 
-    public FirmaResp signCerticom(String xml, String id) throws SignedException {
+    public SignatureResp signCerticom(String xml, String id) throws SignedException {
         String keystoreFile;
         String keystorePassword;
 
@@ -74,7 +74,7 @@ public class Firmado {
             keystorePassword = keystorePasswordCerti;
         }
 
-        FirmaResp response = new FirmaResp();
+        SignatureResp response = new SignatureResp();
         try {
 
             KeyStore ks = getKeyStore(UtilConversion.decodeBase64ToFile(keystoreFile, "pfx"), keystorePassword);

@@ -1,24 +1,26 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.GetStatusCdrDto;
-import com.certicom.certifact_facturas_service_ng.dto.model.OseDto;
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.*;
 import com.certicom.certifact_facturas_service_ng.dto.others.ResponseServer;
+import com.certicom.certifact_facturas_service_ng.dto.others.VoucherAnnular;
+import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
 import com.certicom.certifact_facturas_service_ng.entity.ErrorEntity;
 import com.certicom.certifact_facturas_service_ng.enums.ComunicationSunatEnum;
+import com.certicom.certifact_facturas_service_ng.enums.EstadoComprobanteEnum;
 import com.certicom.certifact_facturas_service_ng.enums.EstadoSunatEnum;
 import com.certicom.certifact_facturas_service_ng.enums.TyperErrorEnum;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
 import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
 import com.certicom.certifact_facturas_service_ng.feign.ErrorCatalogFeign;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
+import com.certicom.certifact_facturas_service_ng.feign.VoidedDocumentsFeign;
 import com.certicom.certifact_facturas_service_ng.service.SendSunatService;
+import com.certicom.certifact_facturas_service_ng.service.TemplateService;
 import com.certicom.certifact_facturas_service_ng.templates.sunat.RequestSunatTemplate;
-import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
-import com.certicom.certifact_facturas_service_ng.util.RebuildFile;
-import com.certicom.certifact_facturas_service_ng.util.UtilXml;
+import com.certicom.certifact_facturas_service_ng.util.*;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
+import com.certicom.certifact_facturas_service_ng.validation.business.VoucherAnnularValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -40,9 +42,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URI;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -53,6 +53,9 @@ public class SendSunatServiceImpl implements SendSunatService {
     private final CompanyFeign companyFeign;
     private final ErrorCatalogFeign errorCatalogFeign;
     private final RequestSunatTemplate requestSunatTemplate;
+    private final VoucherAnnularValidator voucherAnnularValidator;
+    private final VoidedDocumentsFeign voidedDocumentsFeign;
+    private final TemplateService templateService;
 
     @Value("${sunat.endpoint}")
     private String endPointSunat;
@@ -211,6 +214,121 @@ public class SendSunatServiceImpl implements SendSunatService {
         }
 
         return responseSunat;
+    }
+
+    @Override
+    public ResponseSunat sendSummary(String fileName, String contentFileBase64, String rucEmisor) {
+        ResponseSunat responseSunat = new ResponseSunat();
+        String formatSoap;
+        Document document;
+        NodeList nodeFaultcode;
+        NodeList nodeFaultstring;
+        Node node;
+
+        try {
+            System.out.println("ANTES FORMAT SOAT");
+            formatSoap = obtenerFormatBuildSendSumary(rucEmisor,fileName, contentFileBase64);
+
+            System.out.println("FORMAT SOAT 2 SEGUIMIENTO");
+            /*ResponseServer responseServer = send(
+                    formatSoap,
+                    obtenerEndPointSunat(rucEmisor),
+                    ConstantesParameter.TAG_SEND_SUMMARY_TICKET
+            );*/
+            ResponseServer responseServer = null;
+            OseDto ose = companyFeign.findOseByRucInter(rucEmisor);
+            if (ose != null) {
+                if (ose.getId()==1){
+
+                    responseServer = send(formatSoap, obtenerEndPointSunat(rucEmisor),
+                            ConstantesParameter.TAG_SEND_SUMMARY_TICKET);
+                }else if (ose.getId()==2 || ose.getId()==12) {
+                    RestTemplate template = new RestTemplate();
+                    URI uriget = new URI(ose.getUrlFacturas()+ConstantesParameter.TAG_SEND_SUMMARY_TICKET);
+                    HttpHeaders requestHeaders = new HttpHeaders();
+                    System.out.println("SOAP ANULACION");
+                    System.out.println(formatSoap);
+                    HttpEntity<String> requestEntity = new HttpEntity<>(formatSoap, requestHeaders);
+                    ResponseEntity<ResponseServer> entity = template.exchange(uriget, HttpMethod.POST, requestEntity, ResponseServer.class);
+                    System.out.println(entity);
+                    if (entity.getStatusCode() == HttpStatus.OK) {
+                        responseServer = entity.getBody();
+                        System.out.println("user response retrieved ");
+                    }
+                }else if (ose.getId()==10 ) {
+                    System.out.println("Enviar boleta resumen 10");
+                    System.out.println(formatSoap);
+                    responseServer = send(formatSoap, obtenerEndPointSunat(rucEmisor),
+                            ConstantesParameter.TAG_SEND_SUMMARY_TICKET);
+                }
+            } else {
+                System.out.println("Enviar anulacion 0");
+                responseServer = send(formatSoap, obtenerEndPointSunat(rucEmisor),
+                        ConstantesParameter.TAG_SEND_SUMMARY_TICKET);
+            }
+            document = UtilXml.parseXmlFile(responseServer.getContent());
+
+            if (responseServer.isSuccess()) {
+
+                NodeList nodeTicket = document.getElementsByTagName(ConstantesParameter.TAG_SEND_SUMMARY_TICKET);
+                String valueTicket = nodeTicket.item(0).getTextContent();
+                responseSunat.setSuccess(true);
+                responseSunat.setTicket(valueTicket);
+                responseSunat.setEstadoComunicacionSunat(ComunicationSunatEnum.SUCCESS);
+            } else {
+
+                String valueFaultcode = null;
+                String valueFaultstring = null;
+
+                nodeFaultcode = document.getElementsByTagName("faultcode");
+                nodeFaultstring = document.getElementsByTagName("faultstring");
+                node = nodeFaultcode.item(0);
+
+                if (node != null && StringUtils.isNotBlank(node.getTextContent())) {
+
+                    valueFaultcode = (node.getTextContent()).replaceAll("[^0-9]", "");
+                    valueFaultstring = nodeFaultstring.item(0).getTextContent();
+                    if (valueFaultcode.equals("")) {
+                        responseSunat.setEstadoComunicacionSunat(ComunicationSunatEnum.WITHOUT_CONNECTION);
+                    } else {
+                        responseSunat.setEstadoComunicacionSunat(ComunicationSunatEnum.SUCCESS_WITH_ERROR_CONTENT);
+                    }
+                    responseSunat.setStatusCode(valueFaultcode);
+                    responseSunat.setMessage(valueFaultstring);
+                }
+                responseSunat.setSuccess(false);
+
+            }
+        } catch (IOException e) {
+            responseSunat.setMessage("Error al comunicarse con la Sunat." + e.getMessage());
+            responseSunat.setEstadoComunicacionSunat(ComunicationSunatEnum.ERROR_INTERNO_WS_API);
+            responseSunat.setSuccess(false);
+        } catch (Exception ex) {
+
+            responseSunat.setMessage(ex.getMessage());
+            responseSunat.setEstadoComunicacionSunat(ComunicationSunatEnum.ERROR_INTERNO_WS_API);
+            responseSunat.setSuccess(false);
+        }
+        return responseSunat;
+    }
+
+    private String obtenerFormatBuildSendSumary(String ruc, String fileName, String contentFileBase64) {
+        OseDto ose = companyFeign.findOseByRucInter(ruc);
+        String formato = "";
+        if (ose != null) {
+            if (ose.getId()==1){
+                formato =  requestSunatTemplate.buildOseSendSummary(fileName, contentFileBase64);
+            }else if (ose.getId()==2){
+                formato =  requestSunatTemplate.buildOseBlizSendSummary(fileName, contentFileBase64);
+            }else if (ose.getId()==12){
+                formato =  requestSunatTemplate.buildOseBlizSendSummary12(fileName, contentFileBase64);
+            }else if (ose.getId()==10){
+                formato =  requestSunatTemplate.buildSendSummaryCerti(fileName, contentFileBase64);
+            }
+        } else {
+            formato =  requestSunatTemplate.buildSendSummary(fileName, contentFileBase64);
+        }
+        return formato;
     }
 
     private String obtenerFormat(String ruc, String fileName, String contentFileBase64) {

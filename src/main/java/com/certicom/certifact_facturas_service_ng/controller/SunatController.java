@@ -1,12 +1,15 @@
 package com.certicom.certifact_facturas_service_ng.controller;
 
 import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
+import com.certicom.certifact_facturas_service_ng.dto.others.VoucherAnnular;
 import com.certicom.certifact_facturas_service_ng.dto.request.IdentificadorPaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.service.ComunicationSunatService;
+import com.certicom.certifact_facturas_service_ng.service.DocumentsVoidedService;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
 import com.certicom.certifact_facturas_service_ng.service.SendSunatService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 @RequestMapping(SunatController.API_PATH)
@@ -26,7 +31,7 @@ public class SunatController {
     public static final String API_PATH = "/api/sunat";
     private final ComunicationSunatService comunicationSunatService;
     private final SendSunatService sendSunatService;
-
+    private final DocumentsVoidedService documentsVoidedService;
 
     @PostMapping("send")
     public ResponseEntity<?> sendPaymentVoucherToSunat(
@@ -48,7 +53,14 @@ public class SunatController {
     }
 
     @PostMapping("/avoid")
-    public ResponseEntity<?> anularPaymentVoucher() {
+    public ResponseEntity<?> anularPaymentVoucher(@RequestBody List<VoucherAnnular> documentosToAnular) {
+        List<String> ticketsVoidedProcess = new ArrayList<>();
+        ResponsePSE resp = documentsVoidedService.anularDocuments(
+                documentosToAnular,
+                "20204040303",
+                "demo@certifakt.com.pe", ticketsVoidedProcess);
+
+
         return new ResponseEntity<>("", HttpStatus.OK);
     }
 

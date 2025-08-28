@@ -4,7 +4,7 @@ import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.enums.AfectacionIgvEnum;
 import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
-import com.certicom.certifact_facturas_service_ng.templates.sunat.SunatTemplate;
+import com.certicom.certifact_facturas_service_ng.templates.sunat.TemplateSunat;
 import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import org.apache.commons.lang3.StringUtils;
@@ -21,27 +21,27 @@ import java.util.Map;
 import static com.certicom.certifact_facturas_service_ng.util.UtilXml.*;
 
 @Component
-public class NotaCreditoTemplate21 extends SunatTemplate {
+public class NotaCreditoTemplateSunat21 extends TemplateSunat {
 
     HashMap<Integer,String> mapTransaccion = new HashMap<Integer, String>();
     private static final String CUOTA0 = "Cuota000";
 
-    public NotaCreditoTemplate21() {
+    public NotaCreditoTemplateSunat21() {
         this.mapTransaccion.put(1,"Contado");
         this.mapTransaccion.put(2,"Credito");
     }
 
     public String construirNotaCredito(PaymentVoucherDto creditNote) throws TemplateException {
 
-        Firma signature = buildSignature(creditNote);
+        Signature signature = buildSignature(creditNote);
         String templateBuilt = buildTemplateInXML(creditNote, signature);
 
         return templateBuilt;
     }
 
-    protected Firma buildSignature(PaymentVoucherDto creditNote) {
+    protected Signature buildSignature(PaymentVoucherDto creditNote) {
 
-        Firma signature = new Firma();
+        Signature signature = new Signature();
 
         signature.setId("IDSignST");
         signature.setUri("#SignST");
@@ -576,7 +576,7 @@ public class NotaCreditoTemplate21 extends SunatTemplate {
         }
     }
 
-    private String buildTemplateInXML(PaymentVoucherDto notaCredito, Firma signature) throws TemplateException {
+    private String buildTemplateInXML(PaymentVoucherDto notaCredito, Signature signature) throws TemplateException {
 
         String stringXMLGenerate = null;
         Document document;

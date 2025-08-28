@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.templates.sunat;
 
-import com.certicom.certifact_facturas_service_ng.dto.others.Firma;
+import com.certicom.certifact_facturas_service_ng.dto.others.Signature;
 import lombok.extern.slf4j.Slf4j;
 import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
@@ -19,7 +19,7 @@ import java.util.Map;
 import static com.certicom.certifact_facturas_service_ng.util.UtilXml.*;
 
 @Slf4j
-public class SunatTemplate {
+public class TemplateSunat {
 
     protected final static String ROOT_VOIDED_DOCUMENTS = "VoidedDocuments";
     protected final static String ROOT_CREDIT_NOTE = "CreditNote";
@@ -90,7 +90,7 @@ public class SunatTemplate {
         return transformerFactory.newTransformer();
     }
     protected void appendChildSignature(Document document, Element elementRoot,
-                                        Firma signature) {
+                                        Signature signature) {
 
         Element signatureElement = appendChild(document, elementRoot, "cac:Signature");
 
