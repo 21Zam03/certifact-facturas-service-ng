@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.templates.template21;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucher;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.enums.AfectacionIgvEnum;
 import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
@@ -63,7 +63,7 @@ public class FacturaTemplate21 {
         this.mapTransaccion.put(2,"Credito");
     }
 
-    public String construirFactura(PaymentVoucherDto factura) throws TemplateException {
+    public String construirFactura(PaymentVoucher factura) throws TemplateException {
         String xml = "";
         DOMSource source;
         StringWriter writer;

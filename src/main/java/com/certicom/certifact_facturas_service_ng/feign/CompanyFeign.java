@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.CompanyDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.Company;
 import com.certicom.certifact_facturas_service_ng.dto.model.OseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +14,7 @@ public interface CompanyFeign {
     public String getStateFromCompanyByRuc(@RequestParam String rucEmisor);
 
     @GetMapping("/api/company/{ruc}")
-    public CompanyDto findCompanyByRuc(@PathVariable String ruc);
+    public Company findCompanyByRuc(@PathVariable String ruc);
 
     @GetMapping("/api/company/ose")
     public OseDto findOseByRucInter(@RequestParam String ruc);

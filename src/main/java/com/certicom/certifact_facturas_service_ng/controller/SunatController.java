@@ -1,15 +1,13 @@
 package com.certicom.certifact_facturas_service_ng.controller;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucher;
 import com.certicom.certifact_facturas_service_ng.dto.others.VoucherAnnular;
 import com.certicom.certifact_facturas_service_ng.dto.request.IdentificadorPaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.service.ComunicationSunatService;
 import com.certicom.certifact_facturas_service_ng.service.DocumentsVoidedService;
-import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
 import com.certicom.certifact_facturas_service_ng.service.SendSunatService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -37,7 +35,7 @@ public class SunatController {
     public ResponseEntity<?> sendPaymentVoucherToSunat(
             @RequestBody @Valid IdentificadorPaymentVoucherRequest paymentVoucher
     ) {
-        PaymentVoucherDto paymentVoucherDto = sendSunatService.prepareComprobanteForEnvioSunatInter("20204040303", paymentVoucher.getTipo(), paymentVoucher.getSerie(), paymentVoucher.getNumero());
+        PaymentVoucher paymentVoucherDto = sendSunatService.prepareComprobanteForEnvioSunatInter("20204040303", paymentVoucher.getTipo(), paymentVoucher.getSerie(), paymentVoucher.getNumero());
         Map<String, Object> result = comunicationSunatService.sendDocumentBill(paymentVoucherDto.getRucEmisor(), paymentVoucherDto.getIdPaymentVoucher());
         ResponsePSE resp = (ResponsePSE) result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE);
         if (resp.getEstado()) {
@@ -49,6 +47,7 @@ public class SunatController {
             //GetStatusCdrDTO dataGetStatusCDR = (GetStatusCdrDTO) result.get(ConstantesParameter.PARAM_BEAN_GET_STATUS_CDR);
             //messageProducer.produceGetStatusCDR(dataGetStatusCDR);
         }
+        System.out.println("RESPUESTA: "+resp);
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 

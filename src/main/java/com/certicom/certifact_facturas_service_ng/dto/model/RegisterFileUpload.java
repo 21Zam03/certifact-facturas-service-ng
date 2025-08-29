@@ -1,4 +1,4 @@
-package com.certicom.certifact_facturas_service_ng.entity;
+package com.certicom.certifact_facturas_service_ng.dto.model;
 
 import lombok.*;
 
@@ -10,7 +10,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Builder
 @ToString
-public class RegisterFileUploadEntity {
+public class RegisterFileUpload {
 
     private static final long serialVersionUID = 1L;
 

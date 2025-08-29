@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.controller;
 
 import com.certicom.certifact_facturas_service_ng.converter.PaymentVoucherConverter;
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucher;
 import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
@@ -49,9 +49,9 @@ public class PaymentVoucherController {
     @PostMapping
     public ResponseEntity<?> savePaymentVoucher(@RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest) {
         log.info("ComprobanteController - registrarComprobante - [comprobanteRequest={}]", paymentVoucherRequest.toString());
-        PaymentVoucherDto paymentVoucherDto = PaymentVoucherConverter.requestToDto(paymentVoucherRequest);
-        paymentVoucherValidator.validate(paymentVoucherDto, false);
-        Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucherDto, false, 2L);
+        PaymentVoucher paymentVoucher = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);
+        paymentVoucherValidator.validate(paymentVoucher, false);
+        Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucher, false, 2L);
         return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
         //return new ResponseEntity<>("TEST", HttpStatus.OK);
     }
@@ -59,9 +59,9 @@ public class PaymentVoucherController {
     @PutMapping
     public ResponseEntity<?> editPaymentVoucher(@RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest) {
         log.info("ComprobanteController - registrarComprobante - [comprobanteRequest={}]", paymentVoucherRequest.toString());
-        PaymentVoucherDto paymentVoucherDto = PaymentVoucherConverter.requestToDto(paymentVoucherRequest);
-        paymentVoucherValidator.validate(paymentVoucherDto, true);
-        Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucherDto, true, 2L);
+        PaymentVoucher paymentVoucher = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);
+        paymentVoucherValidator.validate(paymentVoucher, true);
+        Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucher, true, 2L);
         return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
     }
 

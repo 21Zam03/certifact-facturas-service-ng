@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.templates.template21;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucher;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.enums.AfectacionIgvEnum;
 import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
@@ -22,13 +22,13 @@ import static com.certicom.certifact_facturas_service_ng.util.UtilXml.*;
 @Component
 public class NotaDebitoTemplateSunat21 extends TemplateSunat {
 
-    public String buildDebitNote(PaymentVoucherDto debitNote) throws TemplateException {
+    public String buildDebitNote(PaymentVoucher debitNote) throws TemplateException {
         Signature signature = buildSignature(debitNote);
         String templateBuilt = buildTemplateInXML(debitNote, signature);
         return templateBuilt;
     }
 
-    protected Signature buildSignature(PaymentVoucherDto debitNote) {
+    protected Signature buildSignature(PaymentVoucher debitNote) {
         Signature signature = new Signature();
 
         signature.setId("IDSignST");
@@ -39,7 +39,7 @@ public class NotaDebitoTemplateSunat21 extends TemplateSunat {
         return signature;
     }
 
-    private String buildTemplateInXML(PaymentVoucherDto debitNote, Signature signature) throws TemplateException {
+    private String buildTemplateInXML(PaymentVoucher debitNote, Signature signature) throws TemplateException {
 
         String stringXMLGenerate = null;
         Document document;

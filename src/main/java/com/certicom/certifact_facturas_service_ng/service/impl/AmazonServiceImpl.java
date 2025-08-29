@@ -5,9 +5,10 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.certicom.certifact_facturas_service_ng.dto.model.CompanyDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.Company;
 import com.certicom.certifact_facturas_service_ng.dto.model.RegisterFileUploadDto;
-import com.certicom.certifact_facturas_service_ng.entity.RegisterFileUploadEntity;
+import com.certicom.certifact_facturas_service_ng.dto.model.RegisterFileUpload;
+import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
 import com.certicom.certifact_facturas_service_ng.feign.RegisterFileUploadFeign;
@@ -45,7 +46,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
     private String baseUrl;
 
     @Override
-    public RegisterFileUploadEntity subirArchivoAlStorage(InputStream inputStream, String nameFile, String folder, CompanyDto company) {
+    public RegisterFileUpload subirArchivoAlStorage(InputStream inputStream, String nameFile, String folder, Company company) {
         System.out.println("NOMBRE DEL ARCHIVO "+nameFile);
         String periodo = UtilDate.dateNowToString("MMyyyy ");
 
@@ -72,7 +73,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
 
             this.s3client.putObject(putObjectRequest);
 
-            RegisterFileUploadEntity resp = registerFileUploadFeign.saveRegisterFileUpload(RegisterFileUploadDto.builder()
+            RegisterFileUpload resp = registerFileUploadFeign.saveRegisterFileUpload(RegisterFileUploadDto.builder()
                     .bucket(bucket)
                     .nombreGenerado(fileNameKey)
                     .nombreOriginal(nameFile)
@@ -119,7 +120,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
     }
 
     @Override
-    public RegisterFileUploadEntity uploadFileStorage(InputStream inputStream, String nameFile, String folder, CompanyDto company) {
+    public RegisterFileUpload uploadFileStorage(InputStream inputStream, String nameFile, String folder, Company company) {
         System.out.println("NOMBRE DEL ARCHIVO "+nameFile);
         String periodo = UtilDate.dateNowToString("MMyyyy ");
 
@@ -145,7 +146,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, fileNameKey, inputStream, metadata);
 
             this.s3client.putObject(putObjectRequest);
-            RegisterFileUploadEntity resp = registerFileUploadFeign.saveRegisterFileUpload(
+            RegisterFileUpload resp = registerFileUploadFeign.saveRegisterFileUpload(
                     RegisterFileUploadDto.builder()
                             .bucket(bucket)
                             .nombreGenerado(fileNameKey)
@@ -165,6 +166,38 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
             log.error("error [" + ex.getMessage() + "] occurred while uploading [" + nameFile + "] ");
             throw new ServiceException("Ocurrio un error al subir el archivo: " + ex.getMessage());
         }
+    }
+
+    @Override
+    public ByteArrayInputStream downloadFileInvoice(Long id, String uuid, TipoArchivoEnum tipoArchivoEnum) {
+        String tipo = tipoArchivoEnum.name();
+        RegisterFileUpload registerFileUploadInterDto = registerFileUploadFeign.findByIdPaymentVoucherAndUuidTipo(id, uuid, tipo);
+        return downloadFileStorageInter(registerFileUploadInterDto);
+    }
+
+    @Override
+    public ByteArrayInputStream downloadFileStorageInter(RegisterFileUpload fileStorage) {
+        String bucket, name;
+        if (fileStorage == null ) {
+            return new ByteArrayInputStream(new byte[0]);
+        }
+        if (fileStorage.getIsOld() == null || !fileStorage.getIsOld()) {
+            bucket = fileStorage.getBucket();
+            name = fileStorage.getNombreGenerado();
+        } else {
+            bucket = String.format("%s/archivos_old/%s", this.bucketName, fileStorage.getRucCompany());
+            name = String.format("%s.%s", fileStorage.getUuid(), fileStorage.getExtension());
+        }
+        System.out.println("bucket: "+bucket);
+        System.out.println("name: "+name);
+        ByteArrayInputStream ba = null;
+        try{
+            ba = new ByteArrayInputStream(getFile(bucket, name).toByteArray());
+        }catch (Exception e){
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+        }
+        return ba;
     }
 
     public ByteArrayOutputStream getFile(String bucketName, String keyName) {

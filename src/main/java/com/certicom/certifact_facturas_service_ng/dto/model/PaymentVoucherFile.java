@@ -1,4 +1,4 @@
-package com.certicom.certifact_facturas_service_ng.entity;
+package com.certicom.certifact_facturas_service_ng.dto.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PaymentVoucherFileEntity {
+public class PaymentVoucherFile {
 
     private Long id;
     private String tipoArchivo;

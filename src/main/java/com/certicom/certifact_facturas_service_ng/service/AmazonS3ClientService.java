@@ -1,17 +1,20 @@
 package com.certicom.certifact_facturas_service_ng.service;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.CompanyDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.Company;
 import com.certicom.certifact_facturas_service_ng.dto.model.RegisterFileUploadDto;
-import com.certicom.certifact_facturas_service_ng.entity.RegisterFileUploadEntity;
+import com.certicom.certifact_facturas_service_ng.dto.model.RegisterFileUpload;
+import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 public interface AmazonS3ClientService {
 
-    RegisterFileUploadEntity subirArchivoAlStorage(InputStream inputStream, String nameFile, String folder, CompanyDto company);
+    RegisterFileUpload subirArchivoAlStorage(InputStream inputStream, String nameFile, String folder, Company company);
     String downloadFileStorageInB64(RegisterFileUploadDto fileStorage);
     ByteArrayInputStream downloadFileStorageDto(RegisterFileUploadDto fileStorage);
-    RegisterFileUploadEntity uploadFileStorage(InputStream inputStream, String nameFile, String folder, CompanyDto company);
+    RegisterFileUpload uploadFileStorage(InputStream inputStream, String nameFile, String folder, Company company);
+    ByteArrayInputStream downloadFileInvoice(Long id, String uuid, TipoArchivoEnum tipoArchivoEnum);
+    ByteArrayInputStream downloadFileStorageInter(RegisterFileUpload fileStorage);
 
 }

@@ -1,21 +1,18 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.CompanyDto;
+import com.certicom.certifact_facturas_service_ng.dto.model.Company;
 import com.certicom.certifact_facturas_service_ng.dto.model.GetStatusCdrDto;
 import com.certicom.certifact_facturas_service_ng.dto.model.RegisterFileUploadDto;
 import com.certicom.certifact_facturas_service_ng.dto.model.SendBillDto;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
 import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
-import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherFileEntity;
-import com.certicom.certifact_facturas_service_ng.entity.RegisterFileUploadEntity;
+import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherFile;
+import com.certicom.certifact_facturas_service_ng.dto.model.RegisterFileUpload;
 import com.certicom.certifact_facturas_service_ng.entity.TmpVoucherSendBillEntity;
 import com.certicom.certifact_facturas_service_ng.enums.*;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
-import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
-import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
-import com.certicom.certifact_facturas_service_ng.feign.RegisterFileUploadFeign;
-import com.certicom.certifact_facturas_service_ng.feign.TmpVoucherFeign;
+import com.certicom.certifact_facturas_service_ng.feign.*;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.ComunicationSunatService;
 import com.certicom.certifact_facturas_service_ng.service.SendSunatService;
@@ -39,6 +36,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
     private final CompanyFeign companyFeign;
     private final TmpVoucherFeign tmpVoucherFeign;
     private final RegisterFileUploadFeign registerFileUploadFeign;
+    private final PaymentVoucherFileFeign paymentVoucherFileFeign;
 
     private final AmazonS3ClientService amazonS3ClientService;
     private final SendSunatService sendSunatService;
@@ -141,7 +139,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
 
                             messageResponse = "La Factura numero "+paymentVoucherEntity.getSerie()+"-"+paymentVoucherEntity.getNumero()+", ha sido aceptada";
 
-                            RegisterFileUploadEntity responseStorage = uploadFileCdr(ruc, voucherPendiente.getNombreDocumento(), voucherPendiente.getTipoComprobante(),
+                            RegisterFileUpload responseStorage = uploadFileCdr(ruc, voucherPendiente.getNombreDocumento(), voucherPendiente.getTipoComprobante(),
                                     ConstantesParameter.REGISTRO_STATUS_NUEVO, responseSunatCdr.getContentBase64());
 
                             paymentVoucherEntity.setEstado(EstadoComprobanteEnum.ACEPTADO.getCodigo());
@@ -150,8 +148,8 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                             paymentVoucherEntity.setCodigosRespuestaSunat("0");
                             System.out.println("SEGUIMIENTO 020");
                             if (responseStorage.getIdRegisterFileSend() != null) {
-                                paymentVoucherEntity.getPaymentVoucherFileEntityList().add(
-                                        PaymentVoucherFileEntity.builder()
+                                paymentVoucherEntity.getPaymentVoucherFileList().add(
+                                        PaymentVoucherFile.builder()
                                                 .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
                                                 .idRegisterFileSend(responseStorage.getIdRegisterFileSend())
                                                 .tipoArchivo(TipoArchivoEnum.CDR.name())
@@ -228,7 +226,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                             messageResponse = "La Factura numero "+paymentVoucherEntity.getSerie()+"-"+paymentVoucherEntity.getNumero()+", ha sido aceptada";
 
 
-                            RegisterFileUploadEntity responseStorage = uploadFileCdr(ruc, voucherPendiente.getNombreDocumento(), voucherPendiente.getTipoComprobante(), ConstantesParameter.REGISTRO_STATUS_NUEVO,
+                            RegisterFileUpload responseStorage = uploadFileCdr(ruc, voucherPendiente.getNombreDocumento(), voucherPendiente.getTipoComprobante(), ConstantesParameter.REGISTRO_STATUS_NUEVO,
                                     responseSunatCdr.getContentBase64());
 
                             paymentVoucherEntity.setEstado(EstadoComprobanteEnum.ACEPTADO.getCodigo());
@@ -237,8 +235,8 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                             paymentVoucherEntity.setCodigosRespuestaSunat("0");
                             System.out.println("SEGUIMIENTO 021");
                             if (responseStorage.getIdRegisterFileSend() != null) {
-                                paymentVoucherEntity.getPaymentVoucherFileEntityList().add(
-                                    PaymentVoucherFileEntity.builder()
+                                paymentVoucherEntity.getPaymentVoucherFileList().add(
+                                    PaymentVoucherFile.builder()
                                             .estadoArchivo(EstadoArchivoEnum.INACTIVO.name())
                                             .idRegisterFileSend(responseStorage.getIdRegisterFileSend())
                                             .tipoArchivo(TipoArchivoEnum.CDR.name())
@@ -287,10 +285,10 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                                      String contenidoBase64, String mensajeRespuesta, String estadoComprobante,
                                      String nombreDocumento, String codigosRespuesta) throws Exception {
 
-
-        RegisterFileUploadEntity responseStorage = uploadFileCdr(ruc, nombreDocumento, tipoComprobante, ConstantesParameter.REGISTRO_STATUS_NUEVO,
+        RegisterFileUpload responseStorage = uploadFileCdr(ruc, nombreDocumento, tipoComprobante, ConstantesParameter.REGISTRO_STATUS_NUEVO,
                 contenidoBase64);
 
+        System.out.println("RESPONSE STORAGE: "+responseStorage);
         tmpVoucherFeign.deleteTmpVoucherById(idTmpVoucher);
 
         paymentVoucherFeign.updateStatePaymentVoucher(
@@ -302,25 +300,26 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
         );
         //AGREGANDO ARCHIVO
         if (responseStorage.getIdRegisterFileSend() != null) {
-            PaymentVoucherFileEntity.builder()
+            paymentVoucherFileFeign.save(PaymentVoucherFile.builder()
                     .orden(2)
                     .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
+                    .idPaymentVoucher(idPaymentVoucher)
                     .idRegisterFileSend(responseStorage.getIdRegisterFileSend())
                     .tipoArchivo(TipoArchivoEnum.CDR.name())
-                    .build();
-
+                    .build());
         }
         //AJUSTE DE STOCK
         //************
 
     }
 
-    public RegisterFileUploadEntity uploadFileCdr(String rucEmisor, String nameDocument, String tipoComprobante, String estadoRegistro,
-                                                  String fileXMLZipBase64) throws Exception {
+    public RegisterFileUpload uploadFileCdr(String rucEmisor, String nameDocument, String tipoComprobante, String estadoRegistro,
+                                            String fileXMLZipBase64) throws Exception {
 
-        CompanyDto companyEntity = companyFeign.findCompanyByRuc(rucEmisor);
-        RegisterFileUploadEntity file = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(fileXMLZipBase64),
+        Company companyEntity = companyFeign.findCompanyByRuc(rucEmisor);
+        RegisterFileUpload file = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(fileXMLZipBase64),
                 nameDocument, "cdr", companyEntity);
+        System.out.println("FILE UPLOAD: "+file);
         return file;
     }
 

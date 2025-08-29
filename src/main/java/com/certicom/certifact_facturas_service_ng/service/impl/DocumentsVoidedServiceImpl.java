@@ -4,11 +4,9 @@ import com.certicom.certifact_facturas_service_ng.dto.model.*;
 import com.certicom.certifact_facturas_service_ng.dto.others.VoucherAnnular;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
-import com.certicom.certifact_facturas_service_ng.entity.RegisterFileUploadEntity;
+import com.certicom.certifact_facturas_service_ng.dto.model.RegisterFileUpload;
 import com.certicom.certifact_facturas_service_ng.enums.ComunicationSunatEnum;
-import com.certicom.certifact_facturas_service_ng.enums.EstadoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.enums.EstadoComprobanteEnum;
-import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
 import com.certicom.certifact_facturas_service_ng.feign.VoidedDocumentsFeign;
@@ -113,7 +111,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                 String identificadorDocumento = rucEmisor + "-" + documento.getTipoComprobante() + "-" +
                         documento.getSerie().toUpperCase() + "-" + documento.getNumero();
                 System.out.println(identificadorDocumento);
-                PaymentVoucherDto entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+                PaymentVoucher entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
                 System.out.println(entity);
                 if (documento.getRucEmisor()==null){
                     documento.setRucEmisor(rucEmisor);
@@ -133,7 +131,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                         document.getSerie().toUpperCase() + "-" + document.getNumero();
                 System.out.println(identificadorDocumento);
                 boolean noExiste = false;
-                PaymentVoucherDto entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+                PaymentVoucher entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
                 if (entity==null){
                     noExiste=true;
                 }
@@ -186,7 +184,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                 for (VoucherAnnular document : anulados) {
                     String identificadorDocumento = rucEmisor + "-" + document.getTipoComprobante() + "-" +
                             document.getSerie().toUpperCase() + "-" + document.getNumero();
-                    PaymentVoucherDto entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+                    PaymentVoucher entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
                     if (entity.getEstado().equals("08") ){
                         if (messageBuilder == null) {
                             messageBuilder = new StringBuilder();
@@ -240,7 +238,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
         Map<String, String> templateGenerated;
         StringBuilder messageBuilder = new StringBuilder();
 
-        CompanyDto companyEntity = completarDatosVoided(voided,esRetencion);
+        Company companyEntity = completarDatosVoided(voided,esRetencion);
 
         if (companyEntity.getOseId() != null && companyEntity.getOseId()==2) {
             templateGenerated = templateService.buildVoidedDocumentsSign(voided);
@@ -284,7 +282,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
         if (!responseSunat.isSuccess()) {
             return resp;
         }
-        RegisterFileUploadEntity file = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(fileXMLZipBase64),
+        RegisterFileUpload file = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(fileXMLZipBase64),
                 nameDocument, "voided", companyEntity);
 
         voided.setEstadoComprobante(EstadoComprobanteEnum.PROCESO_ENVIO.getCodigo());
@@ -294,7 +292,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
         return resp;
     }
 
-    private CompanyDto completarDatosVoided(Voided voided, boolean esRetencion) {
+    private Company completarDatosVoided(Voided voided, boolean esRetencion) {
 
         Date fechaActual = Calendar.getInstance().getTime();
         Integer correlativo;
@@ -308,7 +306,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                 voided.getRucEmisor(), voided.getFechaGeneracion());
         correlativo++;
         voided.setCorrelativoGeneracionDia(correlativo);
-        CompanyDto company = companyFeign.findCompanyByRuc(voided.getRucEmisor());
+        Company company = companyFeign.findCompanyByRuc(voided.getRucEmisor());
         voided.setDenominacionEmisor(company.getRazon());
         voided.setTipoDocumentoEmisor(ConstantesSunat.TIPO_DOCUMENTO_IDENTIDAD_RUC);
         voided.setId(baja + "-" +
