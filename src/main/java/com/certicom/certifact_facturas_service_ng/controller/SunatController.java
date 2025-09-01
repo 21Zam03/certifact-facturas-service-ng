@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.controller;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
 import com.certicom.certifact_facturas_service_ng.dto.others.VoucherAnnular;
 import com.certicom.certifact_facturas_service_ng.dto.request.IdentificadorPaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;

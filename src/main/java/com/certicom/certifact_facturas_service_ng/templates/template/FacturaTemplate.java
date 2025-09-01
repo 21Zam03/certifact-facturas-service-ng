@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.templates.template;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
 import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
 import com.certicom.certifact_facturas_service_ng.dto.others.GuiaRelacionada;

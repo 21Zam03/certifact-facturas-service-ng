@@ -1,8 +1,5 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.Company;
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucher;
-import com.certicom.certifact_facturas_service_ng.enums.TipoPdfEnum;
 import com.certicom.certifact_facturas_service_ng.exceptions.QRGenerationException;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
 import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;

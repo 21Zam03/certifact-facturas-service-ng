@@ -1,4 +1,4 @@
-package com.certicom.certifact_facturas_service_ng.dto.others;
+package com.certicom.certifact_facturas_service_ng.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class UserDto {
+public class User {
 
-    private Long idUsuario;
+    private Long idUser;
     private Integer idOficina;
     private String nombreUsuario;
     private String contrasena;

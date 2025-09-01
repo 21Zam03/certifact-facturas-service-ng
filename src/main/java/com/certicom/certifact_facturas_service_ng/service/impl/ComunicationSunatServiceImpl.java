@@ -1,14 +1,9 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.Company;
-import com.certicom.certifact_facturas_service_ng.dto.model.GetStatusCdrDto;
-import com.certicom.certifact_facturas_service_ng.dto.model.RegisterFileUploadDto;
-import com.certicom.certifact_facturas_service_ng.dto.model.SendBillDto;
+import com.certicom.certifact_facturas_service_ng.model.*;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
 import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherFile;
-import com.certicom.certifact_facturas_service_ng.dto.model.RegisterFileUpload;
 import com.certicom.certifact_facturas_service_ng.entity.TmpVoucherSendBillEntity;
 import com.certicom.certifact_facturas_service_ng.enums.*;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
@@ -133,7 +128,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                         break;
                     case SUCCESS_WITH_ERROR_CONTENT:
                         if(Integer.parseInt(responseSunat.getStatusCode())==1033){
-                            PaymentVoucherEntity paymentVoucherEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
+                            PaymentVoucher paymentVoucherEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
                             GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc,paymentVoucherEntity.getTipoComprobante(),paymentVoucherEntity.getSerie(),paymentVoucherEntity.getNumero(),idPaymentVoucher);
                             responseSunatCdr = sendSunatService.getStatusCDR(statusCdrDTO, ruc);
 
@@ -217,7 +212,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                         break;
                     case WITHOUT_CONNECTION:
                         if(responseSunat.getMessage().contains("1033")){
-                            PaymentVoucherEntity paymentVoucherEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
+                            PaymentVoucher paymentVoucherEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
 
                             GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc,paymentVoucherEntity.getTipoComprobante(),paymentVoucherEntity.getSerie(),paymentVoucherEntity.getNumero(),idPaymentVoucher);
 

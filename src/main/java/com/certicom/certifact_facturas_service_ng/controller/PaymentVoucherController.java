@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.controller;
 
 import com.certicom.certifact_facturas_service_ng.converter.PaymentVoucherConverter;
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
 import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;

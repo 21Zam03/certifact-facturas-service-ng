@@ -1,6 +1,5 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.*;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.dto.others.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
@@ -11,6 +10,7 @@ import com.certicom.certifact_facturas_service_ng.exceptions.SignedException;
 import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
 import com.certicom.certifact_facturas_service_ng.feign.*;
 import com.certicom.certifact_facturas_service_ng.formatter.PaymentVoucherFormatter;
+import com.certicom.certifact_facturas_service_ng.model.*;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.TemplateService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
@@ -79,11 +79,11 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         PaymentVoucherDto comprobanteMonedaEur = null;
 
         try {
-            UserDto usuarioLogueado = userFeign.obtenerUsuario(idUsuario);
+            User usuarioLogueado = userFeign.findUserById(idUsuario);
             if(usuarioLogueado == null) {
                 throw new ServiceException("Usuario no encontrado");
             }
-            if(usuarioLogueado.getIdUsuario()!=null){
+            if(usuarioLogueado.getIdUser()!=null){
                 idOficina = usuarioLogueado.getIdOficina();
             }
             numPagina = (pageNumber-1) * perPage;
@@ -91,13 +91,13 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             if(idOficina == null) idOficina = 0;
             estadoSunat = estadoSunats.toString();
 
-            result = paymentVoucherFeign.listarComprobantesConFiltros(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
+            result = paymentVoucherFeign.listPaymentVoucherWithFilter(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
                     filtroSerie, filtroNumero, idOficina, estadoSunat, numPagina, perPage);
 
-            cantidad = paymentVoucherFeign.contarComprobantes(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
+            cantidad = paymentVoucherFeign.countPaymentVoucher(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
                     filtroSerie, filtroNumero, idOficina, estadoSunat, numPagina, perPage);
 
-            tsolespayment = paymentVoucherFeign.obtenerTotalSolesGeneral(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
+            tsolespayment = paymentVoucherFeign.getTotalSoles(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
                     filtroSerie, filtroNumero, idOficina, estadoSunat, pageNumber, perPage);
 
             comprobanteMonedaSol = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals(CODSOLES)).findFirst().orElse(null);
@@ -141,7 +141,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         boolean status = false;
         String messageResponse;
         String nombreDocumento = "";
-        PaymentVoucherEntity comprobanteCreado = null;
+        PaymentVoucher comprobanteCreado = null;
 
         try {
             log.info("GENERANDO COMPROBANTE - {} - {}", comprobante.getSerie(), comprobante.getNumero());
@@ -359,7 +359,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         return archivo;
     }
 
-    private PaymentVoucherEntity registrarComprobante(
+    private PaymentVoucher registrarComprobante(
             PaymentVoucher comprobante, Long idArchivoRegistro, Boolean isEdit,
             PaymentVoucher antiguoComprobante, String estado, String estadoAnterior, String estadoEnSunat,
             Integer estadoItem, String mensajeRespuesta, String registroUsuario, String usuarioModificacion,
@@ -673,7 +673,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
         if (registroUsuario != null && entity.getOficinaId() == null) {
             if (!registroUsuario.equals(ConstantesSunat.SUPERADMIN)) {
-                UserEntity user = userFeign.findByUserByUsername(registroUsuario);
+                UserEntity user = userFeign.findUserByUsername(registroUsuario);
                 comprobante.setOficinaId(user.getOficinaId());
                 //entity.setOficinaId(user.getOficinaId());
             }
@@ -681,13 +681,13 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         //entity.setUuid(UUIDGen.generate());
         comprobante.setUuid(UUIDGen.generate());
         comprobante.setFechaEmisionDate(new Date());
-        PaymentVoucherEntity comprobanteCreado = paymentVoucherFeign.savePaymentVoucher(comprobante);
+        PaymentVoucher comprobanteCreado = paymentVoucherFeign.savePaymentVoucher(comprobante);
 
         log.info("COMPROBANTE CREADO: {}", comprobanteCreado.toString());
         return comprobanteCreado;
     }
 
-    private void transformarUrlsAResponse(ResponsePSE response, PaymentVoucherEntity paymentVoucher) {
+    private void transformarUrlsAResponse(ResponsePSE response, PaymentVoucher paymentVoucher) {
         if (paymentVoucher != null) {
             String urlTicket = urlServiceDownload + "descargapdfuuid/" + paymentVoucher.getIdPaymentVoucher() + "/" + paymentVoucher.getUuid() + "/ticket/" + paymentVoucher.getIdentificadorDocumento();
             String urlA4 = urlServiceDownload + "descargapdfuuid/" + paymentVoucher.getIdPaymentVoucher() + "/" + paymentVoucher.getUuid() + "/a4/" + paymentVoucher.getIdentificadorDocumento();

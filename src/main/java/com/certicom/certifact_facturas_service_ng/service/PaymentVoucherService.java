@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.service;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
 
 import java.util.Map;
 

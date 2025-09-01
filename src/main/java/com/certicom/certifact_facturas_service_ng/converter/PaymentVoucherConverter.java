@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.converter;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
 import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
 
 public class PaymentVoucherConverter {

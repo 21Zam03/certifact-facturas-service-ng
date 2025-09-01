@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.Company;
-import com.certicom.certifact_facturas_service_ng.dto.model.OseDto;
+import com.certicom.certifact_facturas_service_ng.model.Company;
+import com.certicom.certifact_facturas_service_ng.model.OseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

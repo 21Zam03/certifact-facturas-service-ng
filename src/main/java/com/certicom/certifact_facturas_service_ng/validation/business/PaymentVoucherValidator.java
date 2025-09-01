@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.validation.business;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
 import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
 import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
@@ -688,7 +688,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
     private void validateIdentificadorDocumento(String rucEmisor, String tipoComprobante, String serie, Integer numero, boolean isEdit) {
         try {
             String idDocumento = rucEmisor + "-" + tipoComprobante + "-" + serie + "-" + numero;
-            PaymentVoucherEntity identificadorEntity = paymentVoucherFeign.getPaymentVoucherByIdentificadorDocumento(idDocumento);
+            PaymentVoucher identificadorEntity = paymentVoucherFeign.getPaymentVoucherByIdentificadorDocumento(idDocumento);
             if (identificadorEntity != null && !isEdit) {
                 throw new ValidationException(
                         "El comprobante ya ha sido registrado [" + rucEmisorLabel + ":" + rucEmisor + "; "

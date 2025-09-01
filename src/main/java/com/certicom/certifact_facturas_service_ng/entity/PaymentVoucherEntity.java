@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.entity;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucherFile;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherFile;
 import lombok.*;
 
 import java.math.BigDecimal;

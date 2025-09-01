@@ -26,9 +26,9 @@ public class FileController {
 
 
     public static final String API_PATH = "/api/file";
-    private final ReportService reportService;
+    //private final ReportService reportService;
     private final AmazonS3ClientService amazonS3ClientService;
-
+/*
     @GetMapping("/descargapdfuuid/{id}/{uuid}/{tipoPdf}/{nameDocument}")
     public ResponseEntity<?> downloadPdf(
             @PathVariable Long id, @PathVariable String uuid,
@@ -40,7 +40,7 @@ public class FileController {
         return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/pdf"))
                 .body(resource);
     }
-
+*/
     @GetMapping("/descargacdruuid/{id}/{uuid}/{nameDocument}")
     public ResponseEntity<?> downloadCDR(
             @PathVariable Long id, @PathVariable String uuid,

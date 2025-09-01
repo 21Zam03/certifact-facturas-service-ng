@@ -1,6 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.Error;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
 import com.certicom.certifact_facturas_service_ng.dto.others.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.entity.*;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -34,7 +35,7 @@ public interface PaymentVoucherFeign {
      * @return Lista paginada de comprobantes que cumplen con los filtros aplicados.
      */
     @GetMapping("/api/invoice-sp/payment-voucher")
-    List<PaymentVoucherDto> listarComprobantesConFiltros(
+    List<PaymentVoucherDto> listPaymentVoucherWithFilter(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
             @RequestParam(name = "filtroHasta", required = true) String filtroHasta,
@@ -70,7 +71,7 @@ public interface PaymentVoucherFeign {
      * @return Cantidad total de comprobantes que cumplen con los filtros aplicados.
      */
     @GetMapping("/api/invoice-sp/payment-voucher/count-total")
-    Integer contarComprobantes(
+    Integer countPaymentVoucher(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
             @RequestParam(name = "filtroHasta", required = true) String filtroHasta,
@@ -86,7 +87,7 @@ public interface PaymentVoucherFeign {
 
 
     @GetMapping("/api/invoice-sp/payment-voucher/cash-total")
-    List<PaymentVoucherDto> obtenerTotalSolesGeneral(
+    List<PaymentVoucherDto> getTotalSoles(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
             @RequestParam(name = "filtroHasta", required = true) String filtroHasta,
@@ -113,7 +114,7 @@ public interface PaymentVoucherFeign {
     );
 
     @GetMapping("/api/invoice-sp/payment-voucher/id-document")
-    public PaymentVoucherEntity getPaymentVoucherByIdentificadorDocumento(@RequestParam String identificadorDocumento);
+    public PaymentVoucher getPaymentVoucherByIdentificadorDocumento(@RequestParam String identificadorDocumento);
 
     @GetMapping("/api/invoice-sp/payment-voucher/number")
     public Integer obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(
@@ -121,7 +122,7 @@ public interface PaymentVoucherFeign {
     );
 
     @PostMapping("/api/invoice-sp/payment-voucher")
-    public PaymentVoucherEntity savePaymentVoucher(@RequestBody PaymentVoucher entity);
+    public PaymentVoucher savePaymentVoucher(@RequestBody PaymentVoucher entity);
 
     @GetMapping("/api/invoice-sp/payment-voucher/parameters")
     public PaymentVoucher findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
@@ -129,7 +130,7 @@ public interface PaymentVoucherFeign {
             @RequestParam String serie, @RequestParam Integer numero);
 
     @GetMapping("/api/invoice-sp/payment-voucher/{id}")
-    public PaymentVoucherEntity findPaymentVoucherById(@PathVariable Long id);
+    public PaymentVoucher findPaymentVoucherById(@PathVariable Long id);
 
     @GetMapping("/api/invoice-sp/payment-voucher/parameters-dto")
     public PaymentVoucher findPaymentVoucherByRucAndTipoComprobanteAndSerieDocumentoAndNumeroDocumento
@@ -137,7 +138,7 @@ public interface PaymentVoucherFeign {
              @RequestParam String serieDocumento, @RequestParam Integer numeroDocumento);
 
     @GetMapping("/api/invoice-sp/error-catalog")
-    public ErrorEntity findFirst1ByCodeAndDocument(@RequestParam String codigoRespuesta, @RequestParam String tipoDocumento);
+    public Error findFirst1ByCodeAndDocument(@RequestParam String codigoRespuesta, @RequestParam String tipoDocumento);
 
     @GetMapping("/api/invoice-sp/payment-voucher/id-documento")
     public PaymentVoucher getIdentificadorDocument(@RequestParam String idDocumento);
@@ -149,7 +150,7 @@ public interface PaymentVoucherFeign {
             @RequestParam String usuario,
             @RequestParam Timestamp fechaModificacion);
 
-    @GetMapping("/api/invoice-sp/payment-voucher/idpaymentvoucher&uuid")
-    public PaymentVoucher findByIdPaymentVoucherAndUuid(Long id, String uuid);
+    @GetMapping("/api/invoice-sp/payment-voucher/idpaymentvoucheranduuid")
+    public PaymentVoucher findByIdPaymentVoucherAndUuid(@RequestParam Long id, @RequestParam String uuid);
 
 }

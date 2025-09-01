@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.service;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.Voided;
-import com.certicom.certifact_facturas_service_ng.dto.model.VoidedDocumentsDto;
+import com.certicom.certifact_facturas_service_ng.model.Voided;
+import com.certicom.certifact_facturas_service_ng.model.VoidedDocumentsDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.VoucherAnnular;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 

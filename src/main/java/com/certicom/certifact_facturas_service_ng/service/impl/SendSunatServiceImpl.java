@@ -1,6 +1,5 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.*;
 import com.certicom.certifact_facturas_service_ng.dto.others.ResponseServer;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
 import com.certicom.certifact_facturas_service_ng.entity.ErrorEntity;
@@ -12,6 +11,9 @@ import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
 import com.certicom.certifact_facturas_service_ng.feign.ErrorCatalogFeign;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
 import com.certicom.certifact_facturas_service_ng.feign.VoidedDocumentsFeign;
+import com.certicom.certifact_facturas_service_ng.model.GetStatusCdrDto;
+import com.certicom.certifact_facturas_service_ng.model.OseDto;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
 import com.certicom.certifact_facturas_service_ng.service.SendSunatService;
 import com.certicom.certifact_facturas_service_ng.service.TemplateService;
 import com.certicom.certifact_facturas_service_ng.templates.sunat.RequestSunatTemplate;

@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
-import com.certicom.certifact_facturas_service_ng.dto.model.RegisterFileUploadDto;
-import com.certicom.certifact_facturas_service_ng.dto.model.RegisterFileUpload;
+import com.certicom.certifact_facturas_service_ng.model.RegisterFileUploadDto;
+import com.certicom.certifact_facturas_service_ng.model.RegisterFileUpload;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +19,6 @@ public interface RegisterFileUploadFeign {
     public RegisterFileUpload saveRegisterFileUpload(@RequestBody RegisterFileUploadDto registerFileUploadDto);
 
     @GetMapping("/api/register-file-upload/id&uuid&tipo")
-    public RegisterFileUpload findByIdPaymentVoucherAndUuidTipo(Long id, String uuid, String tipo);
+    public RegisterFileUpload findByIdPaymentVoucherAndUuidTipo(@RequestParam Long id, @RequestParam String uuid, @RequestParam String tipo);
 
 }
