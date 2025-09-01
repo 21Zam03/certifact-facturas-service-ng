@@ -386,11 +386,11 @@ public class ComprobanteValidator extends CamposEntrada<Object>
                 if(!resultado.getLeft()) {
                     return resultado;
                 }
-                resultado = validarMontoAnticipado(anticipo.getMontoAnticipado());
+                resultado = validarMontoAnticipado(anticipo.getMontoAnticipo());
                 if(!resultado.getLeft()) {
                     return resultado;
                 }
-                resultado = validarTipoDocumentoAnticipo(anticipo.getTipoDocumentoAnticipo());
+                resultado = validarTipoDocumentoAnticipo(anticipo.getTipoDocAnticipo());
                 if(!resultado.getLeft()) {
                     return resultado;
                 }

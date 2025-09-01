@@ -12,11 +12,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface RegisterFileUploadFeign {
 
     @GetMapping("/api/register-file-upload")
-    public RegisterFileUploadDto findFirst1ByPaymentVoucherIdPaymentVoucherAndTipoArchivoAndEstadoArchivoOrderByOrdenDesc
+    public RegisterFileUpload findFirst1ByPaymentVoucherIdPaymentVoucherAndTipoArchivoAndEstadoArchivoOrderByOrdenDesc
             (@RequestParam Long idPayment, @RequestParam String tipoArchivo, @RequestParam String estadoArchivo);
 
     @PostMapping("/api/register-file-upload")
-    public RegisterFileUpload saveRegisterFileUpload(@RequestBody RegisterFileUploadDto registerFileUploadDto);
+    public RegisterFileUpload saveRegisterFileUpload(@RequestBody RegisterFileUpload registerFileUploadDto);
 
     @GetMapping("/api/register-file-upload/id&uuid&tipo")
     public RegisterFileUpload findByIdPaymentVoucherAndUuidTipo(@RequestParam Long id, @RequestParam String uuid, @RequestParam String tipo);

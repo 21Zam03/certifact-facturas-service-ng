@@ -249,14 +249,14 @@ public class FacturaTemplate {
                     Element prepaidPayment = appendChild(doc, invoiceRootElement, "cac:PrepaidPayment");
                     appendChild(doc, prepaidPayment, "cbc:ID",
                             String.format("%s-%s", anticipo.getSerieAnticipo(), anticipo.getNumeroAnticipo())).
-                            setAttribute(ConstantesSunat.ATTRIBUTE_SCHEME_ID, anticipo.getTipoDocumentoAnticipo());
-                    appendChild(doc, prepaidPayment, "cbc:PaidAmount", UtilFormat.format(anticipo.getMontoAnticipado())).
+                            setAttribute(ConstantesSunat.ATTRIBUTE_SCHEME_ID, anticipo.getTipoDocAnticipo());
+                    appendChild(doc, prepaidPayment, "cbc:PaidAmount", UtilFormat.format(anticipo.getMontoAnticipo())).
                             setAttribute(ConstantesSunat.ATTRIBUTE_CURRENCY_ID, factura.getCodigoMoneda());
                     appendChild(doc, prepaidPayment, "cbc:InstructionID", factura.getRucEmisor()).
                             setAttribute(ConstantesSunat.ATTRIBUTE_SCHEME_ID, factura.getTipoDocumentoEmisor());
                     ;
 
-                    montoAnticiposTotalValorVenta = montoAnticiposTotalValorVenta.add(anticipo.getMontoAnticipado());
+                    montoAnticiposTotalValorVenta = montoAnticiposTotalValorVenta.add(anticipo.getMontoAnticipo());
                     factura.setTotalAnticipos(montoAnticiposTotalValorVenta);
                 }
             }

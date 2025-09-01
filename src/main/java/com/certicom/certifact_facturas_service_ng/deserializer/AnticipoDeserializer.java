@@ -69,10 +69,10 @@ public class AnticipoDeserializer extends CamposEntrada<Anticipo> {
         }
 
         objectResult = new Anticipo();
-        objectResult.setMontoAnticipado(montoAnticipado);
+        objectResult.setMontoAnticipo(montoAnticipado);
         objectResult.setNumeroAnticipo(numeroAnticipo);
         objectResult.setSerieAnticipo(serieAnticipo);
-        objectResult.setTipoDocumentoAnticipo(tipoDocumentoAnticipo);
+        objectResult.setTipoDocAnticipo(tipoDocumentoAnticipo);
 
         return objectResult;
     }

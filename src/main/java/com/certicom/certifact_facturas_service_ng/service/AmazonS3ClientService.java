@@ -11,8 +11,8 @@ import java.io.InputStream;
 public interface AmazonS3ClientService {
 
     RegisterFileUpload subirArchivoAlStorage(InputStream inputStream, String nameFile, String folder, Company company);
-    String downloadFileStorageInB64(RegisterFileUploadDto fileStorage);
-    ByteArrayInputStream downloadFileStorageDto(RegisterFileUploadDto fileStorage);
+    String downloadFileStorageInB64(RegisterFileUpload fileStorage);
+    ByteArrayInputStream downloadFileStorageDto(RegisterFileUpload fileStorage);
     RegisterFileUpload uploadFileStorage(InputStream inputStream, String nameFile, String folder, Company company);
     ByteArrayInputStream downloadFileInvoice(Long id, String uuid, TipoArchivoEnum tipoArchivoEnum);
     ByteArrayInputStream downloadFileStorageInter(RegisterFileUpload fileStorage);

@@ -60,7 +60,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                         EstadoVoucherTmpEnum.BLOQUEO.getEstado()
                 );
 
-                RegisterFileUploadDto registerFileUploadDto = registerFileUploadFeign
+                RegisterFileUpload registerFileUploadDto = registerFileUploadFeign
                         .findFirst1ByPaymentVoucherIdPaymentVoucherAndTipoArchivoAndEstadoArchivoOrderByOrdenDesc(idPaymentVoucher, TipoArchivoEnum.XML.name(),
                                 EstadoArchivoEnum.ACTIVO.name());
                 System.out.println("REGISTER FILE UPLOAD: "+registerFileUploadDto);

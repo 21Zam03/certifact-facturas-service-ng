@@ -219,7 +219,7 @@ public class FacturaTemplate21 {
 
                     Element additionalDocument = appendChild(doc, invoiceRootElement, "cac:AdditionalDocumentReference");
                     appendChild(doc, additionalDocument, "cbc:ID", String.format("%s-%s", anticipo.getSerieAnticipo(), anticipo.getNumeroAnticipo()));
-                    appendChild(doc, additionalDocument, "cbc:DocumentTypeCode", anticipo.getTipoDocumentoAnticipo().equals("01")?"02":anticipo.getTipoDocumentoAnticipo());
+                    appendChild(doc, additionalDocument, "cbc:DocumentTypeCode", anticipo.getTipoDocAnticipo().equals("01")?"02":anticipo.getTipoDocAnticipo());
                     appendChild(doc, additionalDocument, "cbc:DocumentStatusCode", anticipo.getIdentificadorPago());
                     Element issuerParty = appendChild(doc, additionalDocument, "cac:IssuerParty");
                     Element partyIdentification = appendChild(doc, issuerParty, "cac:PartyIdentification");
@@ -363,10 +363,10 @@ public class FacturaTemplate21 {
                     attributes.put(ConstantesSunat.ATTRIBUTE_SCHEME_AGENCY_NAME, "PE:SUNAT");
 
                     appendChild(doc, prepaidPayment, "cbc:ID", anticipo.getIdentificadorPago(), attributes);
-                    appendChild(doc, prepaidPayment, "cbc:PaidAmount", UtilFormat.format(anticipo.getMontoAnticipado()))
+                    appendChild(doc, prepaidPayment, "cbc:PaidAmount", UtilFormat.format(anticipo.getMontoAnticipo()))
                             .setAttribute(ConstantesSunat.ATTRIBUTE_CURRENCY_ID, factura.getCodigoMoneda());
 
-                    montoAnticiposTotalValorVenta = montoAnticiposTotalValorVenta.add(anticipo.getMontoAnticipado());
+                    montoAnticiposTotalValorVenta = montoAnticiposTotalValorVenta.add(anticipo.getMontoAnticipo());
                     factura.setTotalAnticipos(montoAnticiposTotalValorVenta);
                 }
 

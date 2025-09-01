@@ -24,23 +24,10 @@ import java.text.ParseException;
 @RequiredArgsConstructor
 public class FileController {
 
-
     public static final String API_PATH = "/api/file";
-    //private final ReportService reportService;
-    private final AmazonS3ClientService amazonS3ClientService;
-/*
-    @GetMapping("/descargapdfuuid/{id}/{uuid}/{tipoPdf}/{nameDocument}")
-    public ResponseEntity<?> downloadPdf(
-            @PathVariable Long id, @PathVariable String uuid,
-            @PathVariable String tipoPdf, @PathVariable String nameDocument
-    ) throws ParseException, IOException {
 
-        byte[] targetArray = ByteStreams.toByteArray(reportService.getPdfComprobanteuid(id, uuid, nameDocument, tipoPdf));
-        ByteArrayResource resource = new ByteArrayResource(targetArray);
-        return ResponseEntity.ok().contentType(MediaType.parseMediaType("application/pdf"))
-                .body(resource);
-    }
-*/
+    private final AmazonS3ClientService amazonS3ClientService;
+
     @GetMapping("/descargacdruuid/{id}/{uuid}/{nameDocument}")
     public ResponseEntity<?> downloadCDR(
             @PathVariable Long id, @PathVariable String uuid,
@@ -62,5 +49,7 @@ public class FileController {
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .body(resource);
     }
+
+
 
 }

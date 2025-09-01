@@ -73,7 +73,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
 
             this.s3client.putObject(putObjectRequest);
 
-            RegisterFileUpload resp = registerFileUploadFeign.saveRegisterFileUpload(RegisterFileUploadDto.builder()
+            RegisterFileUpload resp = registerFileUploadFeign.saveRegisterFileUpload(RegisterFileUpload.builder()
                     .bucket(bucket)
                     .nombreGenerado(fileNameKey)
                     .nombreOriginal(nameFile)
@@ -90,12 +90,12 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
     }
 
     @Override
-    public String downloadFileStorageInB64(RegisterFileUploadDto fileStorage) {
+    public String downloadFileStorageInB64(RegisterFileUpload fileStorage) {
         return UtilArchivo.binToB64(downloadFileStorageDto(fileStorage));
     }
 
     @Override
-    public ByteArrayInputStream downloadFileStorageDto(RegisterFileUploadDto fileStorage) {
+    public ByteArrayInputStream downloadFileStorageDto(RegisterFileUpload fileStorage) {
         String bucket, name;
         if (fileStorage == null ) {
             return new ByteArrayInputStream(new byte[0]);
@@ -105,7 +105,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
             name = fileStorage.getNombreGenerado();
         } else {
             bucket = String.format("%s/archivos_old/%s", this.bucketName, fileStorage.getRucCompany());
-            name = String.format("%s.%s", fileStorage.getUuid(), fileStorage.getExtensiones());
+            name = String.format("%s.%s", fileStorage.getUuid(), fileStorage.getExtension());
         }
         System.out.println("bucket: "+bucket);
         System.out.println("name: "+name);
@@ -147,7 +147,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
 
             this.s3client.putObject(putObjectRequest);
             RegisterFileUpload resp = registerFileUploadFeign.saveRegisterFileUpload(
-                    RegisterFileUploadDto.builder()
+                    RegisterFileUpload.builder()
                             .bucket(bucket)
                             .nombreGenerado(fileNameKey)
                             .nombreOriginal(nameFile)

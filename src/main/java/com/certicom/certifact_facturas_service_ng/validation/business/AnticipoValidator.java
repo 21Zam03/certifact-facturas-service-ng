@@ -18,8 +18,8 @@ public class AnticipoValidator extends CamposEntrada<Object> {
     public void validateAnticipo(Anticipo anticipo) {
         validateSerie(anticipo.getSerieAnticipo());
         validateNumero(anticipo.getNumeroAnticipo());
-        validateMontoAnticipado(anticipo.getMontoAnticipado());
-        validateTipoDocumentoAnticipo(anticipo.getTipoDocumentoAnticipo());
+        validateMontoAnticipado(anticipo.getMontoAnticipo());
+        validateTipoDocumentoAnticipo(anticipo.getTipoDocAnticipo());
     }
 
     private void validateTipoDocumentoAnticipo(String tipoDocumento) {

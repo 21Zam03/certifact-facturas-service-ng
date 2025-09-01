@@ -279,11 +279,11 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
     private void setOficinaId(PaymentVoucher comprobante, Company company) {
         if (Boolean.TRUE.equals(company.getAllowSaveOficina()) && comprobante.getOficinaId() == null) {
-            OficinaDto oficinaDto = branchOfficeFeign.obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
+            BranchOffices branchOffices = branchOfficeFeign.obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
                     company.getId(), comprobante.getSerie(), comprobante.getTipoComprobante());
-            if(oficinaDto!=null) {
-                if (oficinaDto.getId() != null) {
-                    comprobante.setOficinaId(oficinaDto.getId());
+            if(branchOffices !=null) {
+                if (branchOffices.getId() != null) {
+                    comprobante.setOficinaId(branchOffices.getId());
                 }
             }
         }
@@ -561,14 +561,6 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             }
             entity.setAnticipoEntityList(anticipoEntityList);
         }*/
-
-        /*INFORMACION DE CAMPOS ADICIONALES*/
-        if (comprobante.getCamposAdicionales() != null && !comprobante.getCamposAdicionales().isEmpty()) {
-            for (CampoAdicional campoAdicional : comprobante.getCamposAdicionales()) {
-                Integer campoAdicionalId = additionalFieldFeign.findAditionalFieldIdByValorCampo(campoAdicional.getNombreCampo());
-                campoAdicional.setCampoAdicionalEntityId(campoAdicionalId);
-            }
-        }
 
         /*INFORMACION DE CUOTAS*/
     /*    if (comprobante.getCuotas() != null && !comprobante.getCuotas().isEmpty()) {

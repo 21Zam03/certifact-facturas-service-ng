@@ -16,7 +16,7 @@ public class Anticipo {
     private String identificadorPago;
     private String serieAnticipo;
     private Integer numeroAnticipo;
-    private String tipoDocumentoAnticipo;
-    private BigDecimal montoAnticipado;
+    private String tipoDocAnticipo;
+    private BigDecimal montoAnticipo;
 
 }

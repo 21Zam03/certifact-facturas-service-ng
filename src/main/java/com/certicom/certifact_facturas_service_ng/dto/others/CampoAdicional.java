@@ -5,16 +5,18 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class CampoAdicional {
+public class CampoAdicional implements Serializable {
 
     private Integer id;
     private String nombreCampo;
     private String valorCampo;
-    private Integer campoAdicionalEntityId;
-    private Long comprobanteEntityId;
+    private Integer typeFieldId;
+    private Long idPaymentVoucher;
 
 }
