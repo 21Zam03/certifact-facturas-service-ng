@@ -31,10 +31,15 @@ public class FileController {
     @GetMapping("/descargacdruuid/{id}/{uuid}/{nameDocument}")
     public ResponseEntity<?> downloadCDR(
             @PathVariable Long id, @PathVariable String uuid,
-            @PathVariable String nameDocument, HttpServletRequest request) {
-        String authorization = request.getHeader("Authorization");
+            @PathVariable String nameDocument, HttpServletRequest request) throws IOException {
+        InputStream is = amazonS3ClientService.downloadFileInvoice(id, uuid, TipoArchivoEnum.CDR);
+        byte[] targetArray = ByteStreams.toByteArray(is);
 
-        return new ResponseEntity<>("", HttpStatus.OK);
+        ByteArrayResource resource = new ByteArrayResource(targetArray);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType("application/zip"))
+                .body(resource);
     }
 
     @GetMapping("/descargaxmluuid/{id}/{uuid}/{nameDocument}")
@@ -49,7 +54,5 @@ public class FileController {
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .body(resource);
     }
-
-
 
 }

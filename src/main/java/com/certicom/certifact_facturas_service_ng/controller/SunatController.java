@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.controller;
 
 import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
-import com.certicom.certifact_facturas_service_ng.dto.others.VoucherAnnular;
+import com.certicom.certifact_facturas_service_ng.dto.request.VoucherAnnularRequest;
 import com.certicom.certifact_facturas_service_ng.dto.request.IdentificadorPaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.service.ComunicationSunatService;
@@ -52,7 +52,7 @@ public class SunatController {
     }
 
     @PostMapping("/avoid")
-    public ResponseEntity<?> anularPaymentVoucher(@RequestBody List<VoucherAnnular> documentosToAnular) {
+    public ResponseEntity<?> anularPaymentVoucher(@RequestBody List<VoucherAnnularRequest> documentosToAnular) {
         List<String> ticketsVoidedProcess = new ArrayList<>();
         ResponsePSE resp = documentsVoidedService.anularDocuments(
                 documentosToAnular,

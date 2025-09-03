@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.deserializer;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.CampoAdicional;
-import com.certicom.certifact_facturas_service_ng.exceptions.DeserializadorException;
+import com.certicom.certifact_facturas_service_ng.exceptions.DeserializerException;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.fasterxml.jackson.core.JacksonException;
@@ -33,7 +33,7 @@ public class CampoAdicionalDeserializer extends CamposEntrada<CampoAdicional> {
         if (campoTrama != null) {
             if (!campoTrama.isTextual()) {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + "5[" + nombreCampoAdicionalLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             } else {
                 nombreCampo = campoTrama.textValue();
             }

@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
-import com.certicom.certifact_facturas_service_ng.dto.others.VoucherAnnular;
+import com.certicom.certifact_facturas_service_ng.dto.request.VoucherAnnularRequest;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
 import com.certicom.certifact_facturas_service_ng.model.*;
@@ -21,6 +21,7 @@ import com.certicom.certifact_facturas_service_ng.validation.business.VoucherAnn
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLOutput;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -61,11 +62,11 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                     .estadoArchivo(EstadoArchivoEnum.ACTIVO)
                     .registerFileUpload(RegisterFileUploadEntity.builder().idRegisterFileSend(idRegisterFile).build())
                     .tipoArchivo(TipoArchivoEnum.XML)
-                    .build());
+                       .build());
         }
 
         * */
-
+        System.out.println("DOCUMENT SUMMARY : " + documentSummary);
         for (VoidedLine item : voided.getLines()) {
 
             DetailsDocsVoidedDto detail = new DetailsDocsVoidedDto();
@@ -81,7 +82,6 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
             identificadorComprobantes.add(voided.getRucEmisor() + "-" + item.getTipoComprobante() + "-" +
                     item.getSerieDocumento() + "-" + item.getNumeroDocumento());
         }
-
         documentSummary = voidedDocumentsFeign.save(documentSummary);
 
         paymentVoucherFeign.updateStateToSendSunatForVoidedDocuments(
@@ -89,43 +89,36 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                 EstadoComprobanteEnum.PENDIENTE_ANULACION.getCodigo(),
                 usuario,
                 fechaEjecucion);
-
         return documentSummary;
     }
 
     @Override
-    public ResponsePSE anularDocuments(List<VoucherAnnular> documents, String rucEmisor, String userName, List<String> ticketsVoidedProcess) {
+    public ResponsePSE anularDocuments(List<VoucherAnnularRequest> documents, String rucEmisor, String userName, List<String> ticketsVoidedProcess) {
         ResponsePSE respuesta = new ResponsePSE();
-        Map<String, List<VoucherAnnular>> documentosBajaByFechaEmisionFacturasMap = new HashMap<>();
-        Map<String, List<VoucherAnnular>> documentosBajaByFechaEmisionGuiasMap = new HashMap<>();
-        Map<String, List<VoucherAnnular>> documentosBajaByFechaEmisionOtrosMap = new HashMap<>();
-        List<VoucherAnnular> documentosVoidedByFechaEmision;
-
-        List<VoucherAnnular> documentosSummary = new ArrayList<>();
+        Map<String, List<VoucherAnnularRequest>> documentosBajaByFechaEmisionFacturasMap = new HashMap<>();
+        List<VoucherAnnularRequest> documentosVoidedByFechaEmision;
+        List<VoucherAnnularRequest> documentosSummary = new ArrayList<>();
         StringBuilder messageBuilder = null;
-        List<VoucherAnnular> documentsanular = new ArrayList<>();
-        try {
+        List<VoucherAnnularRequest> documentsanular = new ArrayList<>();
 
-            for (VoucherAnnular documento : documents) {
+        voucherAnnularValidator.validateVoucherAnnular(documents, rucEmisor);
+
+        try {
+            for (VoucherAnnularRequest documento : documents) {
                 String identificadorDocumento = rucEmisor + "-" + documento.getTipoComprobante() + "-" +
                         documento.getSerie().toUpperCase() + "-" + documento.getNumero();
-                System.out.println(identificadorDocumento);
                 PaymentVoucher entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
-                System.out.println(entity);
+                System.out.println("VOIDED: "+ entity);
                 if (documento.getRucEmisor()==null){
                     documento.setRucEmisor(rucEmisor);
                 }
-                if(entity==null){
-                    System.out.println("Document not found");
-                    //throw new Exception("Documento no encontrado en los registros");
-                }else if (!entity.getEstado().equals("08") ){
-                    documentsanular.add(documento);
-                }
+                documento.setFechaEmision(entity.getFechaEmision());
+                documento.setSerie(documento.getSerie().toUpperCase());
+                documentsanular.add(documento);
             }
 
-            voucherAnnularValidator.validateVoucherAnnular(documentsanular, rucEmisor);
-
-            for (VoucherAnnular document : documents) {
+            for (VoucherAnnularRequest document : documents) {
+                System.out.println("FECHA EMISION: "+document.getFechaEmision());
                 String identificadorDocumento = rucEmisor + "-" + document.getTipoComprobante() + "-" +
                         document.getSerie().toUpperCase() + "-" + document.getNumero();
                 System.out.println(identificadorDocumento);
@@ -152,6 +145,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                             }
                             documentosVoidedByFechaEmision.add(document);
                             documentosBajaByFechaEmisionFacturasMap.put(document.getFechaEmision(), documentosVoidedByFechaEmision);
+                            System.out.println("documentos: "+documentosBajaByFechaEmisionFacturasMap);
                             break;
                         case ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO:
                         case ConstantesSunat.TIPO_DOCUMENTO_NOTA_DEBITO:
@@ -174,13 +168,14 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                 }
             }
             for (String fechaEmision : documentosBajaByFechaEmisionFacturasMap.keySet()) {
+                System.out.println("FECHA EMISION: "+fechaEmision);
                 Voided voided = new Voided();
                 List<VoidedLine> lines = new ArrayList<>();
                 voided.setFechaBaja(fechaEmision);
                 voided.setRucEmisor(rucEmisor);
 
-                List<VoucherAnnular> anulados = documentosBajaByFechaEmisionFacturasMap.get(fechaEmision);
-                for (VoucherAnnular document : anulados) {
+                List<VoucherAnnularRequest> anulados = documentosBajaByFechaEmisionFacturasMap.get(fechaEmision);
+                for (VoucherAnnularRequest document : anulados) {
                     String identificadorDocumento = rucEmisor + "-" + document.getTipoComprobante() + "-" +
                             document.getSerie().toUpperCase() + "-" + document.getNumero();
                     PaymentVoucher entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
@@ -222,6 +217,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
         } catch (Exception e) {
             respuesta.setEstado(false);
             respuesta.setMensaje(e.getMessage());
+            System.out.println("ERROR: " + e.getMessage());
         }
         return respuesta;
     }
@@ -238,7 +234,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
         StringBuilder messageBuilder = new StringBuilder();
 
         Company companyEntity = completarDatosVoided(voided,esRetencion);
-
+        System.out.println("VOIDED 2: "+voided);
         if (companyEntity.getOseId() != null && companyEntity.getOseId()==2) {
             templateGenerated = templateService.buildVoidedDocumentsSign(voided);
         } else if (companyEntity.getOseId() != null && (companyEntity.getOseId()==10||companyEntity.getOseId()==12)) {
@@ -246,7 +242,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
         } else {
             templateGenerated = templateService.buildVoidedDocumentsSign(voided);
         }
-
+        System.out.println("PLANTILLA GENERADA: "+templateGenerated);
         System.out.println("ANULACIONES SUNAT 1 ");
         System.out.println(companyEntity);
 
@@ -279,13 +275,15 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
             default:
         }
         if (!responseSunat.isSuccess()) {
+            System.out.println("RESPUESTA: "+responseSunat.getMessage());
             return resp;
         }
         RegisterFileUpload file = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(fileXMLZipBase64),
                 nameDocument, "voided", companyEntity);
-
+        System.out.println("FILE: "+file);
         voided.setEstadoComprobante(EstadoComprobanteEnum.PROCESO_ENVIO.getCodigo());
         VoidedDocumentsDto voidedDocumentsEntity = registrarVoidedDocuments(voided, file.getIdRegisterFileSend(), userName, responseSunat.getTicket());
+        System.out.println("VOIDED DOCUMENT: "+voidedDocumentsEntity);
         resp.put(ConstantesParameter.PARAM_NUM_TICKET, voidedDocumentsEntity.getTicketSunat());
         resp.put(ConstantesParameter.PARAM_DESCRIPTION, "Se registro correctamente el documento: " + voided.getId());
         return resp;

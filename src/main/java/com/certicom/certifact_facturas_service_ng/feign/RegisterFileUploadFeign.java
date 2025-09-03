@@ -1,6 +1,5 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
-import com.certicom.certifact_facturas_service_ng.model.RegisterFileUploadDto;
 import com.certicom.certifact_facturas_service_ng.model.RegisterFileUpload;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

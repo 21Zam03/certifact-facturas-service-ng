@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.deserializer;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteCuota;
-import com.certicom.certifact_facturas_service_ng.exceptions.DeserializadorException;
+import com.certicom.certifact_facturas_service_ng.exceptions.DeserializerException;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.fasterxml.jackson.core.JacksonException;
@@ -35,7 +35,7 @@ public class CuotaDeserializer extends CamposEntrada<ComprobanteCuota> {
         if (campoTrama != null) {
             if (!campoTrama.isNumber()) {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "5[" + numeroCuotaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             } else {
                 numero = campoTrama.intValue();
             }
@@ -45,7 +45,7 @@ public class CuotaDeserializer extends CamposEntrada<ComprobanteCuota> {
         if (campoTrama != null) {
             if (!campoTrama.isNumber()) {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "6[" + montoCuotaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             } else {
                 monto = campoTrama.decimalValue();
             }
@@ -54,7 +54,7 @@ public class CuotaDeserializer extends CamposEntrada<ComprobanteCuota> {
         if (campoTrama != null) {
             if (!campoTrama.isTextual()) {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + "6[" + fechaCuotaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             } else {
                 fecha = campoTrama.textValue();
             }

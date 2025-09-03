@@ -1,7 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.service;
 
 import com.certicom.certifact_facturas_service_ng.model.Company;
-import com.certicom.certifact_facturas_service_ng.model.RegisterFileUploadDto;
 import com.certicom.certifact_facturas_service_ng.model.RegisterFileUpload;
 import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 

@@ -35,9 +35,9 @@ public class PaymentVoucherController {
             @RequestParam(name = "filtroNumero", required = false) Integer filtroNumero,
             @RequestParam(name = "pageNumber", required = true) Integer pageNumber,
             @RequestParam(name = "perPage", required = true) Integer perPage,
-            @RequestParam(name = "estadoSunat", required = false) Integer estadoSunat,
-            @RequestParam(name = "idUsuario", required = true) Long idUsuario
+            @RequestParam(name = "estadoSunat", required = false) Integer estadoSunat
     ) {
+        Long idUsuario = 2L;
         log.info("ComprobanteController - listarComprobantesConfiltros - [filtroDesde={}, filtroHasta={}, filtroTipoComprobante={}, fltroRuc={}, " +
                         "filtroSerie={}, filtroNumero={}, pageNumber={}, perPage={}, estadoSunat={}, idUsuario={}]",
                 filtroDesde, filtroHasta, filtroTipoComprobante, filtroRuc, filtroSerie, filtroNumero, pageNumber, perPage, estadoSunat, idUsuario);
@@ -48,21 +48,27 @@ public class PaymentVoucherController {
 
     @PostMapping
     public ResponseEntity<?> savePaymentVoucher(@RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest) {
-        log.info("ComprobanteController - registrarComprobante - [comprobanteRequest={}]", paymentVoucherRequest.toString());
+        Long idUsuario = 2L;
+        watchLog(paymentVoucherRequest);
         PaymentVoucher paymentVoucher = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);
         paymentVoucherValidator.validate(paymentVoucher, false);
-        Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucher, false, 2L);
+        Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucher, false, idUsuario);
         return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
         //return new ResponseEntity<>("TEST", HttpStatus.OK);
     }
 
     @PutMapping
     public ResponseEntity<?> editPaymentVoucher(@RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest) {
-        log.info("ComprobanteController - registrarComprobante - [comprobanteRequest={}]", paymentVoucherRequest.toString());
+        Long idUsuario = 2L;
+        watchLog(paymentVoucherRequest);
         PaymentVoucher paymentVoucher = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);
         paymentVoucherValidator.validate(paymentVoucher, true);
-        Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucher, true, 2L);
+        Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucher, true, idUsuario);
         return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
+    }
+
+    private void watchLog(Object object) {
+        log.info("ComprobanteController - watchLog - [object={}]", object.toString());
     }
 
 }

@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "facturas-service-sp", url = "http://localhost:8090", contextId = "voidedDocuments")
 public interface VoidedDocumentsFeign {
 
-    @GetMapping("/api/voided-documents")
+    @GetMapping("/api/voided-documents/correlativo")
     public Integer getCorrelativoGeneracionByDiaInVoidedDocuments(
             @RequestParam String ruc,
             @RequestParam String fechaGeneracionBaja);

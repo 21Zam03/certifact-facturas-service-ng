@@ -34,7 +34,7 @@ public interface PaymentVoucherFeign {
      *
      * @return Lista paginada de comprobantes que cumplen con los filtros aplicados.
      */
-    @GetMapping("/api/invoice-sp/payment-voucher")
+    @GetMapping("/api/payment-voucher")
     List<PaymentVoucherDto> listPaymentVoucherWithFilter(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
@@ -70,7 +70,7 @@ public interface PaymentVoucherFeign {
      *
      * @return Cantidad total de comprobantes que cumplen con los filtros aplicados.
      */
-    @GetMapping("/api/invoice-sp/payment-voucher/count-total")
+    @GetMapping("/api/payment-voucher/count-total")
     Integer countPaymentVoucher(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
@@ -86,7 +86,7 @@ public interface PaymentVoucherFeign {
     );
 
 
-    @GetMapping("/api/invoice-sp/payment-voucher/cash-total")
+    @GetMapping("/api/payment-voucher/cash-total")
     List<PaymentVoucherDto> getTotalSoles(
             @RequestParam(name = "rucEmisor", required = true) String rucEmisor,
             @RequestParam(name = "filtroDesde", required = true) String filtroDesde,
@@ -101,38 +101,38 @@ public interface PaymentVoucherFeign {
             @RequestParam(name = "perPage", required = true) Integer perPage
     );
 
-    @PutMapping("/api/invoice-sp/payment-voucher/state-1")
+    @PutMapping("/api/payment-voucher/state-1")
     public int updateStatePaymentVoucher(
             @RequestParam Long idPaymentVoucher, @RequestParam String codigo, @RequestParam String messageResponse,
             @RequestParam String codesResponse
     );
 
-    @PutMapping("/api/invoice-sp/payment-voucher/state-2")
+    @PutMapping("/api/payment-voucher/state-2")
     public int updateStatePaymentVoucher(
             @RequestParam Long idPaymentVoucher, @RequestParam String codigo, @RequestParam String estadoEnSunat,
             @RequestParam String messageResponse, @RequestParam String codesResponse
     );
 
-    @GetMapping("/api/invoice-sp/payment-voucher/id-document")
+    @GetMapping("/api/payment-voucher/id-document")
     public PaymentVoucher getPaymentVoucherByIdentificadorDocumento(@RequestParam String identificadorDocumento);
 
-    @GetMapping("/api/invoice-sp/payment-voucher/number")
+    @GetMapping("/api/payment-voucher/number")
     public Integer obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(
             @RequestParam String tipoComprobante, @RequestParam String serie, @RequestParam String ruc
     );
 
-    @PostMapping("/api/invoice-sp/payment-voucher")
+    @PostMapping("/api/payment-voucher")
     public PaymentVoucher savePaymentVoucher(@RequestBody PaymentVoucher entity);
 
-    @GetMapping("/api/invoice-sp/payment-voucher/parameters")
+    @GetMapping("/api/payment-voucher/parameters")
     public PaymentVoucher findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
             @RequestParam String rucEmisor, @RequestParam String tipoComprobante,
             @RequestParam String serie, @RequestParam Integer numero);
 
-    @GetMapping("/api/invoice-sp/payment-voucher/{id}")
+    @GetMapping("/api/payment-voucher/{id}")
     public PaymentVoucher findPaymentVoucherById(@PathVariable Long id);
 
-    @GetMapping("/api/invoice-sp/payment-voucher/parameters-dto")
+    @GetMapping("/api/payment-voucher/parameters-dto")
     public PaymentVoucher findPaymentVoucherByRucAndTipoComprobanteAndSerieDocumentoAndNumeroDocumento
             (@RequestParam String finalRucEmisor, @RequestParam String tipoComprobante,
              @RequestParam String serieDocumento, @RequestParam Integer numeroDocumento);
@@ -140,17 +140,17 @@ public interface PaymentVoucherFeign {
     @GetMapping("/api/invoice-sp/error-catalog")
     public Error findFirst1ByCodeAndDocument(@RequestParam String codigoRespuesta, @RequestParam String tipoDocumento);
 
-    @GetMapping("/api/invoice-sp/payment-voucher/id-documento")
+    @GetMapping("/api/payment-voucher/id-document")
     public PaymentVoucher getIdentificadorDocument(@RequestParam String idDocumento);
 
-    @PutMapping("/api/invoice-sp/payment-voucher/state-3")
+    @PutMapping("/api/payment-voucher/state-3")
     public int updateStateToSendSunatForVoidedDocuments(
             @RequestParam List<String> identificadorComprobantes,
             @RequestParam String estadoPendienteAnulacion,
             @RequestParam String usuario,
             @RequestParam Timestamp fechaModificacion);
 
-    @GetMapping("/api/invoice-sp/payment-voucher/idpaymentvoucheranduuid")
+    @GetMapping("/api/payment-voucher/idpaymentvoucheranduuid")
     public PaymentVoucher findByIdPaymentVoucherAndUuid(@RequestParam Long id, @RequestParam String uuid);
 
 }

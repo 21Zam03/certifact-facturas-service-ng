@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.deserializer;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
-import com.certicom.certifact_facturas_service_ng.exceptions.DeserializadorException;
+import com.certicom.certifact_facturas_service_ng.exceptions.DeserializerException;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.fasterxml.jackson.core.JacksonException;
@@ -95,7 +95,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 cantidad = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + cantidadLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -134,7 +134,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 valorUnitario = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorUnitarioLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -144,7 +144,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 valorVenta = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorVentaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -154,7 +154,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 descuento = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + descuentoLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -167,7 +167,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 precioVentaUnitario = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + precioVentaUnitarioLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -177,7 +177,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 valorReferencialUnitario = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorReferencialUnitarioLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -187,7 +187,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 montoBaseIgv = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIgvLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(montoBaseIvapLabel);
@@ -196,7 +196,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 montoBaseIvap = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIvapLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(montoBaseExportacionLabel);
@@ -205,7 +205,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 montoBaseExportacion = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseExportacionLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(montoBaseExoneradoLabel);
@@ -214,7 +214,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 montoBaseExonerado = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseExoneradoLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(montoBaseInafectoLabel);
@@ -223,7 +223,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 montoBaseInafecto = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseInafectoLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(montoBaseGratuitoLabel);
@@ -232,7 +232,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 montoBaseGratuito = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseGratuitoLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(montoBaseIscLabel);
@@ -241,7 +241,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 montoBaseIsc = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIscLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(montoBaseIcbperLabel);
@@ -250,7 +250,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 montoBaseIcbper = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIscLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(montoIcbperLabel);
@@ -259,7 +259,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 montoIcbper = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseIscLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(montoBaseOtrosTributosLabel);
@@ -268,7 +268,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 montoBaseOtrosTributos = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoBaseOtrosTributosLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -278,7 +278,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 igv = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + igvLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(ivapLabel);
@@ -287,7 +287,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 ivap = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + ivapLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(impuestoVentaGratuitaLabel);
@@ -296,7 +296,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 impuestoVentaGratuita = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + impuestoVentaGratuitaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(otrosTributosLabel);
@@ -305,7 +305,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 otrosTributos = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + otrosTributosLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -315,7 +315,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 porcentajeIgv = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeIgvLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(porcentajeIvapLabel);
@@ -324,7 +324,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 porcentajeIvap = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeIvapLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(porcentajeIscLabel);
@@ -333,7 +333,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 porcentajeIsc = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeIscLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(porcentajeOtrosTributosLabel);
@@ -342,7 +342,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 porcentajeOtrosTributos = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeOtrosTributosLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(porcentajeTributoVentaGratuitaLabel);
@@ -351,7 +351,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 porcentajeTributoVentaGratuita = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeTributoVentaGratuitaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -361,7 +361,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 isc = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + iscLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(tipoCalculoISCLabel);
@@ -393,7 +393,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 valorServicioTransporte = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorServicioTransporteLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -403,7 +403,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 valorCargaEfectiva = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorCargaEfectivaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -413,7 +413,7 @@ public class ComprobanteItemDeserializer extends CamposEntrada<ComprobanteItem> 
                 valorCargaUtil = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + valorCargaUtilLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 

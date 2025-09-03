@@ -6,7 +6,6 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.certicom.certifact_facturas_service_ng.model.Company;
-import com.certicom.certifact_facturas_service_ng.model.RegisterFileUploadDto;
 import com.certicom.certifact_facturas_service_ng.model.RegisterFileUpload;
 import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
@@ -27,6 +26,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
+import java.sql.SQLOutput;
 import java.util.UUID;
 
 @Service
@@ -157,10 +157,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
 
             watch.stop();
             log.info(String.format("%s %s %s", "Tiempo de Subida de archivo:", nameFile, watch.getTime()));
-
             return resp;
-
-
         } catch (Exception ex) {
             ex.printStackTrace();
             log.error("error [" + ex.getMessage() + "] occurred while uploading [" + nameFile + "] ");

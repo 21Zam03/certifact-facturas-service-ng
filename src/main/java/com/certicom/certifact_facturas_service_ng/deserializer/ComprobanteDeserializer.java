@@ -2,7 +2,7 @@ package com.certicom.certifact_facturas_service_ng.deserializer;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
-import com.certicom.certifact_facturas_service_ng.exceptions.DeserializadorException;
+import com.certicom.certifact_facturas_service_ng.exceptions.DeserializerException;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.fasterxml.jackson.core.JacksonException;
@@ -135,7 +135,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
         if (campoTrama != null) {
             if (!campoTrama.isTextual()) {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + "1 [" + tipoComprobanteLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             } else {
                 tipoComprobante = campoTrama.textValue();
             }
@@ -145,7 +145,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
         if (campoTrama != null) {
             if (!campoTrama.isTextual()) {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + " 2[" + serieLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             } else {
                 serieDocumento = campoTrama.textValue();
             }
@@ -157,7 +157,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 numeroDocumento = campoTrama.intValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_INTEGER + "[" + numeroLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(fechaEmisionLabel);
@@ -176,7 +176,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 tipoTransaccion = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_INTEGER + "[" + tipoTransaccionLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(montoPendienteLabel);
@@ -185,7 +185,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 montoPendiente = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_INTEGER + "[" + montoPendienteLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(cantidadCuotasLabel);
@@ -194,7 +194,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 cantidadCuotas = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_INTEGER + "[" + cantidadCuotasLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(pagoCuentaLabel);
@@ -203,7 +203,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 pagoCuenta = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_INTEGER + "[" + pagoCuentaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -282,7 +282,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 porcentajeDetraccion = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeDetraccionLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -298,7 +298,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 totalValorVentaExportacion = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + totalValorVentaExportacionlabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(totalValorVentaGravadaLabel);
@@ -310,7 +310,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
             } else {
 
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + totalValorVentaGravadaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(totalValorBaseOtrosTributosLabel);
@@ -319,7 +319,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 totalValorBaseOtrosTributos = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + totalValorBaseOtrosTributosLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(totalValorBaseIscLabel);
@@ -328,7 +328,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 totalValorBaseIsc = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + totalValorBaseIscLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(totalImpOperGratuitaLabel);
@@ -337,7 +337,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 totalImpOperacionGratuita = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + totalImpOperGratuitaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(totalValorVentaInafectaLabel);
@@ -346,7 +346,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 totalValorVentaInafecta = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + totalValorVentaInafectaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(totalValorVentaExoneradaLabel);
@@ -355,7 +355,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 totalValorVentaExonerada = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + totalValorVentaExoneradaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(totalValorVentaGratuitaLabel);
@@ -364,7 +364,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 totalValorVentaGratuita = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + totalValorVentaGratuitaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(totalValorVentaGravadaIVAPLabel);
@@ -373,7 +373,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 totalValorVentaGravadaIVAP = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + totalValorVentaGravadaIVAPLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(totalDescuentoLabel);
@@ -393,7 +393,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 totalIgv = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + totalIgvLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(totalIscLabel);
@@ -402,7 +402,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 totalIsc = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + totalIscLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(totalOtrostributosLabel);
@@ -411,7 +411,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 totalOtrostributos = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + totalOtrostributosLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -421,7 +421,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 descuentoGlobales = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + descuentoGlobalesLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(totalOtrosCargosLabel);
@@ -434,7 +434,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
 
                 } else {
                     mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER +" "+ campoTrama +"[" + totalOtrosCargosLabel + "]";
-                    throw new DeserializadorException(mensajeError);
+                    throw new DeserializerException(mensajeError);
                 }
             }
 
@@ -445,7 +445,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 importeTotalVenta = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + importeTotalLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -457,7 +457,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 numeroAfectado = campoTrama.intValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_INTEGER + "[" + numeroAfectadoLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -574,7 +574,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 porcentajeDetraccion = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeDetraccionLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
         campoTrama = trama.get(porcentajeRetencionLabel);
@@ -583,7 +583,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 porcentajeRetencion = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + porcentajeRetencionLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -593,7 +593,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 montoDetraccion = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoDetraccionLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 
@@ -603,7 +603,7 @@ public class ComprobanteDeserializer extends CamposEntrada<PaymentVoucherRequest
                 montoRetencion = campoTrama.decimalValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_ERROR_DESERIALIZACION_NUMBER + "[" + montoRetencionLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 

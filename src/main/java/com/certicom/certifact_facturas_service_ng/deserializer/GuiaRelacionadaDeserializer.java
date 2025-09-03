@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.deserializer;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.GuiaRelacionada;
-import com.certicom.certifact_facturas_service_ng.exceptions.DeserializadorException;
+import com.certicom.certifact_facturas_service_ng.exceptions.DeserializerException;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.fasterxml.jackson.core.JacksonException;
@@ -33,7 +33,7 @@ public class GuiaRelacionadaDeserializer extends CamposEntrada<GuiaRelacionada> 
         if (campoTrama != null) {
             if (!campoTrama.isTextual()) {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + "24[" + codigoTipoGuiaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             } else {
                 codigoTipoGuia = campoTrama.textValue();
             }
@@ -42,7 +42,7 @@ public class GuiaRelacionadaDeserializer extends CamposEntrada<GuiaRelacionada> 
         if (campoTrama != null && !campoTrama.isNull()) {
             if (!campoTrama.isTextual()) {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + "25[" + serieNumeroGuiaLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             } else {
                 serieNumeroGuia = campoTrama.textValue();
             }
@@ -53,7 +53,7 @@ public class GuiaRelacionadaDeserializer extends CamposEntrada<GuiaRelacionada> 
                 idguiaremision = campoTrama.longValue();
             } else {
                 mensajeError = ConstantesParameter.MSG_RESP_ERROR_DESERIALIZACION_STRING + "26[" + idguiaremisionLabel + "]";
-                throw new DeserializadorException(mensajeError);
+                throw new DeserializerException(mensajeError);
             }
         }
 

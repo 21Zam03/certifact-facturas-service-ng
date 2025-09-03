@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(DeserializadorException.class)
-    public ResponseEntity<ErrorResponse> handleDeserializadorException(DeserializadorException ex) {
+    @ExceptionHandler(DeserializerException.class)
+    public ResponseEntity<ErrorResponse> handleDeserializadorException(DeserializerException ex) {
         return ResponseEntity.badRequest().body(ErrorResponse.builder()
                         .code("DESERIALIZATION_ERROR")
                         .message(ex.getMessage())

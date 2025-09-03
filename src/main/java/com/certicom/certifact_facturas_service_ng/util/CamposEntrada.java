@@ -5,6 +5,17 @@ import org.springframework.beans.factory.annotation.Value;
 
 public abstract class CamposEntrada<T> extends JsonDeserializer<T> {
 
+    @Value("${json.annular.input.numeroDocumento}")
+    protected String numeroToAnularLabel;
+    @Value("${json.annular.input.serieDocumento}")
+    protected String serieToAnularLabel;
+    @Value("${json.annular.input.tipoComprobante}")
+    protected String tipoComprobanteToAnularLabel;
+    @Value("${json.annular.input.tipoComprobanteRelacionado}")
+    protected String tipoComprobanteRelacionadoToAnularLabel;
+    @Value("${json.annular.input.motivoAnulacion}")
+    protected String motivoToAnularLabel;
+
     @Value("${json.payment_voucher.input.tipoComprobante}")
     protected String tipoComprobanteLabel;
     @Value("${json.payment_voucher.input.serie}")
