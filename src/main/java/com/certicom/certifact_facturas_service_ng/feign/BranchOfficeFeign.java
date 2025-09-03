@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "facturas-service-sp", url = "http://localhost:8090", contextId = "branchOffices")
 public interface BranchOfficeFeign {
 
-    @GetMapping("/api/invoice-sp/office")
+    @GetMapping("/api/office")
     public BranchOffices obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
             @RequestParam Integer empresaId, @RequestParam String serie, @RequestParam String tipoComprobante
     );

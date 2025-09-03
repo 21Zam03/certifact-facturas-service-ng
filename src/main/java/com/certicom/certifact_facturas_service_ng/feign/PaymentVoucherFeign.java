@@ -114,7 +114,7 @@ public interface PaymentVoucherFeign {
     );
 
     @GetMapping("/api/payment-voucher/id-document")
-    public PaymentVoucher getPaymentVoucherByIdentificadorDocumento(@RequestParam String identificadorDocumento);
+    public PaymentVoucher getPaymentVoucherByIdentificadorDocumento(@RequestParam String idDocumento);
 
     @GetMapping("/api/payment-voucher/number")
     public Integer obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(

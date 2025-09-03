@@ -1,5 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,6 +35,7 @@ public class VoidedDocumentsDto {
     //private List<VoidedFileEntity> voidedFiles;
     private Integer intentosGetStatus;
 
+    @JsonIgnore
     public List<DetailsDocsVoidedDto> getBajaDocumentos() {
         if (this.detailBajaDocumentos == null) {
             this.detailBajaDocumentos = new ArrayList<DetailsDocsVoidedDto>();
@@ -41,6 +43,7 @@ public class VoidedDocumentsDto {
         return this.detailBajaDocumentos;
     }
 
+    @JsonIgnore
     public DetailsDocsVoidedDto addDetailDocsVoided(DetailsDocsVoidedDto detailDocsVoided) {
         getBajaDocumentos().add(detailDocsVoided);
         detailDocsVoided.setVoidedDocument(this);

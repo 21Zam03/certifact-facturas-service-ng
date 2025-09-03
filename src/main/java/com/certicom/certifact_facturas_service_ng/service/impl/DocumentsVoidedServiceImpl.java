@@ -77,11 +77,14 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
             detail.setEstado(ConstantesParameter.REGISTRO_ACTIVO);
             detail.setMotivoBaja(item.getRazon());
             detail.setNumeroItem(item.getNumeroItem());
+            System.out.println("summary");
             documentSummary.addDetailDocsVoided(detail);
-
+            System.out.println("gooo");
             identificadorComprobantes.add(voided.getRucEmisor() + "-" + item.getTipoComprobante() + "-" +
                     item.getSerieDocumento() + "-" + item.getNumeroDocumento());
+            System.out.println("end");
         }
+        System.out.println("end 2");
         documentSummary = voidedDocumentsFeign.save(documentSummary);
 
         paymentVoucherFeign.updateStateToSendSunatForVoidedDocuments(
@@ -89,6 +92,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                 EstadoComprobanteEnum.PENDIENTE_ANULACION.getCodigo(),
                 usuario,
                 fechaEjecucion);
+
         return documentSummary;
     }
 
