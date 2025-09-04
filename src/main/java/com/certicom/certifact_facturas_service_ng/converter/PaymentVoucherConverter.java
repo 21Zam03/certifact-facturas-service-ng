@@ -1,12 +1,12 @@
 package com.certicom.certifact_facturas_service_ng.converter;
 
-import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherModel;
 import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
 
 public class PaymentVoucherConverter {
 
-    public static PaymentVoucher requestToModel(PaymentVoucherRequest paymentVoucherRequest) {
-        return PaymentVoucher.builder()
+    public static PaymentVoucherModel requestToModel(PaymentVoucherRequest paymentVoucherRequest) {
+        return PaymentVoucherModel.builder()
                 .ublVersion("2.1")
                 .rucEmisor(paymentVoucherRequest.getRucEmisor())
                 .tipoComprobante(paymentVoucherRequest.getTipoComprobante())

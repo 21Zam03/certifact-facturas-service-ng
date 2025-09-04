@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @ToString
-public class OseDto {
+public class OseModel {
 
     private Integer Id;
     private String urlFacturas;

@@ -1,9 +1,8 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
-import com.certicom.certifact_facturas_service_ng.model.Error;
-import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.ErrorCatalogModel;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherModel;
 import com.certicom.certifact_facturas_service_ng.dto.others.PaymentVoucherDto;
-import com.certicom.certifact_facturas_service_ng.entity.*;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
@@ -114,7 +113,7 @@ public interface PaymentVoucherFeign {
     );
 
     @GetMapping("/api/payment-voucher/id-document")
-    public PaymentVoucher getPaymentVoucherByIdentificadorDocumento(@RequestParam String idDocumento);
+    public PaymentVoucherModel getPaymentVoucherByIdentificadorDocumento(@RequestParam String idDocumento);
 
     @GetMapping("/api/payment-voucher/number")
     public Integer obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(
@@ -122,26 +121,26 @@ public interface PaymentVoucherFeign {
     );
 
     @PostMapping("/api/payment-voucher")
-    public PaymentVoucher savePaymentVoucher(@RequestBody PaymentVoucher entity);
+    public PaymentVoucherModel savePaymentVoucher(@RequestBody PaymentVoucherModel entity);
 
     @GetMapping("/api/payment-voucher/parameters")
-    public PaymentVoucher findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
+    public PaymentVoucherModel findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
             @RequestParam String rucEmisor, @RequestParam String tipoComprobante,
             @RequestParam String serie, @RequestParam Integer numero);
 
     @GetMapping("/api/payment-voucher/{id}")
-    public PaymentVoucher findPaymentVoucherById(@PathVariable Long id);
+    public PaymentVoucherModel findPaymentVoucherById(@PathVariable Long id);
 
     @GetMapping("/api/payment-voucher/parameters-dto")
-    public PaymentVoucher findPaymentVoucherByRucAndTipoComprobanteAndSerieDocumentoAndNumeroDocumento
+    public PaymentVoucherModel findPaymentVoucherByRucAndTipoComprobanteAndSerieDocumentoAndNumeroDocumento
             (@RequestParam String finalRucEmisor, @RequestParam String tipoComprobante,
              @RequestParam String serieDocumento, @RequestParam Integer numeroDocumento);
 
     @GetMapping("/api/invoice-sp/error-catalog")
-    public Error findFirst1ByCodeAndDocument(@RequestParam String codigoRespuesta, @RequestParam String tipoDocumento);
+    public ErrorCatalogModel findFirst1ByCodeAndDocument(@RequestParam String codigoRespuesta, @RequestParam String tipoDocumento);
 
     @GetMapping("/api/payment-voucher/id-document")
-    public PaymentVoucher getIdentificadorDocument(@RequestParam String idDocumento);
+    public PaymentVoucherModel getIdentificadorDocument(@RequestParam String idDocumento);
 
     @PutMapping("/api/payment-voucher/state-3")
     public int updateStateToSendSunatForVoidedDocuments(
@@ -151,6 +150,6 @@ public interface PaymentVoucherFeign {
             @RequestParam Timestamp fechaModificacion);
 
     @GetMapping("/api/payment-voucher/idpaymentvoucheranduuid")
-    public PaymentVoucher findByIdPaymentVoucherAndUuid(@RequestParam Long id, @RequestParam String uuid);
+    public PaymentVoucherModel findByIdPaymentVoucherAndUuid(@RequestParam Long id, @RequestParam String uuid);
 
 }

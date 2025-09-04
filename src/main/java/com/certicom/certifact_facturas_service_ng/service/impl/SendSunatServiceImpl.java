@@ -11,9 +11,9 @@ import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
 import com.certicom.certifact_facturas_service_ng.feign.ErrorCatalogFeign;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
 import com.certicom.certifact_facturas_service_ng.feign.VoidedDocumentsFeign;
-import com.certicom.certifact_facturas_service_ng.model.GetStatusCdrDto;
-import com.certicom.certifact_facturas_service_ng.model.OseDto;
-import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.dto.others.GetStatusCdrDto;
+import com.certicom.certifact_facturas_service_ng.model.OseModel;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherModel;
 import com.certicom.certifact_facturas_service_ng.service.SendSunatService;
 import com.certicom.certifact_facturas_service_ng.service.TemplateService;
 import com.certicom.certifact_facturas_service_ng.templates.sunat.RequestSunatTemplate;
@@ -68,31 +68,31 @@ public class SendSunatServiceImpl implements SendSunatService {
     private String endPointConsultaCDR;
 
     @Override
-    public PaymentVoucher prepareComprobanteForEnvioSunatInter(String finalRucEmisor, String tipoComprobante, String serieDocumento, Integer numeroDocumento) throws ServiceException {
-        PaymentVoucher paymentVoucher = paymentVoucherFeign.
+    public PaymentVoucherModel prepareComprobanteForEnvioSunatInter(String finalRucEmisor, String tipoComprobante, String serieDocumento, Integer numeroDocumento) throws ServiceException {
+        PaymentVoucherModel paymentVoucherModel = paymentVoucherFeign.
                 findPaymentVoucherByRucAndTipoComprobanteAndSerieDocumentoAndNumeroDocumento(finalRucEmisor, tipoComprobante, serieDocumento, numeroDocumento);
 
-        if (paymentVoucher == null)
+        if (paymentVoucherModel == null)
             throw new ServiceException(String.format("%s [%s-%s-%s-%s]", "El comprobante que desea enviar a la Sunat, no existe: ", finalRucEmisor, tipoComprobante, serieDocumento, numeroDocumento != null ? numeroDocumento.toString() : ""));
-        System.out.println("RESULTA: "+ paymentVoucher.toString());
-        if (paymentVoucher.getEstadoSunat().equals(EstadoSunatEnum.ACEPTADO.getAbreviado()))
+        System.out.println("RESULTA: "+ paymentVoucherModel.toString());
+        if (paymentVoucherModel.getEstadoSunat().equals(EstadoSunatEnum.ACEPTADO.getAbreviado()))
             throw new ServiceException("Este comprobante ya se encuentra aceptado en Sunat.");
 
-        if (paymentVoucher.getEstadoSunat().equals(EstadoSunatEnum.ANULADO.getAbreviado()))
+        if (paymentVoucherModel.getEstadoSunat().equals(EstadoSunatEnum.ANULADO.getAbreviado()))
             throw new ServiceException("Este comprobante se encuentra anulado en Sunat.");
 
-        if (paymentVoucher.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_BOLETA))
+        if (paymentVoucherModel.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_BOLETA))
             throw new ServiceException("Por este metodo solo se permite enviar Facturas, Notas de crédito y Débito.");
 
 
-        if (paymentVoucher.getTipoComprobanteAfectado() != null) {
+        if (paymentVoucherModel.getTipoComprobanteAfectado() != null) {
             if (
-                    (paymentVoucher.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO))
+                    (paymentVoucherModel.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO))
             ) {
                 throw new ServiceException("Por este metodo solo se permite enviar Notas de crédito y Débito asociadas a Facturas, las notas asociadas a boletas se deben enviar por resumen diario.");
             }
         }
-        return paymentVoucher;
+        return paymentVoucherModel;
     }
 
     @Override
@@ -105,7 +105,7 @@ public class SendSunatServiceImpl implements SendSunatService {
             System.out.println("--------------");
 
             ResponseServer responseServer = null;
-            OseDto ose = companyFeign.findOseByRucInter(rucEmisor);
+            OseModel ose = companyFeign.findOseByRucInter(rucEmisor);
             System.out.println("OSE: "+ose);
             if (ose != null) {
                 if (ose.getId() == 1) {
@@ -162,7 +162,7 @@ public class SendSunatServiceImpl implements SendSunatService {
             String formatSoap = obtenerStatusCdr(statusDto,rucEmisor);
 
             ResponseServer responseServer = null;
-            OseDto ose = companyFeign.findOseByRucInter(rucEmisor);
+            OseModel ose = companyFeign.findOseByRucInter(rucEmisor);
             if (ose != null) {
                 if (ose.getId()==1) {
                     responseServer = send(
@@ -235,7 +235,7 @@ public class SendSunatServiceImpl implements SendSunatService {
                     ConstantesParameter.TAG_SEND_SUMMARY_TICKET
             );*/
             ResponseServer responseServer = null;
-            OseDto ose = companyFeign.findOseByRucInter(rucEmisor);
+            OseModel ose = companyFeign.findOseByRucInter(rucEmisor);
             if (ose != null) {
                 if (ose.getId()==1){
 
@@ -312,7 +312,7 @@ public class SendSunatServiceImpl implements SendSunatService {
     }
 
     private String obtenerFormatBuildSendSumary(String ruc, String fileName, String contentFileBase64) {
-        OseDto ose = companyFeign.findOseByRucInter(ruc);
+        OseModel ose = companyFeign.findOseByRucInter(ruc);
         String formato = "";
         if (ose != null) {
             if (ose.getId()==1){
@@ -331,7 +331,7 @@ public class SendSunatServiceImpl implements SendSunatService {
     }
 
     private String obtenerFormat(String ruc, String fileName, String contentFileBase64) {
-        OseDto ose = companyFeign.findOseByRucInter(ruc);
+        OseModel ose = companyFeign.findOseByRucInter(ruc);
         String formato = "";
         if (ose != null) {
             if (ose.getId()==1){
@@ -403,7 +403,7 @@ public class SendSunatServiceImpl implements SendSunatService {
     }
 
     private String obtenerEndPointSunat(String ruc) {
-        OseDto ose = companyFeign.findOseByRucInter(ruc);
+        OseModel ose = companyFeign.findOseByRucInter(ruc);
         if (ose != null && ose.getId()!=10) {
             return ose.getUrlFacturas();
         } else {
@@ -585,7 +585,7 @@ public class SendSunatServiceImpl implements SendSunatService {
     }
 
     private String obtenerStatusCdr(GetStatusCdrDto statusDto, String ruc) {
-        OseDto ose = companyFeign.findOseByRucInter(ruc);
+        OseModel ose = companyFeign.findOseByRucInter(ruc);
         String statusstring = "";
         if (ose != null) {
             if (ose.getId()==1){

@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
-import com.certicom.certifact_facturas_service_ng.model.BranchOffices;
+import com.certicom.certifact_facturas_service_ng.model.BranchOfficesModel;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface BranchOfficeFeign {
 
     @GetMapping("/api/office")
-    public BranchOffices obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
+    public BranchOfficesModel obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
             @RequestParam Integer empresaId, @RequestParam String serie, @RequestParam String tipoComprobante
     );
 

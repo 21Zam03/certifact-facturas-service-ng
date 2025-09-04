@@ -1,4 +1,4 @@
-package com.certicom.certifact_facturas_service_ng.model;
+package com.certicom.certifact_facturas_service_ng.dto.others;
 
 import lombok.*;
 

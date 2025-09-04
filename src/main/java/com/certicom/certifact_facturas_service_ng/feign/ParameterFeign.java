@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
-import com.certicom.certifact_facturas_service_ng.model.Parameter;
+import com.certicom.certifact_facturas_service_ng.model.ParameterModel;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -9,6 +9,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface ParameterFeign {
 
     @GetMapping("/api/parameter/name")
-    Parameter findByName(@RequestParam String name);
+    ParameterModel findByName(@RequestParam String name);
 
 }

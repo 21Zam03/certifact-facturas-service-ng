@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.entity;
 
-import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherFile;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherFileModel;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -103,7 +103,7 @@ public class PaymentVoucherEntity {
     private Integer oficinaId;
 
     private BranchOfficeEntity branchOfficeEntity;
-    private List<PaymentVoucherFile> paymentVoucherFileList;
+    private List<PaymentVoucherFileModel> paymentVoucherFileModelList;
     private List<DetailsPaymentVoucherEntity> detailsPaymentVoucherEntityList;
     private List<AnticipoEntity> anticipoEntityList;
     private List<CuotasPaymentVoucherEntity> cuotasEntityList;

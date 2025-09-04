@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Parameter {
+public class ParameterModel {
 
     private Integer idParameter;
     private String name;

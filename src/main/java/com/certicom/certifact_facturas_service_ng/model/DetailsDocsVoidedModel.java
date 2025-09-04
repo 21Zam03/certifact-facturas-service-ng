@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class DetailsDocsVoidedDto {
+public class DetailsDocsVoidedModel {
 
     private Long idDetailDocsSummary;
     private Integer numeroItem;

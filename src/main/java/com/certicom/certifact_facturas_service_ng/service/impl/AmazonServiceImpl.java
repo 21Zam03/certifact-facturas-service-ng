@@ -5,8 +5,8 @@ import com.amazonaws.services.s3.model.GetObjectRequest;
 import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
-import com.certicom.certifact_facturas_service_ng.model.Company;
-import com.certicom.certifact_facturas_service_ng.model.RegisterFileUpload;
+import com.certicom.certifact_facturas_service_ng.model.CompanyModel;
+import com.certicom.certifact_facturas_service_ng.model.RegisterFileUploadModel;
 import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
@@ -26,7 +26,6 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
-import java.sql.SQLOutput;
 import java.util.UUID;
 
 @Service
@@ -46,12 +45,12 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
     private String baseUrl;
 
     @Override
-    public RegisterFileUpload subirArchivoAlStorage(InputStream inputStream, String nameFile, String folder, Company company) {
+    public RegisterFileUploadModel subirArchivoAlStorage(InputStream inputStream, String nameFile, String folder, CompanyModel companyModel) {
         System.out.println("NOMBRE DEL ARCHIVO "+nameFile);
         String periodo = UtilDate.dateNowToString("MMyyyy ");
 
         String fileNameKey = String.format("%s-%s", UUID.randomUUID(), nameFile);
-        String bucket = String.format("%s/archivos/%s/%s/%s", this.bucketName, company.getRuc(), folder, periodo);
+        String bucket = String.format("%s/archivos/%s/%s/%s", this.bucketName, companyModel.getRuc(), folder, periodo);
 
         try {
 
@@ -73,11 +72,11 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
 
             this.s3client.putObject(putObjectRequest);
 
-            RegisterFileUpload resp = registerFileUploadFeign.saveRegisterFileUpload(RegisterFileUpload.builder()
+            RegisterFileUploadModel resp = registerFileUploadFeign.saveRegisterFileUpload(RegisterFileUploadModel.builder()
                     .bucket(bucket)
                     .nombreGenerado(fileNameKey)
                     .nombreOriginal(nameFile)
-                    .codCompany(company.getId())
+                    .codCompany(companyModel.getId())
                     .build());
             watch.stop();
             log.info(String.format("%s %s %s", "Tiempo de Subida de archivo:", nameFile, watch.getTime()));
@@ -90,12 +89,12 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
     }
 
     @Override
-    public String downloadFileStorageInB64(RegisterFileUpload fileStorage) {
+    public String downloadFileStorageInB64(RegisterFileUploadModel fileStorage) {
         return UtilArchivo.binToB64(downloadFileStorageDto(fileStorage));
     }
 
     @Override
-    public ByteArrayInputStream downloadFileStorageDto(RegisterFileUpload fileStorage) {
+    public ByteArrayInputStream downloadFileStorageDto(RegisterFileUploadModel fileStorage) {
         String bucket, name;
         if (fileStorage == null ) {
             return new ByteArrayInputStream(new byte[0]);
@@ -120,12 +119,12 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
     }
 
     @Override
-    public RegisterFileUpload uploadFileStorage(InputStream inputStream, String nameFile, String folder, Company company) {
+    public RegisterFileUploadModel uploadFileStorage(InputStream inputStream, String nameFile, String folder, CompanyModel companyModel) {
         System.out.println("NOMBRE DEL ARCHIVO "+nameFile);
         String periodo = UtilDate.dateNowToString("MMyyyy ");
 
         String fileNameKey = String.format("%s-%s", UUID.randomUUID(), nameFile);
-        String bucket = String.format("%s/archivos/%s/%s/%s", this.bucketName, company.getRuc(), folder, periodo);
+        String bucket = String.format("%s/archivos/%s/%s/%s", this.bucketName, companyModel.getRuc(), folder, periodo);
 
         try {
 
@@ -146,12 +145,12 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
             PutObjectRequest putObjectRequest = new PutObjectRequest(bucket, fileNameKey, inputStream, metadata);
 
             this.s3client.putObject(putObjectRequest);
-            RegisterFileUpload resp = registerFileUploadFeign.saveRegisterFileUpload(
-                    RegisterFileUpload.builder()
+            RegisterFileUploadModel resp = registerFileUploadFeign.saveRegisterFileUpload(
+                    RegisterFileUploadModel.builder()
                             .bucket(bucket)
                             .nombreGenerado(fileNameKey)
                             .nombreOriginal(nameFile)
-                            .codCompany(company.getId())
+                            .codCompany(companyModel.getId())
                             .build()
             );
 
@@ -168,12 +167,12 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
     @Override
     public ByteArrayInputStream downloadFileInvoice(Long id, String uuid, TipoArchivoEnum tipoArchivoEnum) {
         String tipo = tipoArchivoEnum.name();
-        RegisterFileUpload registerFileUploadInterDto = registerFileUploadFeign.findByIdPaymentVoucherAndUuidTipo(id, uuid, tipo);
-        return downloadFileStorageInter(registerFileUploadInterDto);
+        RegisterFileUploadModel registerFileUploadModelInterDto = registerFileUploadFeign.findByIdPaymentVoucherAndUuidTipo(id, uuid, tipo);
+        return downloadFileStorageInter(registerFileUploadModelInterDto);
     }
 
     @Override
-    public ByteArrayInputStream downloadFileStorageInter(RegisterFileUpload fileStorage) {
+    public ByteArrayInputStream downloadFileStorageInter(RegisterFileUploadModel fileStorage) {
         String bucket, name;
         if (fileStorage == null ) {
             return new ByteArrayInputStream(new byte[0]);

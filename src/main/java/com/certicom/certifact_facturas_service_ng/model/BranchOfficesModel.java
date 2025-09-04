@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class BranchOffices {
+public class BranchOfficesModel {
 
     private Integer id;
     private Long codCompany;

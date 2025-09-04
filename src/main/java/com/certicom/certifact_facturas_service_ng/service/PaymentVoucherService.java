@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.service;
 
-import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherModel;
 
 import java.util.Map;
 
@@ -12,8 +12,10 @@ public interface PaymentVoucherService {
             Integer pageNumber, Integer perPage, Integer estadoSunat, Long idUsuario);
 
     /*METODO PARA GUARDAR O EDITAR UN COMPROBANTE*/
-    Map<String, Object> generatePaymentVoucher(
-            PaymentVoucher paymentVoucher, boolean isEdit, Long idUsuario
-    );
+    Map<String, Object> generatePaymentVoucher(PaymentVoucherModel paymentVoucherModel, boolean isEdit, Long idUsuario);
+
+    Map<String, Object> createPaymentVoucher(PaymentVoucherModel paymentVoucherModel, Long idUsuario);
+
+    Map<String, Object> updatePaymentVoucher(PaymentVoucherModel paymentVoucherModel, Long idUsuario);
 
 }

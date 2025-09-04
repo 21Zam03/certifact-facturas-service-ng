@@ -1,14 +1,14 @@
 package com.certicom.certifact_facturas_service_ng.service;
 
-import com.certicom.certifact_facturas_service_ng.model.GetStatusCdrDto;
-import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.dto.others.GetStatusCdrDto;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherModel;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
 
 
 public interface SendSunatService {
 
-    PaymentVoucher prepareComprobanteForEnvioSunatInter(String ruc, String tipo, String serie, Integer numero) throws ServiceException;
+    PaymentVoucherModel prepareComprobanteForEnvioSunatInter(String ruc, String tipo, String serie, Integer numero) throws ServiceException;
     ResponseSunat sendBillPaymentVoucher(String fileName, String contentFileBase64, String rucEmisor);
     ResponseSunat getStatusCDR(GetStatusCdrDto statusDto, String rucEmisor);
 

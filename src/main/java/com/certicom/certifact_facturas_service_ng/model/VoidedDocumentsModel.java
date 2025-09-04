@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class VoidedDocumentsDto {
+public class VoidedDocumentsModel {
 
     private Long idDocumentVoided;
     private Integer correlativoGeneracionDia;
@@ -33,36 +33,41 @@ public class VoidedDocumentsDto {
     private String estadoComprobante;
     private Integer intentosGetStatus;
 
-    private List<DetailsDocsVoidedDto> detailBajaDocumentos;
-    private List<VoidedFileDto> voidedFiles;
+    private List<DetailsDocsVoidedModel> detailBajaDocumentos;
+    private List<VoidedFileModel> voidedFileModels;
 
     @JsonIgnore
-    public List<DetailsDocsVoidedDto> getOrCreateDocumentos() {
+    public List<DetailsDocsVoidedModel> getOrCreateDocumentos() {
         if (this.detailBajaDocumentos == null) {
-            this.detailBajaDocumentos = new ArrayList<DetailsDocsVoidedDto>();
+            this.detailBajaDocumentos = new ArrayList<DetailsDocsVoidedModel>();
         }
         return this.detailBajaDocumentos;
     }
 
     @JsonIgnore
-    public List<VoidedFileDto> getOrCreateVoidedFiles() {
-        if(this.voidedFiles == null) {
-            this.voidedFiles = new ArrayList<>();
+    public List<VoidedFileModel> getOrCreateVoidedFiles() {
+        if(this.voidedFileModels == null) {
+            this.voidedFileModels = new ArrayList<>();
         }
-        return this.voidedFiles;
+        return this.voidedFileModels;
     }
 
     @JsonIgnore
-    public DetailsDocsVoidedDto addDetailDocsVoided(DetailsDocsVoidedDto detailDocsVoided) {
+    public DetailsDocsVoidedModel addDetailDocsVoided(DetailsDocsVoidedModel detailDocsVoided) {
         getOrCreateDocumentos().add(detailDocsVoided);
         //detailDocsVoided.setVoidedDocument(this);
         return detailDocsVoided;
     }
 
     @JsonIgnore
-    public void addVoidFile(VoidedFileDto voidedFileDto) {
-        getOrCreateVoidedFiles().add(voidedFileDto);
-        this.voidedFiles.add(voidedFileDto);
+    public void addVoidFile(VoidedFileModel voidedFileModel) {
+        System.out.println("voided file dto: "+ voidedFileModel);
+        if (getOrCreateVoidedFiles().isEmpty()) {
+            voidedFileModel.setOrden(1);
+        } else {
+            voidedFileModel.setOrden(getOrCreateVoidedFiles().size()+1);
+        }
+        getOrCreateVoidedFiles().add(voidedFileModel);
     }
 
 }

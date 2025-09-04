@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.controller;
 
 import com.certicom.certifact_facturas_service_ng.converter.PaymentVoucherConverter;
-import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherModel;
 import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
@@ -21,7 +21,7 @@ import java.util.Map;
 @Slf4j
 public class PaymentVoucherController {
 
-    public static final String API_PATH = "/api/payment-voucher";
+    public static final String API_PATH = "/api/v1/facturas";
     private final PaymentVoucherService paymentVoucherService;
     private final PaymentVoucherValidator paymentVoucherValidator;
 
@@ -50,9 +50,9 @@ public class PaymentVoucherController {
     public ResponseEntity<?> savePaymentVoucher(@RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest) {
         Long idUsuario = 2L;
         watchLog(paymentVoucherRequest);
-        PaymentVoucher paymentVoucher = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);
-        paymentVoucherValidator.validate(paymentVoucher, false);
-        Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucher, false, idUsuario);
+        PaymentVoucherModel paymentVoucherModel = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);
+        paymentVoucherValidator.validate(paymentVoucherModel, false);
+        Map<String, Object> result = paymentVoucherService.createPaymentVoucher(paymentVoucherModel, idUsuario);
         return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
         //return new ResponseEntity<>("TEST", HttpStatus.OK);
     }
@@ -61,9 +61,9 @@ public class PaymentVoucherController {
     public ResponseEntity<?> editPaymentVoucher(@RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest) {
         Long idUsuario = 2L;
         watchLog(paymentVoucherRequest);
-        PaymentVoucher paymentVoucher = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);
-        paymentVoucherValidator.validate(paymentVoucher, true);
-        Map<String, Object> result = paymentVoucherService.generatePaymentVoucher(paymentVoucher, true, idUsuario);
+        PaymentVoucherModel paymentVoucherModel = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);
+        paymentVoucherValidator.validate(paymentVoucherModel, true);
+        Map<String, Object> result = paymentVoucherService.updatePaymentVoucher(paymentVoucherModel,  idUsuario);
         return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
     }
 

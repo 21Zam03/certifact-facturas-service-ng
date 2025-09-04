@@ -1,10 +1,12 @@
 package com.certicom.certifact_facturas_service_ng.model;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -13,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @ToString
-public class PaymentVoucher {
+public class PaymentVoucherModel {
 
     private Long idPaymentVoucher;
     private String tipoComprobante;
@@ -106,6 +108,24 @@ public class PaymentVoucher {
     private String Uuid;
     private Date fechaEmisionDate;
 
-    private List<PaymentVoucherFile> paymentVoucherFileList;
+    private List<PaymentVoucherFileModel> paymentVoucherFileModelList;
+
+    @JsonIgnore
+    public List<PaymentVoucherFileModel> getOrCreatePaymentVoucherFile() {
+        if (this.paymentVoucherFileModelList == null) {
+            this.paymentVoucherFileModelList = new ArrayList<PaymentVoucherFileModel>();
+        }
+        return this.paymentVoucherFileModelList;
+    }
+
+    @JsonIgnore
+    public void addPaymentVoucherFile(PaymentVoucherFileModel paymentVoucherFileModel) {
+        if (getOrCreatePaymentVoucherFile().isEmpty()) {
+            paymentVoucherFileModel.setOrden(1);
+        } else {
+            paymentVoucherFileModel.setOrden(getOrCreatePaymentVoucherFile().size()+1);
+        }
+        getOrCreatePaymentVoucherFile().add(paymentVoucherFileModel);
+    }
 
 }

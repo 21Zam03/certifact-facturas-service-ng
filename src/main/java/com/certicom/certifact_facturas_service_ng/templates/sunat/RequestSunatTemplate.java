@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.templates.sunat;
 
-import com.certicom.certifact_facturas_service_ng.model.GetStatusCdrDto;
+import com.certicom.certifact_facturas_service_ng.dto.others.GetStatusCdrDto;
 import com.certicom.certifact_facturas_service_ng.util.UtilXml;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;;

@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.controller;
 
-import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherModel;
 import com.certicom.certifact_facturas_service_ng.dto.request.VoucherAnnularRequest;
 import com.certicom.certifact_facturas_service_ng.dto.request.IdentificadorPaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
@@ -35,8 +35,8 @@ public class SunatController {
     public ResponseEntity<?> sendPaymentVoucherToSunat(
             @RequestBody @Valid IdentificadorPaymentVoucherRequest paymentVoucher
     ) {
-        PaymentVoucher paymentVoucherDto = sendSunatService.prepareComprobanteForEnvioSunatInter("20204040303", paymentVoucher.getTipo(), paymentVoucher.getSerie(), paymentVoucher.getNumero());
-        Map<String, Object> result = comunicationSunatService.sendDocumentBill(paymentVoucherDto.getRucEmisor(), paymentVoucherDto.getIdPaymentVoucher());
+        PaymentVoucherModel paymentVoucherModelDto = sendSunatService.prepareComprobanteForEnvioSunatInter("20204040303", paymentVoucher.getTipo(), paymentVoucher.getSerie(), paymentVoucher.getNumero());
+        Map<String, Object> result = comunicationSunatService.sendDocumentBill(paymentVoucherModelDto.getRucEmisor(), paymentVoucherModelDto.getIdPaymentVoucher());
         ResponsePSE resp = (ResponsePSE) result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE);
         if (resp.getEstado()) {
             System.out.println("ENVIAR correo");
@@ -59,8 +59,7 @@ public class SunatController {
                 "20204040303",
                 "demo@certifakt.com.pe", ticketsVoidedProcess);
 
-
-        return new ResponseEntity<>("", HttpStatus.OK);
+        return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
 }

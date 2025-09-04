@@ -9,13 +9,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PaymentVoucherFile {
+public class VoidedFileModel {
 
     private Long id;
     private String tipoArchivo;
     private String estadoArchivo;
-    private Long idPaymentVoucher;
-    private Long idRegisterFileSend;
     private Integer orden;
+    private Long idRegisterFileSend;
+    private Long idDocumentVoided;
+
+    //private RegisterFileUploadEntity registerFileUpload;
+    //private VoidedDocumentsEntity voidedDocument;
 
 }

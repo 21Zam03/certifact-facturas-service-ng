@@ -2,12 +2,10 @@ package com.certicom.certifact_facturas_service_ng.controller;
 
 import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
-import com.certicom.certifact_facturas_service_ng.service.ReportService;
 import com.google.common.io.ByteStreams;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,7 +15,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.ParseException;
 
 @RestController
 @RequestMapping(FileController.API_PATH)
@@ -54,5 +51,6 @@ public class FileController {
                 .contentType(MediaType.parseMediaType("application/zip"))
                 .body(resource);
     }
+
 
 }

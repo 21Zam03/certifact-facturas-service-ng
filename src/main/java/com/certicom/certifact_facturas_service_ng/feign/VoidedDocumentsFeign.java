@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
-import com.certicom.certifact_facturas_service_ng.model.VoidedDocumentsDto;
+import com.certicom.certifact_facturas_service_ng.model.VoidedDocumentsModel;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +16,6 @@ public interface VoidedDocumentsFeign {
             @RequestParam String fechaGeneracionBaja);
 
     @PostMapping("/api/voided-documents")
-    public VoidedDocumentsDto save(@RequestBody VoidedDocumentsDto voidedDocuments);
+    public VoidedDocumentsModel save(@RequestBody VoidedDocumentsModel voidedDocumentsModel);
 
 }

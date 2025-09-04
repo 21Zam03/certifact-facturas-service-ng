@@ -1,5 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
+import com.certicom.certifact_facturas_service_ng.dto.others.Voided;
+import com.certicom.certifact_facturas_service_ng.dto.others.VoidedLine;
 import com.certicom.certifact_facturas_service_ng.dto.request.VoucherAnnularRequest;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
@@ -23,7 +25,6 @@ import com.certicom.certifact_facturas_service_ng.validation.business.VoucherAnn
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.sql.SQLOutput;
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -40,10 +41,10 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
     private final VoucherAnnularValidator voucherAnnularValidator;
 
     @Override
-    public VoidedDocumentsDto registrarVoidedDocuments(Voided voided, Long idRegisterFile, String usuario, String ticket) {
+    public VoidedDocumentsModel registrarVoidedDocuments(Voided voided, Long idRegisterFile, String usuario, String ticket) {
         Date fechaActual = Calendar.getInstance().getTime();
         Timestamp fechaEjecucion = new Timestamp(fechaActual.getTime());
-        VoidedDocumentsDto documentSummary = new VoidedDocumentsDto();
+        VoidedDocumentsModel documentSummary = new VoidedDocumentsModel();
         List<String> identificadorComprobantes = new ArrayList<>();
 
         documentSummary.setEstado(ConstantesParameter.STATE_SUMMARY_VOIDED_DOCUMENTS_IN_PROCESO);
@@ -58,7 +59,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
         documentSummary.setEstadoComprobante(voided.getEstadoComprobante());
 
         documentSummary.addVoidFile(
-                VoidedFileDto.builder()
+                VoidedFileModel.builder()
                         .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
                         .tipoArchivo(TipoArchivoEnum.XML.name())
                         .idRegisterFileSend(idRegisterFile)
@@ -67,7 +68,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
 
         System.out.println("DOCUMENT SUMMARY : " + documentSummary);
         for (VoidedLine item : voided.getLines()) {
-            DetailsDocsVoidedDto detail = new DetailsDocsVoidedDto();
+            DetailsDocsVoidedModel detail = new DetailsDocsVoidedModel();
 
             detail.setSerieDocumento(item.getSerieDocumento());
             detail.setNumeroDocumento(item.getNumeroDocumento());
@@ -80,7 +81,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
             identificadorComprobantes.add(voided.getRucEmisor() + "-" + item.getTipoComprobante() + "-" +
                     item.getSerieDocumento() + "-" + item.getNumeroDocumento());
         }
-        System.out.println("end 2");
+
         documentSummary = voidedDocumentsFeign.save(documentSummary);
 
         paymentVoucherFeign.updateStateToSendSunatForVoidedDocuments(
@@ -107,7 +108,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
             for (VoucherAnnularRequest documento : documents) {
                 String identificadorDocumento = rucEmisor + "-" + documento.getTipoComprobante() + "-" +
                         documento.getSerie().toUpperCase() + "-" + documento.getNumero();
-                PaymentVoucher entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+                PaymentVoucherModel entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
                 System.out.println("VOIDED: "+ entity);
                 if (documento.getRucEmisor()==null){
                     documento.setRucEmisor(rucEmisor);
@@ -123,7 +124,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                         document.getSerie().toUpperCase() + "-" + document.getNumero();
                 System.out.println(identificadorDocumento);
                 boolean noExiste = false;
-                PaymentVoucher entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+                PaymentVoucherModel entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
                 if (entity==null){
                     noExiste=true;
                 }
@@ -168,7 +169,6 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                 }
             }
             for (String fechaEmision : documentosBajaByFechaEmisionFacturasMap.keySet()) {
-                System.out.println("FECHA EMISION: "+fechaEmision);
                 Voided voided = new Voided();
                 List<VoidedLine> lines = new ArrayList<>();
                 voided.setFechaBaja(fechaEmision);
@@ -178,7 +178,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                 for (VoucherAnnularRequest document : anulados) {
                     String identificadorDocumento = rucEmisor + "-" + document.getTipoComprobante() + "-" +
                             document.getSerie().toUpperCase() + "-" + document.getNumero();
-                    PaymentVoucher entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+                    PaymentVoucherModel entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
                     if (entity.getEstado().equals("08") ){
                         if (messageBuilder == null) {
                             messageBuilder = new StringBuilder();
@@ -233,24 +233,24 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
         Map<String, String> templateGenerated;
         StringBuilder messageBuilder = new StringBuilder();
 
-        Company companyEntity = completarDatosVoided(voided,esRetencion);
+        CompanyModel companyModel = completarDatosVoided(voided,esRetencion);
         System.out.println("VOIDED 2: "+voided);
-        if (companyEntity.getOseId() != null && companyEntity.getOseId()==2) {
+        if (companyModel.getOseId() != null && companyModel.getOseId()==2) {
             templateGenerated = templateService.buildVoidedDocumentsSign(voided);
-        } else if (companyEntity.getOseId() != null && (companyEntity.getOseId()==10||companyEntity.getOseId()==12)) {
+        } else if (companyModel.getOseId() != null && (companyModel.getOseId()==10|| companyModel.getOseId()==12)) {
             templateGenerated = templateService.buildVoidedDocumentsSignCerti(voided);
         } else {
             templateGenerated = templateService.buildVoidedDocumentsSign(voided);
         }
         System.out.println("PLANTILLA GENERADA: "+templateGenerated);
         System.out.println("ANULACIONES SUNAT 1 ");
-        System.out.println(companyEntity);
+        System.out.println(companyModel);
 
         fileXMLZipBase64 = templateGenerated.get(ConstantesParameter.PARAM_FILE_ZIP_BASE64);
         nameDocument = templateGenerated.get(ConstantesParameter.PARAM_NAME_DOCUMENT);
         nameDocumentComplete = nameDocument + "." + ConstantesParameter.TYPE_FILE_ZIP;
         System.out.println(nameDocument);
-        responseSunat = sendSunatService.sendSummary(nameDocumentComplete, fileXMLZipBase64,companyEntity.getRuc());
+        responseSunat = sendSunatService.sendSummary(nameDocumentComplete, fileXMLZipBase64, companyModel.getRuc());
 
         System.out.println("ANULACIONES SUNAT 2 ");
         System.out.println(responseSunat);
@@ -278,18 +278,18 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
             System.out.println("RESPUESTA: "+responseSunat.getMessage());
             return resp;
         }
-        RegisterFileUpload file = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(fileXMLZipBase64),
-                nameDocument, "voided", companyEntity);
+        RegisterFileUploadModel file = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(fileXMLZipBase64),
+                nameDocument, "voided", companyModel);
         System.out.println("FILE: "+file);
         voided.setEstadoComprobante(EstadoComprobanteEnum.PROCESO_ENVIO.getCodigo());
-        VoidedDocumentsDto voidedDocumentsEntity = registrarVoidedDocuments(voided, file.getIdRegisterFileSend(), userName, responseSunat.getTicket());
-        System.out.println("VOIDED DOCUMENT RESULT: "+voidedDocumentsEntity);
-        resp.put(ConstantesParameter.PARAM_NUM_TICKET, voidedDocumentsEntity.getTicketSunat());
+        VoidedDocumentsModel voidedDocumentsModelEntity = registrarVoidedDocuments(voided, file.getIdRegisterFileSend(), userName, responseSunat.getTicket());
+        System.out.println("VOIDED DOCUMENT RESULT: "+ voidedDocumentsModelEntity);
+        resp.put(ConstantesParameter.PARAM_NUM_TICKET, voidedDocumentsModelEntity.getTicketSunat());
         resp.put(ConstantesParameter.PARAM_DESCRIPTION, "Se registro correctamente el documento: " + voided.getId());
         return resp;
     }
 
-    private Company completarDatosVoided(Voided voided, boolean esRetencion) {
+    private CompanyModel completarDatosVoided(Voided voided, boolean esRetencion) {
 
         Date fechaActual = Calendar.getInstance().getTime();
         Integer correlativo;
@@ -303,13 +303,13 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                 voided.getRucEmisor(), voided.getFechaGeneracion());
         correlativo++;
         voided.setCorrelativoGeneracionDia(correlativo);
-        Company company = companyFeign.findCompanyByRuc(voided.getRucEmisor());
-        voided.setDenominacionEmisor(company.getRazon());
+        CompanyModel companyModel = companyFeign.findCompanyByRuc(voided.getRucEmisor());
+        voided.setDenominacionEmisor(companyModel.getRazon());
         voided.setTipoDocumentoEmisor(ConstantesSunat.TIPO_DOCUMENTO_IDENTIDAD_RUC);
         voided.setId(baja + "-" +
                 voided.getFechaGeneracion().replace("-", "") +
                 "-" + voided.getCorrelativoGeneracionDia());
 
-        return company;
+        return companyModel;
     }
 }

@@ -1,9 +1,8 @@
 package com.certicom.certifact_facturas_service_ng.validation.business;
 
-import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherModel;
 import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
-import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
 import com.certicom.certifact_facturas_service_ng.exceptions.ValidationException;
 import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
@@ -67,43 +66,43 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
     @Value("${urlspublicas.descargaComprobante}")
     private String urlServiceDownload;
 
-    public void validate(PaymentVoucher paymentVoucher, boolean isEdit) {
+    public void validate(PaymentVoucherModel paymentVoucherModel, boolean isEdit) {
         boolean datosReceptorObligatorio;
 
-        validateRucAtivo(paymentVoucher.getRucEmisor());
-        validateTipoComprobante(paymentVoucher.getTipoComprobante());
-        if (isNotaCreditoODebito(paymentVoucher.getTipoComprobante())) {
-            validateCamposNotaCreditoDebito(paymentVoucher);
+        validateRucAtivo(paymentVoucherModel.getRucEmisor());
+        validateTipoComprobante(paymentVoucherModel.getTipoComprobante());
+        if (isNotaCreditoODebito(paymentVoucherModel.getTipoComprobante())) {
+            validateCamposNotaCreditoDebito(paymentVoucherModel);
         } else {
-            validateTipoDocumentoReceptorFactura(paymentVoucher.getTipoDocumentoReceptor());
+            validateTipoDocumentoReceptorFactura(paymentVoucherModel.getTipoDocumentoReceptor());
         }
-        validateSerie(paymentVoucher.getSerie(), paymentVoucher.getTipoComprobante(), paymentVoucher.getTipoComprobanteAfectado());
-        validateNumero(paymentVoucher.getNumero());
-        validateNumeracion(paymentVoucher.getTipoComprobante(), paymentVoucher.getSerie(), paymentVoucher.getRucEmisor(), paymentVoucher.getNumero());
-        validateIdentificadorDocumento(paymentVoucher.getRucEmisor(), paymentVoucher.getTipoComprobante(), paymentVoucher.getSerie(), paymentVoucher.getNumero(), isEdit);
-        validateFechaEmision(paymentVoucher.getFechaEmision());
-        validateHoraEmision(paymentVoucher.getHoraEmision(), paymentVoucher.getFechaEmision());
-        validateTipoMoneda(paymentVoucher.getCodigoMoneda());
-        validateImporteTotal(paymentVoucher.getImporteTotalVenta());
-        datosReceptorObligatorio = validateObligatoriedadDatosCliente(paymentVoucher.getTipoComprobante(),
-                paymentVoucher.getTipoComprobanteAfectado(), paymentVoucher.getImporteTotalVenta());
-        validateTipoDocumentoReceptor(paymentVoucher.getTipoDocumentoReceptor(), datosReceptorObligatorio);
-        validateNumeroDocumentoReceptor(paymentVoucher.getNumeroDocumentoReceptor(),
-                paymentVoucher.getTipoDocumentoReceptor(), datosReceptorObligatorio);
-        validateDenominacionReceptor(paymentVoucher.getDenominacionReceptor(), datosReceptorObligatorio);
-        validateDomicilioFiscalEmisor(paymentVoucher.getCodigoLocalAnexoEmisor());
-        validateTipoDocumentoRelacionado(paymentVoucher.getCodigoTipoOtroDocumentoRelacionado());
-        validateNumeroDocumentoRelacionado(paymentVoucher.getSerieNumeroOtroDocumentoRelacionado(),
-                paymentVoucher.getCodigoTipoOtroDocumentoRelacionado());
-        validateAnticipos(paymentVoucher.getAnticipos());
-        validateItems(paymentVoucher.getItems(), paymentVoucher.getTipoComprobante(), paymentVoucher.getUblVersion(), paymentVoucher.getRucEmisor());
-        if(paymentVoucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
-            validateTotalIsc(paymentVoucher.getTotalValorBaseIsc(), paymentVoucher.getTotalIsc(), paymentVoucher.getItems());
-            validateTotalGratuita(paymentVoucher.getTotalValorVentaGratuita(), paymentVoucher.getTotalImpOperGratuita(), paymentVoucher.getItems());
-            validateTotalGravada(paymentVoucher.getTotalValorVentaGravada(), paymentVoucher.getTotalIgv(), paymentVoucher.getItems());
-            validateTotalOtrosTributos(paymentVoucher.getTotalValorBaseOtrosTributos(), paymentVoucher.getTotalOtrostributos(), paymentVoucher.getItems());
+        validateSerie(paymentVoucherModel.getSerie(), paymentVoucherModel.getTipoComprobante(), paymentVoucherModel.getTipoComprobanteAfectado());
+        validateNumero(paymentVoucherModel.getNumero());
+        validateNumeracion(paymentVoucherModel.getTipoComprobante(), paymentVoucherModel.getSerie(), paymentVoucherModel.getRucEmisor(), paymentVoucherModel.getNumero());
+        validateIdentificadorDocumento(paymentVoucherModel.getRucEmisor(), paymentVoucherModel.getTipoComprobante(), paymentVoucherModel.getSerie(), paymentVoucherModel.getNumero(), isEdit);
+        validateFechaEmision(paymentVoucherModel.getFechaEmision());
+        validateHoraEmision(paymentVoucherModel.getHoraEmision(), paymentVoucherModel.getFechaEmision());
+        validateTipoMoneda(paymentVoucherModel.getCodigoMoneda());
+        validateImporteTotal(paymentVoucherModel.getImporteTotalVenta());
+        datosReceptorObligatorio = validateObligatoriedadDatosCliente(paymentVoucherModel.getTipoComprobante(),
+                paymentVoucherModel.getTipoComprobanteAfectado(), paymentVoucherModel.getImporteTotalVenta());
+        validateTipoDocumentoReceptor(paymentVoucherModel.getTipoDocumentoReceptor(), datosReceptorObligatorio);
+        validateNumeroDocumentoReceptor(paymentVoucherModel.getNumeroDocumentoReceptor(),
+                paymentVoucherModel.getTipoDocumentoReceptor(), datosReceptorObligatorio);
+        validateDenominacionReceptor(paymentVoucherModel.getDenominacionReceptor(), datosReceptorObligatorio);
+        validateDomicilioFiscalEmisor(paymentVoucherModel.getCodigoLocalAnexoEmisor());
+        validateTipoDocumentoRelacionado(paymentVoucherModel.getCodigoTipoOtroDocumentoRelacionado());
+        validateNumeroDocumentoRelacionado(paymentVoucherModel.getSerieNumeroOtroDocumentoRelacionado(),
+                paymentVoucherModel.getCodigoTipoOtroDocumentoRelacionado());
+        validateAnticipos(paymentVoucherModel.getAnticipos());
+        validateItems(paymentVoucherModel.getItems(), paymentVoucherModel.getTipoComprobante(), paymentVoucherModel.getUblVersion(), paymentVoucherModel.getRucEmisor());
+        if(paymentVoucherModel.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
+            validateTotalIsc(paymentVoucherModel.getTotalValorBaseIsc(), paymentVoucherModel.getTotalIsc(), paymentVoucherModel.getItems());
+            validateTotalGratuita(paymentVoucherModel.getTotalValorVentaGratuita(), paymentVoucherModel.getTotalImpOperGratuita(), paymentVoucherModel.getItems());
+            validateTotalGravada(paymentVoucherModel.getTotalValorVentaGravada(), paymentVoucherModel.getTotalIgv(), paymentVoucherModel.getItems());
+            validateTotalOtrosTributos(paymentVoucherModel.getTotalValorBaseOtrosTributos(), paymentVoucherModel.getTotalOtrostributos(), paymentVoucherModel.getItems());
         }
-        validateDetracciones(paymentVoucher);
+        validateDetracciones(paymentVoucherModel);
     }
 
     private void validateTipoDocumentoReceptorFactura(String tipoDocumentoReceptor) {
@@ -115,40 +114,40 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
         }
     }
 
-    private void validateDetracciones(PaymentVoucher paymentVoucher) {
+    private void validateDetracciones(PaymentVoucherModel paymentVoucherModel) {
         boolean existeCodigoBien = false;
 
-        if (paymentVoucher.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_FACTURA)) {
-            if (paymentVoucher.getCodigoBienDetraccion() != null) {
+        if (paymentVoucherModel.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_FACTURA)) {
+            if (paymentVoucherModel.getCodigoBienDetraccion() != null) {
                 existeCodigoBien = true;
             }
             if (existeCodigoBien) {
-                if (paymentVoucher.getCodigoTipoOperacion().equals("1001") || paymentVoucher.getCodigoTipoOperacion().equals("1004")) {
-                    if (StringUtils.length(StringUtils.trim(paymentVoucher.getCodigoBienDetraccion())) != 3) {
+                if (paymentVoucherModel.getCodigoTipoOperacion().equals("1001") || paymentVoucherModel.getCodigoTipoOperacion().equals("1004")) {
+                    if (StringUtils.length(StringUtils.trim(paymentVoucherModel.getCodigoBienDetraccion())) != 3) {
                         throw new ValidationException("El campo [" + codigoBienDetraccionLabel + "] debe tener 3 digitos.");
                     }
-                    if (paymentVoucher.getCuentaFinancieraBeneficiario() == null) {
+                    if (paymentVoucherModel.getCuentaFinancieraBeneficiario() == null) {
                         throw new ValidationException("El campo [" + cuentaFinancieraBeneficiarioLabel + "] es obligatorio.");
                     }
-                    if (StringUtils.length(StringUtils.trim(paymentVoucher.getCuentaFinancieraBeneficiario())) > 100) {
+                    if (StringUtils.length(StringUtils.trim(paymentVoucherModel.getCuentaFinancieraBeneficiario())) > 100) {
                         throw new ValidationException("El campo [" + cuentaFinancieraBeneficiarioLabel
                                 + "] debe tener como maximo 100 digitos.");
                     }
-                    if (paymentVoucher.getMontoDetraccion() == null) {
+                    if (paymentVoucherModel.getMontoDetraccion() == null) {
                         throw new ValidationException("El campo [" + montoDetraccionLabel + "] es obligarorio.");
                     }
-                    if (!StringUtils.isAlphanumeric(paymentVoucher.getCodigoMedioPago())) {
+                    if (!StringUtils.isAlphanumeric(paymentVoucherModel.getCodigoMedioPago())) {
                         throw new ValidationException("El campo [" + codigoMedioPagoLabel
                                 + "] recibe caracteres alfabeticos y numericos.");
                     }
-                    if (StringUtils.length(StringUtils.trim(paymentVoucher.getCodigoMedioPago())) != 3) {
+                    if (StringUtils.length(StringUtils.trim(paymentVoucherModel.getCodigoMedioPago())) != 3) {
                         throw new ValidationException("El campo [" + codigoMedioPagoLabel + "] debe tener 3 digitos.");
                     }
-                    if (paymentVoucher.getPorcentajeDetraccion() == null) {
+                    if (paymentVoucherModel.getPorcentajeDetraccion() == null) {
                         throw new ValidationException("El campo [" + porcentajeDetraccionLabel + "] es obligarorio.");
                     }
-                    if (paymentVoucher.getCodigoBienDetraccion().equals("027")) {
-                        for (ComprobanteItem item : paymentVoucher.getItems()) {
+                    if (paymentVoucherModel.getCodigoBienDetraccion().equals("027")) {
+                        for (ComprobanteItem item : paymentVoucherModel.getItems()) {
                             if (StringUtils.isBlank(item.getDetalleViajeDetraccion())) {
                                 throw new ValidationException("El campo [" + detalleViajeDetraccionLabel + "] es obligarorio, para codigo bien 027.");
                             }
@@ -448,15 +447,15 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
         }
     }
 
-    private void validateCamposNotaCreditoDebito(PaymentVoucher paymentVoucher) {
-        validateTipoComprobanteAfectado(paymentVoucher.getTipoComprobanteAfectado());
-        validateSerieAfectado(paymentVoucher.getSerieAfectado());
-        validateNumeroAfectado(paymentVoucher.getNumeroAfectado());
-        validateCodigoTipoNotaCredito(paymentVoucher.getTipoComprobante(),
-                paymentVoucher.getCodigoTipoNotaCredito());
-        validateCodigoTipoNotaDebito(paymentVoucher.getTipoComprobante(),
-                paymentVoucher.getCodigoTipoNotaDebito());
-        validateMotivoNota(paymentVoucher.getMotivoNota());
+    private void validateCamposNotaCreditoDebito(PaymentVoucherModel paymentVoucherModel) {
+        validateTipoComprobanteAfectado(paymentVoucherModel.getTipoComprobanteAfectado());
+        validateSerieAfectado(paymentVoucherModel.getSerieAfectado());
+        validateNumeroAfectado(paymentVoucherModel.getNumeroAfectado());
+        validateCodigoTipoNotaCredito(paymentVoucherModel.getTipoComprobante(),
+                paymentVoucherModel.getCodigoTipoNotaCredito());
+        validateCodigoTipoNotaDebito(paymentVoucherModel.getTipoComprobante(),
+                paymentVoucherModel.getCodigoTipoNotaDebito());
+        validateMotivoNota(paymentVoucherModel.getMotivoNota());
     }
 
     private boolean isNotaCreditoODebito(String tipoComprobante) {
@@ -688,7 +687,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
     private void validateIdentificadorDocumento(String rucEmisor, String tipoComprobante, String serie, Integer numero, boolean isEdit) {
         try {
             String idDocumento = rucEmisor + "-" + tipoComprobante + "-" + serie + "-" + numero;
-            PaymentVoucher identificadorEntity = paymentVoucherFeign.getPaymentVoucherByIdentificadorDocumento(idDocumento);
+            PaymentVoucherModel identificadorEntity = paymentVoucherFeign.getPaymentVoucherByIdentificadorDocumento(idDocumento);
             if (identificadorEntity != null && !isEdit) {
                 throw new ValidationException(
                         "El comprobante ya ha sido registrado [" + rucEmisorLabel + ":" + rucEmisor + "; "

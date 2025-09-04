@@ -6,11 +6,10 @@ import com.certicom.certifact_facturas_service_ng.exceptions.ValidationException
 import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
 import com.certicom.certifact_facturas_service_ng.feign.ParameterFeign;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
-import com.certicom.certifact_facturas_service_ng.model.Parameter;
-import com.certicom.certifact_facturas_service_ng.model.PaymentVoucher;
+import com.certicom.certifact_facturas_service_ng.model.ParameterModel;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherModel;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
-import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -20,9 +19,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Date;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Component
 @RequiredArgsConstructor
@@ -33,7 +30,7 @@ public class VoucherAnnularValidator extends CamposEntrada<Object> {
     private final PaymentVoucherFeign paymentVoucherFeign;
 
     public void validateVoucherAnnular(List<VoucherAnnularRequest> documentos, String rucEmisor) {
-        Parameter parametroEntity = parameterFeign.findByName(ConstantesParameter.RANGO_DIAS_BAJA_DOCUMENTOS);
+        ParameterModel parametroEntity = parameterFeign.findByName(ConstantesParameter.RANGO_DIAS_BAJA_DOCUMENTOS);
         Integer rangoFechaAceptable = Integer.parseInt(parametroEntity.getValue());
 
         validateRucActivo(rucEmisor);
@@ -71,7 +68,7 @@ public class VoucherAnnularValidator extends CamposEntrada<Object> {
         EstadoComprobanteEnum estadoComprobante = null;
         System.out.println("tipo de documento: "+tipoDocumento.getClass().getSimpleName());
 
-        PaymentVoucher entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+        PaymentVoucherModel entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
         if (entity==null){
             noExiste=true;
         }else {

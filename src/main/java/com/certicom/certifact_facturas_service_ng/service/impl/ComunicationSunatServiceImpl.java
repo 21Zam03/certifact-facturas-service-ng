@@ -1,9 +1,10 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
+import com.certicom.certifact_facturas_service_ng.dto.others.GetStatusCdrDto;
+import com.certicom.certifact_facturas_service_ng.dto.others.SendBillDto;
 import com.certicom.certifact_facturas_service_ng.model.*;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
-import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
 import com.certicom.certifact_facturas_service_ng.entity.TmpVoucherSendBillEntity;
 import com.certicom.certifact_facturas_service_ng.enums.*;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
@@ -60,15 +61,15 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                         EstadoVoucherTmpEnum.BLOQUEO.getEstado()
                 );
 
-                RegisterFileUpload registerFileUploadDto = registerFileUploadFeign
+                RegisterFileUploadModel registerFileUploadModelDto = registerFileUploadFeign
                         .findFirst1ByPaymentVoucherIdPaymentVoucherAndTipoArchivoAndEstadoArchivoOrderByOrdenDesc(idPaymentVoucher, TipoArchivoEnum.XML.name(),
                                 EstadoArchivoEnum.ACTIVO.name());
-                System.out.println("REGISTER FILE UPLOAD: "+registerFileUploadDto);
+                System.out.println("REGISTER FILE UPLOAD: "+ registerFileUploadModelDto);
 
-                if (registerFileUploadDto == null)
+                if (registerFileUploadModelDto == null)
                     throw new ServiceException("No se encuentra el archivo XML a enviar, por favor edite o regenere el comprobante.");
 
-                fileXMLZipBase64 = amazonS3ClientService.downloadFileStorageInB64(registerFileUploadDto);
+                fileXMLZipBase64 = amazonS3ClientService.downloadFileStorageInB64(registerFileUploadModelDto);
 
 
                 nombreCompleto = voucherPendiente.getNombreDocumento() + "." + ConstantesParameter.TYPE_FILE_ZIP;
@@ -128,23 +129,23 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                         break;
                     case SUCCESS_WITH_ERROR_CONTENT:
                         if(Integer.parseInt(responseSunat.getStatusCode())==1033){
-                            PaymentVoucher paymentVoucherEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
-                            GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc,paymentVoucherEntity.getTipoComprobante(),paymentVoucherEntity.getSerie(),paymentVoucherEntity.getNumero(),idPaymentVoucher);
+                            PaymentVoucherModel paymentVoucherModelEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
+                            GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc, paymentVoucherModelEntity.getTipoComprobante(), paymentVoucherModelEntity.getSerie(), paymentVoucherModelEntity.getNumero(),idPaymentVoucher);
                             responseSunatCdr = sendSunatService.getStatusCDR(statusCdrDTO, ruc);
 
-                            messageResponse = "La Factura numero "+paymentVoucherEntity.getSerie()+"-"+paymentVoucherEntity.getNumero()+", ha sido aceptada";
+                            messageResponse = "La Factura numero "+ paymentVoucherModelEntity.getSerie()+"-"+ paymentVoucherModelEntity.getNumero()+", ha sido aceptada";
 
-                            RegisterFileUpload responseStorage = uploadFileCdr(ruc, voucherPendiente.getNombreDocumento(), voucherPendiente.getTipoComprobante(),
+                            RegisterFileUploadModel responseStorage = uploadFileCdr(ruc, voucherPendiente.getNombreDocumento(), voucherPendiente.getTipoComprobante(),
                                     ConstantesParameter.REGISTRO_STATUS_NUEVO, responseSunatCdr.getContentBase64());
 
-                            paymentVoucherEntity.setEstado(EstadoComprobanteEnum.ACEPTADO.getCodigo());
-                            paymentVoucherEntity.setEstadoSunat(EstadoSunatEnum.ACEPTADO.getAbreviado());
-                            paymentVoucherEntity.setMensajeRespuesta(messageResponse);
-                            paymentVoucherEntity.setCodigosRespuestaSunat("0");
+                            paymentVoucherModelEntity.setEstado(EstadoComprobanteEnum.ACEPTADO.getCodigo());
+                            paymentVoucherModelEntity.setEstadoSunat(EstadoSunatEnum.ACEPTADO.getAbreviado());
+                            paymentVoucherModelEntity.setMensajeRespuesta(messageResponse);
+                            paymentVoucherModelEntity.setCodigosRespuestaSunat("0");
                             System.out.println("SEGUIMIENTO 020");
                             if (responseStorage.getIdRegisterFileSend() != null) {
-                                paymentVoucherEntity.getPaymentVoucherFileList().add(
-                                        PaymentVoucherFile.builder()
+                                paymentVoucherModelEntity.getPaymentVoucherFileModelList().add(
+                                        PaymentVoucherFileModel.builder()
                                                 .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
                                                 .idRegisterFileSend(responseStorage.getIdRegisterFileSend())
                                                 .tipoArchivo(TipoArchivoEnum.CDR.name())
@@ -212,26 +213,26 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                         break;
                     case WITHOUT_CONNECTION:
                         if(responseSunat.getMessage().contains("1033")){
-                            PaymentVoucher paymentVoucherEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
+                            PaymentVoucherModel paymentVoucherModelEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
 
-                            GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc,paymentVoucherEntity.getTipoComprobante(),paymentVoucherEntity.getSerie(),paymentVoucherEntity.getNumero(),idPaymentVoucher);
+                            GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc, paymentVoucherModelEntity.getTipoComprobante(), paymentVoucherModelEntity.getSerie(), paymentVoucherModelEntity.getNumero(),idPaymentVoucher);
 
                             responseSunatCdr = sendSunatService.getStatusCDR(statusCdrDTO, ruc);
 
-                            messageResponse = "La Factura numero "+paymentVoucherEntity.getSerie()+"-"+paymentVoucherEntity.getNumero()+", ha sido aceptada";
+                            messageResponse = "La Factura numero "+ paymentVoucherModelEntity.getSerie()+"-"+ paymentVoucherModelEntity.getNumero()+", ha sido aceptada";
 
 
-                            RegisterFileUpload responseStorage = uploadFileCdr(ruc, voucherPendiente.getNombreDocumento(), voucherPendiente.getTipoComprobante(), ConstantesParameter.REGISTRO_STATUS_NUEVO,
+                            RegisterFileUploadModel responseStorage = uploadFileCdr(ruc, voucherPendiente.getNombreDocumento(), voucherPendiente.getTipoComprobante(), ConstantesParameter.REGISTRO_STATUS_NUEVO,
                                     responseSunatCdr.getContentBase64());
 
-                            paymentVoucherEntity.setEstado(EstadoComprobanteEnum.ACEPTADO.getCodigo());
-                            paymentVoucherEntity.setEstadoSunat(EstadoSunatEnum.ACEPTADO.getAbreviado());
-                            paymentVoucherEntity.setMensajeRespuesta(messageResponse);
-                            paymentVoucherEntity.setCodigosRespuestaSunat("0");
+                            paymentVoucherModelEntity.setEstado(EstadoComprobanteEnum.ACEPTADO.getCodigo());
+                            paymentVoucherModelEntity.setEstadoSunat(EstadoSunatEnum.ACEPTADO.getAbreviado());
+                            paymentVoucherModelEntity.setMensajeRespuesta(messageResponse);
+                            paymentVoucherModelEntity.setCodigosRespuestaSunat("0");
                             System.out.println("SEGUIMIENTO 021");
                             if (responseStorage.getIdRegisterFileSend() != null) {
-                                paymentVoucherEntity.getPaymentVoucherFileList().add(
-                                    PaymentVoucherFile.builder()
+                                paymentVoucherModelEntity.getPaymentVoucherFileModelList().add(
+                                    PaymentVoucherFileModel.builder()
                                             .estadoArchivo(EstadoArchivoEnum.INACTIVO.name())
                                             .idRegisterFileSend(responseStorage.getIdRegisterFileSend())
                                             .tipoArchivo(TipoArchivoEnum.CDR.name())
@@ -280,7 +281,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                                      String contenidoBase64, String mensajeRespuesta, String estadoComprobante,
                                      String nombreDocumento, String codigosRespuesta) throws Exception {
 
-        RegisterFileUpload responseStorage = uploadFileCdr(ruc, nombreDocumento, tipoComprobante, ConstantesParameter.REGISTRO_STATUS_NUEVO,
+        RegisterFileUploadModel responseStorage = uploadFileCdr(ruc, nombreDocumento, tipoComprobante, ConstantesParameter.REGISTRO_STATUS_NUEVO,
                 contenidoBase64);
 
         System.out.println("RESPONSE STORAGE: "+responseStorage);
@@ -295,7 +296,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
         );
         //AGREGANDO ARCHIVO
         if (responseStorage.getIdRegisterFileSend() != null) {
-            paymentVoucherFileFeign.save(PaymentVoucherFile.builder()
+            paymentVoucherFileFeign.save(PaymentVoucherFileModel.builder()
                     .orden(2)
                     .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
                     .idPaymentVoucher(idPaymentVoucher)
@@ -308,12 +309,12 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
 
     }
 
-    public RegisterFileUpload uploadFileCdr(String rucEmisor, String nameDocument, String tipoComprobante, String estadoRegistro,
-                                            String fileXMLZipBase64) throws Exception {
+    public RegisterFileUploadModel uploadFileCdr(String rucEmisor, String nameDocument, String tipoComprobante, String estadoRegistro,
+                                                 String fileXMLZipBase64) throws Exception {
 
-        Company companyEntity = companyFeign.findCompanyByRuc(rucEmisor);
-        RegisterFileUpload file = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(fileXMLZipBase64),
-                nameDocument, "cdr", companyEntity);
+        CompanyModel companyModel = companyFeign.findCompanyByRuc(rucEmisor);
+        RegisterFileUploadModel file = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(fileXMLZipBase64),
+                nameDocument, "cdr", companyModel);
         System.out.println("FILE UPLOAD: "+file);
         return file;
     }

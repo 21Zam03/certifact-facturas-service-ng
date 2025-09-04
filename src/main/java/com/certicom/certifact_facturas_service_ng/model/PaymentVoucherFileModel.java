@@ -9,12 +9,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Error {
+public class PaymentVoucherFileModel {
 
-    private Integer id;
-    private String code;
-    private String description;
-    private String type;
-    private String document;
+    private Long id;
+    private String tipoArchivo;
+    private String estadoArchivo;
+    private Long idPaymentVoucher;
+    private Long idRegisterFileSend;
+    private Integer orden;
 
 }
