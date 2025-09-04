@@ -3,6 +3,8 @@ package com.certicom.certifact_facturas_service_ng.service.impl;
 import com.certicom.certifact_facturas_service_ng.dto.request.VoucherAnnularRequest;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
+import com.certicom.certifact_facturas_service_ng.enums.EstadoArchivoEnum;
+import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.model.*;
 import com.certicom.certifact_facturas_service_ng.enums.ComunicationSunatEnum;
 import com.certicom.certifact_facturas_service_ng.enums.EstadoComprobanteEnum;
@@ -55,20 +57,16 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
         documentSummary.setUserName(usuario);
         documentSummary.setEstadoComprobante(voided.getEstadoComprobante());
 
-        //AGREGANDO ARCHIVO
-        /*
-        if (idRegisterFile != null) {
-            documentSummary.addFile(VoidedFileEntity.builder()
-                    .estadoArchivo(EstadoArchivoEnum.ACTIVO)
-                    .registerFileUpload(RegisterFileUploadEntity.builder().idRegisterFileSend(idRegisterFile).build())
-                    .tipoArchivo(TipoArchivoEnum.XML)
-                       .build());
-        }
+        documentSummary.addVoidFile(
+                VoidedFileDto.builder()
+                        .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
+                        .tipoArchivo(TipoArchivoEnum.XML.name())
+                        .idRegisterFileSend(idRegisterFile)
+                        .build()
+        );
 
-        * */
         System.out.println("DOCUMENT SUMMARY : " + documentSummary);
         for (VoidedLine item : voided.getLines()) {
-
             DetailsDocsVoidedDto detail = new DetailsDocsVoidedDto();
 
             detail.setSerieDocumento(item.getSerieDocumento());
@@ -77,12 +75,10 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
             detail.setEstado(ConstantesParameter.REGISTRO_ACTIVO);
             detail.setMotivoBaja(item.getRazon());
             detail.setNumeroItem(item.getNumeroItem());
-            System.out.println("summary");
+
             documentSummary.addDetailDocsVoided(detail);
-            System.out.println("gooo");
             identificadorComprobantes.add(voided.getRucEmisor() + "-" + item.getTipoComprobante() + "-" +
                     item.getSerieDocumento() + "-" + item.getNumeroDocumento());
-            System.out.println("end");
         }
         System.out.println("end 2");
         documentSummary = voidedDocumentsFeign.save(documentSummary);
@@ -287,7 +283,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
         System.out.println("FILE: "+file);
         voided.setEstadoComprobante(EstadoComprobanteEnum.PROCESO_ENVIO.getCodigo());
         VoidedDocumentsDto voidedDocumentsEntity = registrarVoidedDocuments(voided, file.getIdRegisterFileSend(), userName, responseSunat.getTicket());
-        System.out.println("VOIDED DOCUMENT: "+voidedDocumentsEntity);
+        System.out.println("VOIDED DOCUMENT RESULT: "+voidedDocumentsEntity);
         resp.put(ConstantesParameter.PARAM_NUM_TICKET, voidedDocumentsEntity.getTicketSunat());
         resp.put(ConstantesParameter.PARAM_DESCRIPTION, "Se registro correctamente el documento: " + voided.getId());
         return resp;

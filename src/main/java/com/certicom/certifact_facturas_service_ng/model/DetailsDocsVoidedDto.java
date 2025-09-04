@@ -18,6 +18,7 @@ public class DetailsDocsVoidedDto {
     private String tipoComprobante;
     private String motivoBaja;
     private String estado;
-    private VoidedDocumentsDto voidedDocument;
+
+    //private VoidedDocumentsDto voidedDocument;
 
 }

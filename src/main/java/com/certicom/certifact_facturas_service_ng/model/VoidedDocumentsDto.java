@@ -31,12 +31,13 @@ public class VoidedDocumentsDto {
     private String userName;
     private String userNameModify;
     private String estadoComprobante;
-    private List<DetailsDocsVoidedDto> detailBajaDocumentos;
-    //private List<VoidedFileEntity> voidedFiles;
     private Integer intentosGetStatus;
 
+    private List<DetailsDocsVoidedDto> detailBajaDocumentos;
+    private List<VoidedFileDto> voidedFiles;
+
     @JsonIgnore
-    public List<DetailsDocsVoidedDto> getBajaDocumentos() {
+    public List<DetailsDocsVoidedDto> getOrCreateDocumentos() {
         if (this.detailBajaDocumentos == null) {
             this.detailBajaDocumentos = new ArrayList<DetailsDocsVoidedDto>();
         }
@@ -44,10 +45,24 @@ public class VoidedDocumentsDto {
     }
 
     @JsonIgnore
+    public List<VoidedFileDto> getOrCreateVoidedFiles() {
+        if(this.voidedFiles == null) {
+            this.voidedFiles = new ArrayList<>();
+        }
+        return this.voidedFiles;
+    }
+
+    @JsonIgnore
     public DetailsDocsVoidedDto addDetailDocsVoided(DetailsDocsVoidedDto detailDocsVoided) {
-        getBajaDocumentos().add(detailDocsVoided);
-        detailDocsVoided.setVoidedDocument(this);
+        getOrCreateDocumentos().add(detailDocsVoided);
+        //detailDocsVoided.setVoidedDocument(this);
         return detailDocsVoided;
+    }
+
+    @JsonIgnore
+    public void addVoidFile(VoidedFileDto voidedFileDto) {
+        getOrCreateVoidedFiles().add(voidedFileDto);
+        this.voidedFiles.add(voidedFileDto);
     }
 
 }
