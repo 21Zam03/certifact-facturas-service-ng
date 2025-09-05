@@ -225,18 +225,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             CompanyModel companyModel = completarDatosEmisor(paymentVoucherModel);
             setCodigoTipoOperacionCatalog(paymentVoucherModel);
             setOficinaId(paymentVoucherModel, companyModel);
-
-            if(paymentVoucherModel.getCodigoTipoOperacion() != null) {
-                if (paymentVoucherModel.getCodigoTipoOperacion().equals("1001") || paymentVoucherModel.getCodigoTipoOperacion().equals("1002") ||
-                        paymentVoucherModel.getCodigoTipoOperacion().equals("1003") || paymentVoucherModel.getCodigoTipoOperacion().equals("1004")) {
-                    Leyenda leyendaDto = Leyenda.builder()
-                            .descripcion("Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central")
-                            .codigo("2006")
-                            .build();
-                    paymentVoucherModel.setLeyendas(new ArrayList<>());
-                    paymentVoucherModel.getLeyendas().add(leyendaDto);
-                }
-            }
+            setLeyenda(paymentVoucherModel);
 
             if ((companyModel.getSimultaneo() != null && companyModel.getSimultaneo())) {
                 Integer proximoNumero;
@@ -256,7 +245,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             Map<String, String> plantillaGenerado = generarPlantillaXml(companyModel, paymentVoucherModel);
             nombreDocumento = plantillaGenerado.get(ConstantesParameter.PARAM_NAME_DOCUMENT);
             String fileXMLZipBase64 = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_ZIP_BASE64);
-            String fileXMLBase64 = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64);
+            //String fileXMLBase64 = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64);
 
             RegisterFileUploadModel archivoSubido = subirXmlComprobante(companyModel, nombreDocumento, paymentVoucherModel.getTipoComprobante(), ConstantesParameter.REGISTRO_STATUS_NUEVO, fileXMLZipBase64);
             String estadoRegistro = EstadoComprobanteEnum.REGISTRADO.getCodigo();
@@ -264,6 +253,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             paymentVoucherModel.setCodigoHash(plantillaGenerado.get(ConstantesParameter.CODIGO_HASH));
 
             comprobanteCreado = saveVoucher(paymentVoucherModel, archivoSubido.getIdRegisterFileSend(), estadoRegistro, estadoRegistro, estadoEnSunat, messageResponse, estadoItem,"s-admin");
+
             if(isFacturaOrNoteAssociated) {
                 createTmpVoucher(comprobanteCreado.getIdPaymentVoucher(), nombreDocumento, UUIDGen.generate(), paymentVoucherModel.getTipoComprobante());
                 SendBillDto dataSendBill = SendBillDto.builder().ruc(paymentVoucherModel.getRucEmisor()).idPaymentVoucher(paymentVoucherModel.getIdPaymentVoucher())
@@ -292,9 +282,9 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
     Map<String, Object> updateExistingDocument(PaymentVoucherModel paymentVoucherModel, Long idUsuario) {
         Map<String, Object> resultado = new HashMap<>();
+        String messageResponse = ConstantesParameter.MSG_EDICION_DOCUMENTO_OK;;
         ResponsePSE response;
         boolean status = false;
-        String messageResponse = ConstantesParameter.MSG_EDICION_DOCUMENTO_OK;;
         String nombreDocumento = "";
         PaymentVoucherModel comprobanteCreado = null;
         Integer estadoItem = null;
@@ -304,6 +294,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             CompanyModel companyModel = completarDatosEmisor(paymentVoucherModel);
             setCodigoTipoOperacionCatalog(paymentVoucherModel);
             setOficinaId(paymentVoucherModel, companyModel);
+            setLeyenda(paymentVoucherModel);
 
             PaymentVoucherModel paymentVoucherModelOld = paymentVoucherFeign.findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
                     paymentVoucherModel.getRucEmisor(), paymentVoucherModel.getTipoComprobante(), paymentVoucherModel.getSerie(), paymentVoucherModel.getNumero());
@@ -316,18 +307,6 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
                     || paymentVoucherModelOld.getEstadoSunat().equals(EstadoSunatEnum.ANULADO.getAbreviado())
             ) {
                 throw new ServiceException("Este comprobante no se puede editar, ya fue declarado a Sunat.");
-            }
-
-            if(paymentVoucherModel.getCodigoTipoOperacion() != null) {
-                if (paymentVoucherModel.getCodigoTipoOperacion().equals("1001") || paymentVoucherModel.getCodigoTipoOperacion().equals("1002") ||
-                        paymentVoucherModel.getCodigoTipoOperacion().equals("1003") || paymentVoucherModel.getCodigoTipoOperacion().equals("1004")) {
-                    Leyenda leyendaDto = Leyenda.builder()
-                            .descripcion("Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central")
-                            .codigo("2006")
-                            .build();
-                    paymentVoucherModel.setLeyendas(new ArrayList<>());
-                    paymentVoucherModel.getLeyendas().add(leyendaDto);
-                }
             }
 
             boolean isFacturaOrNoteAssociated = !paymentVoucherModel.getTipoComprobante().equals(ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO)
@@ -344,7 +323,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             Map<String, String> plantillaGenerado = generarPlantillaXml(companyModel, paymentVoucherModel);
             nombreDocumento = plantillaGenerado.get(ConstantesParameter.PARAM_NAME_DOCUMENT);
             String fileXMLZipBase64 = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_ZIP_BASE64);
-            String fileXMLBase64 = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64);
+            //String fileXMLBase64 = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64);
 
             RegisterFileUploadModel archivoSubido = subirXmlComprobante(companyModel, nombreDocumento, paymentVoucherModel.getTipoComprobante(), ConstantesParameter.REGISTRO_STATUS_NUEVO, fileXMLZipBase64);
 
@@ -355,7 +334,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             comprobanteCreado = updateVoucher(paymentVoucherModel, paymentVoucherModelOld, archivoSubido.getIdRegisterFileSend(), estadoRegistro, estadoRegistro, estadoEnSunat, messageResponse, estadoItem,"s-admin", "");
 
             if(isFacturaOrNoteAssociated) {
-                createTmpVoucher(comprobanteCreado.getIdPaymentVoucher(), nombreDocumento, UUIDGen.generate(), paymentVoucherModel.getTipoComprobante());
+                updateTmpVoucher(comprobanteCreado.getIdPaymentVoucher(), nombreDocumento, UUIDGen.generate(), paymentVoucherModel.getTipoComprobante());
                 SendBillDto dataSendBill = SendBillDto.builder().ruc(paymentVoucherModel.getRucEmisor()).idPaymentVoucher(paymentVoucherModel.getIdPaymentVoucher())
                         .nameDocument(nombreDocumento).envioAutomaticoSunat(companyModel.getEnvioAutomaticoSunat() == null || companyModel.getEnvioAutomaticoSunat()).build();
                 resultado.put(ConstantesParameter.PARAM_BEAN_SEND_BILL, dataSendBill);
@@ -380,6 +359,19 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     }
 
 
+    private void setLeyenda(PaymentVoucherModel paymentVoucherModel) {
+        if(paymentVoucherModel.getCodigoTipoOperacion() != null) {
+            if (paymentVoucherModel.getCodigoTipoOperacion().equals("1001") || paymentVoucherModel.getCodigoTipoOperacion().equals("1002") ||
+                    paymentVoucherModel.getCodigoTipoOperacion().equals("1003") || paymentVoucherModel.getCodigoTipoOperacion().equals("1004")) {
+                Leyenda leyendaDto = Leyenda.builder()
+                        .descripcion("Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central")
+                        .codigo("2006")
+                        .build();
+                paymentVoucherModel.setLeyendas(new ArrayList<>());
+                paymentVoucherModel.getLeyendas().add(leyendaDto);
+            }
+        }
+    }
 
     private Map<String, String> generarPlantillaXml(CompanyModel companyModel, PaymentVoucherModel comprobante) throws IOException, NoSuchAlgorithmException {
         Map<String, String> plantillaGenerado = new HashMap<>();
@@ -461,15 +453,13 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             } else {
                 switch (paymentVoucherModel.getCodigoTipoOperacion()) {
                     case "01":
-                        break;
-                    case "04":
                         paymentVoucherModel.setCodigoTipoOperacionCatalogo51("0101");
                         break;
                     case "02":
                         paymentVoucherModel.setCodigoTipoOperacionCatalogo51("0200");
                         break;
-                    default:
-                        paymentVoucherModel.setCodigoTipoOperacionCatalogo51("0101");
+                    case "04":
+                        paymentVoucherModel.setCodigoTipoOperacionCatalogo51("0502");
                         break;
                 }
             }

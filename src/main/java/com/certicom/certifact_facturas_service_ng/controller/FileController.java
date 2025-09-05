@@ -21,7 +21,7 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class FileController {
 
-    public static final String API_PATH = "/api/file";
+    public static final String API_PATH = "/api/internal/file";
 
     private final AmazonS3ClientService amazonS3ClientService;
 
