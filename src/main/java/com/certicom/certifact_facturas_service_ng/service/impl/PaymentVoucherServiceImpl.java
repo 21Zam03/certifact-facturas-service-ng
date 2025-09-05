@@ -173,7 +173,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             String fileXMLBase64 = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64);
 
             /*SE SUBE FORMATO XML DEL COMPROBANTE A AMAZON Y SE GUARDA REGISTRO EN BASE DE DATOS*/
-            RegisterFileUploadModel archivoSubido = subirXmlComprobante(companyModel, nombreDocumento, comprobante.getTipoComprobante(), ConstantesParameter.REGISTRO_STATUS_NUEVO, fileXMLZipBase64);
+            RegisterFileUploadModel archivoSubido = subirXmlComprobante(companyModel, nombreDocumento, fileXMLZipBase64);
 
             /*SETEAMOS DATOS*/
             String estadoRegistro = EstadoComprobanteEnum.REGISTRADO.getCodigo();
@@ -247,7 +247,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             String fileXMLZipBase64 = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_ZIP_BASE64);
             //String fileXMLBase64 = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64);
 
-            RegisterFileUploadModel archivoSubido = subirXmlComprobante(companyModel, nombreDocumento, paymentVoucherModel.getTipoComprobante(), ConstantesParameter.REGISTRO_STATUS_NUEVO, fileXMLZipBase64);
+            RegisterFileUploadModel archivoSubido = subirXmlComprobante(companyModel, nombreDocumento, fileXMLZipBase64);
             String estadoRegistro = EstadoComprobanteEnum.REGISTRADO.getCodigo();
             String estadoEnSunat = EstadoSunatEnum.NO_ENVIADO.getAbreviado();
             paymentVoucherModel.setCodigoHash(plantillaGenerado.get(ConstantesParameter.CODIGO_HASH));
@@ -325,7 +325,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             String fileXMLZipBase64 = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_ZIP_BASE64);
             //String fileXMLBase64 = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64);
 
-            RegisterFileUploadModel archivoSubido = subirXmlComprobante(companyModel, nombreDocumento, paymentVoucherModel.getTipoComprobante(), ConstantesParameter.REGISTRO_STATUS_NUEVO, fileXMLZipBase64);
+            RegisterFileUploadModel archivoSubido = subirXmlComprobante(companyModel, nombreDocumento, fileXMLZipBase64);
 
             String estadoRegistro = EstadoComprobanteEnum.REGISTRADO.getCodigo();
             String estadoEnSunat = EstadoSunatEnum.NO_ENVIADO.getAbreviado();
@@ -498,8 +498,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     }
 
     private RegisterFileUploadModel subirXmlComprobante(
-            CompanyModel companyModel, String nombreDocumento, String tipoDocumento,
-            String estadoRegistro, String archivoXMLZipBase64) {
+            CompanyModel companyModel, String nombreDocumento, String archivoXMLZipBase64) {
         RegisterFileUploadModel archivo = amazonS3ClientService.subirArchivoAlStorage(UtilArchivo.b64ToByteArrayInputStream(archivoXMLZipBase64),
                 nombreDocumento, "invoice", companyModel);
         log.info("ARVHIVO SUBIDO: {}", archivo.toString());
