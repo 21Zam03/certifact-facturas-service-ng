@@ -379,6 +379,8 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         return resultado;
     }
 
+
+
     private Map<String, String> generarPlantillaXml(CompanyModel companyModel, PaymentVoucherModel comprobante) throws IOException, NoSuchAlgorithmException {
         Map<String, String> plantillaGenerado = new HashMap<>();
         /*GENERAMOS PLANTILLA XML DE ACUERDO A SU OSE*/
@@ -942,13 +944,12 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
         if (idRegisterFile != null) {
             paymentVoucherModel.addPaymentVoucherFile(PaymentVoucherFileModel.builder()
-                    .orden(1)
                     .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
                     .idRegisterFileSend(idRegisterFile)
                     .tipoArchivo(TipoArchivoEnum.XML.name())
                     .build());
         }
-
+        System.out.println("LISTA FINAL: "+paymentVoucherModel.getOrCreatePaymentVoucherFile());
         for (ComprobanteItem item : paymentVoucherModel.getItems()) {
             item.setEstado(ConstantesParameter.REGISTRO_ACTIVO);
         }

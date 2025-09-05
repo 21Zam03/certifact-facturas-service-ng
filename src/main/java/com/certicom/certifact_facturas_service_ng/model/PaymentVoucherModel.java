@@ -1,6 +1,8 @@
 package com.certicom.certifact_facturas_service_ng.model;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
+import com.certicom.certifact_facturas_service_ng.enums.EstadoArchivoEnum;
+import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
@@ -120,11 +122,15 @@ public class PaymentVoucherModel {
 
     @JsonIgnore
     public void addPaymentVoucherFile(PaymentVoucherFileModel paymentVoucherFileModel) {
-        if (getOrCreatePaymentVoucherFile().isEmpty()) {
-            paymentVoucherFileModel.setOrden(1);
-        } else {
-            paymentVoucherFileModel.setOrden(getOrCreatePaymentVoucherFile().size()+1);
+        paymentVoucherFileModel.setOrden(getOrCreatePaymentVoucherFile().size()+1);
+        if(paymentVoucherFileModel.getTipoArchivo().equals(TipoArchivoEnum.XML.name())) {
+            getOrCreatePaymentVoucherFile().forEach(f -> {
+                if(f.getTipoArchivo().equals(TipoArchivoEnum.XML.name())) {
+                    f.setEstadoArchivo(EstadoArchivoEnum.INACTIVO.name());
+                }
+            });
         }
+        System.out.println("LISTA: "+getOrCreatePaymentVoucherFile().size());
         getOrCreatePaymentVoucherFile().add(paymentVoucherFileModel);
     }
 
