@@ -11,8 +11,7 @@ public interface PaymentVoucherService {
             String filtroTipoComprobante, String filtroRuc, String filtroSerie, Integer filtroNumero,
             Integer pageNumber, Integer perPage, Integer estadoSunat, Long idUsuario);
 
-    /*METODO PARA GUARDAR O EDITAR UN COMPROBANTE*/
-    Map<String, Object> generatePaymentVoucher(PaymentVoucherModel paymentVoucherModel, boolean isEdit, Long idUsuario);
+    //Map<String, Object> generatePaymentVoucher(PaymentVoucherModel paymentVoucherModel, boolean isEdit, Long idUsuario);
 
     Map<String, Object> createPaymentVoucher(PaymentVoucherModel paymentVoucherModel, Long idUsuario);
 

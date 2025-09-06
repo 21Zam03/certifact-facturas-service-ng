@@ -34,7 +34,7 @@ public class VoidedDocumentsModel {
     private Integer intentosGetStatus;
 
     private List<DetailsDocsVoidedModel> detailBajaDocumentos;
-    private List<VoidedFileModel> voidedFileModels;
+    private List<VoidedFileModel> voidedFileModelList;
 
     @JsonIgnore
     public List<DetailsDocsVoidedModel> getOrCreateDocumentos() {
@@ -46,10 +46,10 @@ public class VoidedDocumentsModel {
 
     @JsonIgnore
     public List<VoidedFileModel> getOrCreateVoidedFiles() {
-        if(this.voidedFileModels == null) {
-            this.voidedFileModels = new ArrayList<>();
+        if(this.voidedFileModelList == null) {
+            this.voidedFileModelList = new ArrayList<>();
         }
-        return this.voidedFileModels;
+        return this.voidedFileModelList;
     }
 
     @JsonIgnore

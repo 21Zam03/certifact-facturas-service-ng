@@ -31,33 +31,6 @@ public class PaymentVoucherFormatter {
         formatData(paymentVoucherModel);
     }
 
-    private void formatData(PaymentVoucherModel paymentVoucherModel) {
-        paymentVoucherModel.setRucEmisor(StringUtils.trimToNull(paymentVoucherModel.getRucEmisor()));
-        paymentVoucherModel.setSerie(paymentVoucherModel.getSerie().toUpperCase());
-        paymentVoucherModel.setHoraEmision(StringUtils.trimToNull(paymentVoucherModel.getHoraEmision()));
-        paymentVoucherModel.setCodigoMoneda(StringUtils.trimToNull(paymentVoucherModel.getCodigoMoneda()));
-        paymentVoucherModel.setCodigoLocalAnexoEmisor(StringUtils.trimToNull(paymentVoucherModel.getCodigoLocalAnexoEmisor()));
-        paymentVoucherModel.setDenominacionReceptor(StringUtils.trimToNull(paymentVoucherModel.getDenominacionReceptor()));
-
-        paymentVoucherModel.setCodigoTipoOtroDocumentoRelacionado(StringUtils.trimToNull(
-                paymentVoucherModel.getCodigoTipoOtroDocumentoRelacionado()));
-        paymentVoucherModel.setSerieNumeroOtroDocumentoRelacionado(StringUtils.trimToNull(
-                paymentVoucherModel.getSerieNumeroOtroDocumentoRelacionado()));
-        paymentVoucherModel.setCodigoTipoOperacion(StringUtils.trimToNull(paymentVoucherModel.getCodigoTipoOperacion()));
-        paymentVoucherModel.setMotivoNota(StringUtils.trimToNull(paymentVoucherModel.getMotivoNota()));
-        //paymentVoucher.setIdentificadorDocumento(identificadorDocumento);
-
-        if (StringUtils.isBlank(paymentVoucherModel.getDenominacionReceptor())) {
-            paymentVoucherModel.setDenominacionReceptor("-");
-        }
-        if (StringUtils.isBlank(paymentVoucherModel.getNumeroDocumentoReceptor())) {
-            paymentVoucherModel.setNumeroDocumentoReceptor("-");
-        }
-        if (StringUtils.isBlank(paymentVoucherModel.getTipoDocumentoReceptor())) {
-            paymentVoucherModel.setTipoDocumentoReceptor("-");
-        }
-    }
-
     private void calculateTotalValorVenta(PaymentVoucherModel paymentVoucherModel) {
         if (isNullOrZero(paymentVoucherModel.getTotalValorVentaGravada())
                 && isNullOrZero(paymentVoucherModel.getTotalValorVentaExportacion())
@@ -73,20 +46,6 @@ public class PaymentVoucherFormatter {
                         paymentVoucherModel.setTotalValorVentaExonerada(paymentVoucherModel.getTotalValorVentaExonerada().add(line.getValorVenta()));
                         break;
                 }
-            }
-        }
-    }
-
-    private void formatAnticipos(List<Anticipo> anticipos) {
-        int correlativo = 1;
-        if (anticipos != null && !anticipos.isEmpty()) {
-            for (int i=0; i<anticipos.size(); i++) {
-                if (correlativo < 10) {
-                    anticipos.get(i).setIdentificadorPago("0" + correlativo);
-                } else {
-                    anticipos.get(i).setIdentificadorPago(Integer.toString(correlativo));
-                }
-                correlativo++;
             }
         }
     }
@@ -121,6 +80,47 @@ public class PaymentVoucherFormatter {
     private void formatItems(PaymentVoucherModel paymentVoucherModel) {
         for (ComprobanteItem line: paymentVoucherModel.getItems() ) {
             paymentVoucherDetailFormatter.format(line);
+        }
+    }
+
+    private void formatAnticipos(List<Anticipo> anticipos) {
+        int correlativo = 1;
+        if (anticipos != null && !anticipos.isEmpty()) {
+            for (int i=0; i<anticipos.size(); i++) {
+                if (correlativo < 10) {
+                    anticipos.get(i).setIdentificadorPago("0" + correlativo);
+                } else {
+                    anticipos.get(i).setIdentificadorPago(Integer.toString(correlativo));
+                }
+                correlativo++;
+            }
+        }
+    }
+
+    private void formatData(PaymentVoucherModel paymentVoucherModel) {
+        paymentVoucherModel.setRucEmisor(StringUtils.trimToNull(paymentVoucherModel.getRucEmisor()));
+        paymentVoucherModel.setSerie(paymentVoucherModel.getSerie().toUpperCase());
+        paymentVoucherModel.setHoraEmision(StringUtils.trimToNull(paymentVoucherModel.getHoraEmision()));
+        paymentVoucherModel.setCodigoMoneda(StringUtils.trimToNull(paymentVoucherModel.getCodigoMoneda()));
+        paymentVoucherModel.setCodigoLocalAnexoEmisor(StringUtils.trimToNull(paymentVoucherModel.getCodigoLocalAnexoEmisor()));
+        paymentVoucherModel.setDenominacionReceptor(StringUtils.trimToNull(paymentVoucherModel.getDenominacionReceptor()));
+
+        paymentVoucherModel.setCodigoTipoOtroDocumentoRelacionado(StringUtils.trimToNull(
+                paymentVoucherModel.getCodigoTipoOtroDocumentoRelacionado()));
+        paymentVoucherModel.setSerieNumeroOtroDocumentoRelacionado(StringUtils.trimToNull(
+                paymentVoucherModel.getSerieNumeroOtroDocumentoRelacionado()));
+        paymentVoucherModel.setCodigoTipoOperacion(StringUtils.trimToNull(paymentVoucherModel.getCodigoTipoOperacion()));
+        paymentVoucherModel.setMotivoNota(StringUtils.trimToNull(paymentVoucherModel.getMotivoNota()));
+        //paymentVoucher.setIdentificadorDocumento(identificadorDocumento);
+
+        if (StringUtils.isBlank(paymentVoucherModel.getDenominacionReceptor())) {
+            paymentVoucherModel.setDenominacionReceptor("-");
+        }
+        if (StringUtils.isBlank(paymentVoucherModel.getNumeroDocumentoReceptor())) {
+            paymentVoucherModel.setNumeroDocumentoReceptor("-");
+        }
+        if (StringUtils.isBlank(paymentVoucherModel.getTipoDocumentoReceptor())) {
+            paymentVoucherModel.setTipoDocumentoReceptor("-");
         }
     }
 

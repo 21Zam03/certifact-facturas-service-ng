@@ -54,7 +54,6 @@ public class PaymentVoucherController {
         paymentVoucherValidator.validate(paymentVoucherModel, false);
         Map<String, Object> result = paymentVoucherService.createPaymentVoucher(paymentVoucherModel, idUsuario);
         return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
-        //return new ResponseEntity<>("TEST", HttpStatus.OK);
     }
 
     @PutMapping
