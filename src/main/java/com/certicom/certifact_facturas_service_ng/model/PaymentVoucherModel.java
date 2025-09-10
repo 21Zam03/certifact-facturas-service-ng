@@ -130,7 +130,6 @@ public class PaymentVoucherModel {
                 }
             });
         }
-        System.out.println("LISTA: "+getOrCreatePaymentVoucherFile().size());
         getOrCreatePaymentVoucherFile().add(paymentVoucherFileModel);
     }
 
