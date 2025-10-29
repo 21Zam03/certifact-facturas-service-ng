@@ -1,7 +1,9 @@
 package com.certicom.certifact_facturas_service_ng.service;
 
 import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
+import com.certicom.certifact_facturas_service_ng.dto.others.InfoEstadoSunat;
 
+import java.util.List;
 import java.util.Map;
 
 public interface PaymentVoucherService {
@@ -19,4 +21,9 @@ public interface PaymentVoucherService {
 
     Integer getSiguienteNumeroComprobante(String tipoDocumento, String serie, String ruc);
 
+    List<PaymentVoucherDto> findComprobanteByAnticipo(String filtroNumDoc, String ruc);
+
+    List<PaymentVoucherDto> findComprobanteByCredito(String filtroNumDoc, String ruc);
+
+    List<InfoEstadoSunat> getEstadoSunatByListaIdsInter(List<Long> idsPaymentVouchers);
 }

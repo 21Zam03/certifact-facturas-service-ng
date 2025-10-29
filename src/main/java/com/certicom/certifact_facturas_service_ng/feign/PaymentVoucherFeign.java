@@ -1,5 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
+import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
 import com.certicom.certifact_facturas_service_ng.model.ErrorCatalogModel;
 import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.PaymentVoucherDtoFilter;
@@ -157,5 +158,23 @@ public interface PaymentVoucherFeign {
             @RequestParam String tipoDocumento,
             @RequestParam String serie,
             @RequestParam String ruc);
+
+    @GetMapping("/api/payment-voucher/anticipo")
+    List<PaymentVoucherDto> findAllByTipoComprobanteInAndNumDocIdentReceptorAndRucEmisorAndTipoOperacionAndEstadoOrderByNumDocIdentReceptor(
+            @RequestParam List<String> tipoComprobante,
+            @RequestParam String numDocIdentReceptor,
+            @RequestParam String rucEmisor,
+            @RequestParam String tipoOperacion,
+            @RequestParam String estado
+    );
+
+    @GetMapping("/api/payment-voucher/credito")
+    List<PaymentVoucherDto> getPaymentVocuherByCredito(
+            @RequestParam String numDocIdentReceptor,
+            @RequestParam String rucEmisor
+    );
+
+    @GetMapping("/api/payment-voucher/statusSunat")
+    List<PaymentVoucherDto> findByIdPaymentVoucherInterList(List<Long> ids);
 
 }

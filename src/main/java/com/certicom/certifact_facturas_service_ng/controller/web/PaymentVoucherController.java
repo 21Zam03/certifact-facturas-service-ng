@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -104,6 +105,26 @@ public class PaymentVoucherController {
             @PathVariable String serie) {
         String ruc = "20204040303";
         return new ResponseEntity<Object>(paymentVoucherService.getSiguienteNumeroComprobante(tipoDocumento, serie, ruc), HttpStatus.OK);
+    }
+
+    @GetMapping("/v1/factura/comprobantes-anticipo")
+    public ResponseEntity<List<PaymentVoucherDto>> comprobantesAnticipo(
+            @RequestParam(name = "filtroNumDoc", required = true) String filtroNumDoc) {
+        String ruc = "20204040303";
+        return new ResponseEntity<List<PaymentVoucherDto>>(paymentVoucherService.findComprobanteByAnticipo(filtroNumDoc, ruc), HttpStatus.OK);
+    }
+
+    @GetMapping("/v1/factura/comprobantes-credito")
+    public ResponseEntity<List<PaymentVoucherDto>> comprobantesCredito(
+            @RequestParam(name = "filtroNumDoc", required = true) String filtroNumDoc) {
+        String ruc = "20204040303";
+        return new ResponseEntity<List<PaymentVoucherDto>>(paymentVoucherService.findComprobanteByCredito(filtroNumDoc, ruc), HttpStatus.OK);
+    }
+
+    @PostMapping("/getEstadosSunat")
+    public ResponseEntity<?> getEstadosSunat(@RequestBody List<Long> idsPaymentVouchers) {
+
+        return new ResponseEntity<Object>(paymentVoucherService.getEstadoSunatByListaIdsInter(idsPaymentVouchers), HttpStatus.OK);
     }
 
 }

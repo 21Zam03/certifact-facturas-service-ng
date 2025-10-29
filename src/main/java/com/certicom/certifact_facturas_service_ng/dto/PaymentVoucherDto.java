@@ -107,6 +107,7 @@ public class PaymentVoucherDto {
     private String serieNumeroDocumentoRelacionado;
     private String Uuid;
     private Date fechaEmisionDate;
+    private Integer estadoAnticipo;
 
     private List<PaymentVoucherFileModel> paymentVoucherFileModelList;
 

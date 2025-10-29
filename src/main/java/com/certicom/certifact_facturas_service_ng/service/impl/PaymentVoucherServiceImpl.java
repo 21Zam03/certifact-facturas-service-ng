@@ -144,6 +144,76 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         return 1;
     }
 
+    @Override
+    public List<PaymentVoucherDto> findComprobanteByAnticipo(String numDocIdentReceptor, String rucEmisor) {
+        List<String> tipoComprobante = new ArrayList<>();
+        tipoComprobante.add("01");
+        tipoComprobante.add("03");
+
+        if (numDocIdentReceptor == null) {
+            numDocIdentReceptor = "";
+        }
+
+        List<PaymentVoucherDto> result = new ArrayList<>();
+        List<PaymentVoucherDto> list = paymentVoucherFeign
+                .findAllByTipoComprobanteInAndNumDocIdentReceptorAndRucEmisorAndTipoOperacionAndEstadoOrderByNumDocIdentReceptor(
+                        tipoComprobante, numDocIdentReceptor, rucEmisor, "04", "02");
+
+        List<PaymentVoucherDto> listDetracciones = paymentVoucherFeign
+                .findAllByTipoComprobanteInAndNumDocIdentReceptorAndRucEmisorAndTipoOperacionAndEstadoOrderByNumDocIdentReceptor(
+                        tipoComprobante, numDocIdentReceptor, rucEmisor, "1001", "02");
+
+
+        for (PaymentVoucherDto vouch : list) {
+            if (vouch.getAnticipos().size() <= 0) {
+                result.add(vouch);
+
+            }
+        }
+
+        for (PaymentVoucherDto vouch : listDetracciones) {
+
+            if (vouch.getEstadoAnticipo() != null && vouch.getEstadoAnticipo() == 1) {
+                if (vouch.getAnticipos().size() <= 0) {
+                    result.add(vouch);
+                }
+            }
+        }
+
+        return result;
+    }
+
+    @Override
+    public List<PaymentVoucherDto> findComprobanteByCredito(String numDocIdentReceptor, String rucEmisor) {
+        if (numDocIdentReceptor == null) {
+            numDocIdentReceptor = "";
+        }
+
+        List<PaymentVoucherDto> result = new ArrayList<>();
+        List<PaymentVoucherDto> list = paymentVoucherFeign
+                .getPaymentVocuherByCredito(numDocIdentReceptor, rucEmisor);
+
+        for (PaymentVoucherDto vouch : list) {
+            if (vouch.getAnticipos().size() <= 0) {
+                result.add(vouch);
+
+            }
+        }
+
+        return list;
+    }
+
+    @Override
+    public List<InfoEstadoSunat> getEstadoSunatByListaIdsInter(List<Long> ids) {
+        List<InfoEstadoSunat> respuesta = new ArrayList<>();
+        List<PaymentVoucherDto> comprobantes = paymentVoucherFeign.findByIdPaymentVoucherInterList(ids);
+        comprobantes.forEach(pv -> {
+            respuesta.add(InfoEstadoSunat.builder().id(pv.getIdPaymentVoucher()).estado(pv.getEstado())
+                    .estadoSunat(pv.getEstadoSunat()).build());
+        });
+        return respuesta;
+    }
+
     /*
     Map<String, Object> generateDocument(PaymentVoucherModel comprobante, Boolean isEdit, Long idUsuario) {
         Map<String, Object> resultado = new HashMap<>();
