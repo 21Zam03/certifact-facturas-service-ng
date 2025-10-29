@@ -10,7 +10,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 @ToString
-public class PaymentVoucherDto {
+public class PaymentVoucherDtoFilter {
 
     private String fechaEmision;
     private String tipoComprobante;
@@ -22,7 +22,7 @@ public class PaymentVoucherDto {
     private String numDocIdentReceptor;
     private String denominacionReceptor;
     private String codigoMoneda;
-    private BigDecimal montoImporteTotalVenta;
+    private BigDecimal importeTotalVenta;
     private String estado;
     private LocalDate fechaRegistro;
     private String rucEmisor;

@@ -1,4 +1,4 @@
-package com.certicom.certifact_facturas_service_ng.dto.request;
+package com.certicom.certifact_facturas_service_ng.request;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

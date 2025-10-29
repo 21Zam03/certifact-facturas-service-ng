@@ -1,4 +1,4 @@
-package com.certicom.certifact_facturas_service_ng.dto.response;
+package com.certicom.certifact_facturas_service_ng.dto.others;
 
 import com.certicom.certifact_facturas_service_ng.enums.ComunicationSunatEnum;
 import lombok.AllArgsConstructor;

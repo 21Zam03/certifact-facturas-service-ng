@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
-import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherModel;
+import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.Voided;
 import com.certicom.certifact_facturas_service_ng.dto.others.SignatureResp;
 import com.certicom.certifact_facturas_service_ng.exceptions.SignedException;
@@ -48,7 +48,7 @@ public class TemplateServiceImpl implements TemplateService {
     private final Firmado firma;
 
     @Override
-    public Map<String, String> buildPaymentVoucherSignOse(PaymentVoucherModel paymentVoucherModel) {
+    public Map<String, String> buildPaymentVoucherSignOse(PaymentVoucherDto paymentVoucherDto) {
 
         String xmlGenerado = null;
         String idFirma;
@@ -84,12 +84,12 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public Map<String, String> buildPaymentVoucherSignOseBliz(PaymentVoucherModel paymentVoucherModel) {
+    public Map<String, String> buildPaymentVoucherSignOseBliz(PaymentVoucherDto paymentVoucherDto) {
         return null;
     }
 
     @Override
-    public Map<String, String> buildPaymentVoucherSignCerti(PaymentVoucherModel paymentVoucherModel) throws TemplateException, SignedException, IOException, NoSuchAlgorithmException {
+    public Map<String, String> buildPaymentVoucherSignCerti(PaymentVoucherDto paymentVoucherDto) throws TemplateException, SignedException, IOException, NoSuchAlgorithmException {
         /*FACTURA, NOTA DE CREDITO Y DEBITO*/
         String xmlGenerado = null;
         String idFirma;
@@ -97,35 +97,35 @@ public class TemplateServiceImpl implements TemplateService {
         Map<String, String> resp;
         SignatureResp signatureResp;
 
-        switch (paymentVoucherModel.getTipoComprobante()) {
+        switch (paymentVoucherDto.getTipoComprobante()) {
             case ConstantesSunat.TIPO_DOCUMENTO_FACTURA:
-                if(paymentVoucherModel.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
-                    xmlGenerado = facturaTemplate.construirFactura(paymentVoucherModel);
-                }else if(paymentVoucherModel.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
-                    xmlGenerado = facturaTemplate21.construirFactura(paymentVoucherModel);
+                if(paymentVoucherDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
+                    xmlGenerado = facturaTemplate.construirFactura(paymentVoucherDto);
+                }else if(paymentVoucherDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
+                    xmlGenerado = facturaTemplate21.construirFactura(paymentVoucherDto);
                 }
                 break;
             case ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO:
-                if(paymentVoucherModel.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
-                    xmlGenerado = notaCreditoTemplate.construirNotaCredito(paymentVoucherModel);
+                if(paymentVoucherDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
+                    xmlGenerado = notaCreditoTemplate.construirNotaCredito(paymentVoucherDto);
 
-                }else if(paymentVoucherModel.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
-                    xmlGenerado = notaCreditoTemplate21.construirNotaCredito(paymentVoucherModel);
+                }else if(paymentVoucherDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
+                    xmlGenerado = notaCreditoTemplate21.construirNotaCredito(paymentVoucherDto);
                 }
                 break;
             default:
-                if(paymentVoucherModel.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
-                    xmlGenerado = notaDebitoTemplate.construirNotaDebito(paymentVoucherModel);
-                }else if(paymentVoucherModel.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
-                    xmlGenerado = notaDebitoTemplate21.buildDebitNote(paymentVoucherModel);
+                if(paymentVoucherDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
+                    xmlGenerado = notaDebitoTemplate.construirNotaDebito(paymentVoucherDto);
+                }else if(paymentVoucherDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
+                    xmlGenerado = notaDebitoTemplate21.buildDebitNote(paymentVoucherDto);
                 }
                 break;
         }
 
-        idFirma = "S" + paymentVoucherModel.getTipoComprobante() + paymentVoucherModel.getSerie() + "-" + paymentVoucherModel.getNumero();
+        idFirma = "S" + paymentVoucherDto.getTipoComprobante() + paymentVoucherDto.getSerie() + "-" + paymentVoucherDto.getNumero();
         signatureResp = firma.signCerticom(xmlGenerado, idFirma);
-        nombreDocumento = paymentVoucherModel.getRucEmisor() + "-" + paymentVoucherModel.getTipoComprobante() + "-" +
-                paymentVoucherModel.getSerie() + "-" + paymentVoucherModel.getNumero();
+        nombreDocumento = paymentVoucherDto.getRucEmisor() + "-" + paymentVoucherDto.getTipoComprobante() + "-" +
+                paymentVoucherDto.getSerie() + "-" + paymentVoucherDto.getNumero();
 
         resp = buildDataTemplate(signatureResp, nombreDocumento);
         resp.put(ConstantesParameter.CODIGO_HASH, UtilArchivo.generarCodigoHash(signatureResp.toString()));
@@ -134,7 +134,7 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public Map<String, String> buildPaymentVoucherSign(PaymentVoucherModel paymentVoucherModel) {
+    public Map<String, String> buildPaymentVoucherSign(PaymentVoucherDto paymentVoucherDto) {
         return null;
     }
 

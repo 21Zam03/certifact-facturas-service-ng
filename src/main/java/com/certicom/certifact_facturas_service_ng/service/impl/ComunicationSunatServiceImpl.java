@@ -1,10 +1,11 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
+import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.GetStatusCdrDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.SendBillDto;
 import com.certicom.certifact_facturas_service_ng.model.*;
-import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
-import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
+import com.certicom.certifact_facturas_service_ng.dto.others.ResponsePSE;
+import com.certicom.certifact_facturas_service_ng.dto.others.ResponseSunat;
 import com.certicom.certifact_facturas_service_ng.entity.TmpVoucherSendBillEntity;
 import com.certicom.certifact_facturas_service_ng.enums.*;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
@@ -129,22 +130,22 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                         break;
                     case SUCCESS_WITH_ERROR_CONTENT:
                         if(Integer.parseInt(responseSunat.getStatusCode())==1033){
-                            PaymentVoucherModel paymentVoucherModelEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
-                            GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc, paymentVoucherModelEntity.getTipoComprobante(), paymentVoucherModelEntity.getSerie(), paymentVoucherModelEntity.getNumero(),idPaymentVoucher);
+                            PaymentVoucherDto paymentVoucherDtoEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
+                            GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc, paymentVoucherDtoEntity.getTipoComprobante(), paymentVoucherDtoEntity.getSerie(), paymentVoucherDtoEntity.getNumero(),idPaymentVoucher);
                             responseSunatCdr = sendSunatService.getStatusCDR(statusCdrDTO, ruc);
 
-                            messageResponse = "La Factura numero "+ paymentVoucherModelEntity.getSerie()+"-"+ paymentVoucherModelEntity.getNumero()+", ha sido aceptada";
+                            messageResponse = "La Factura numero "+ paymentVoucherDtoEntity.getSerie()+"-"+ paymentVoucherDtoEntity.getNumero()+", ha sido aceptada";
 
                             RegisterFileUploadModel responseStorage = uploadFileCdr(ruc, voucherPendiente.getNombreDocumento(), voucherPendiente.getTipoComprobante(),
                                     ConstantesParameter.REGISTRO_STATUS_NUEVO, responseSunatCdr.getContentBase64());
 
-                            paymentVoucherModelEntity.setEstado(EstadoComprobanteEnum.ACEPTADO.getCodigo());
-                            paymentVoucherModelEntity.setEstadoSunat(EstadoSunatEnum.ACEPTADO.getAbreviado());
-                            paymentVoucherModelEntity.setMensajeRespuesta(messageResponse);
-                            paymentVoucherModelEntity.setCodigosRespuestaSunat("0");
+                            paymentVoucherDtoEntity.setEstado(EstadoComprobanteEnum.ACEPTADO.getCodigo());
+                            paymentVoucherDtoEntity.setEstadoSunat(EstadoSunatEnum.ACEPTADO.getAbreviado());
+                            paymentVoucherDtoEntity.setMensajeRespuesta(messageResponse);
+                            paymentVoucherDtoEntity.setCodigosRespuestaSunat("0");
                             System.out.println("SEGUIMIENTO 020");
                             if (responseStorage.getIdRegisterFileSend() != null) {
-                                paymentVoucherModelEntity.getPaymentVoucherFileModelList().add(
+                                paymentVoucherDtoEntity.getPaymentVoucherFileModelList().add(
                                         PaymentVoucherFileModel.builder()
                                                 .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
                                                 .idRegisterFileSend(responseStorage.getIdRegisterFileSend())
@@ -213,25 +214,25 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                         break;
                     case WITHOUT_CONNECTION:
                         if(responseSunat.getMessage().contains("1033")){
-                            PaymentVoucherModel paymentVoucherModelEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
+                            PaymentVoucherDto paymentVoucherDtoEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
 
-                            GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc, paymentVoucherModelEntity.getTipoComprobante(), paymentVoucherModelEntity.getSerie(), paymentVoucherModelEntity.getNumero(),idPaymentVoucher);
+                            GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc, paymentVoucherDtoEntity.getTipoComprobante(), paymentVoucherDtoEntity.getSerie(), paymentVoucherDtoEntity.getNumero(),idPaymentVoucher);
 
                             responseSunatCdr = sendSunatService.getStatusCDR(statusCdrDTO, ruc);
 
-                            messageResponse = "La Factura numero "+ paymentVoucherModelEntity.getSerie()+"-"+ paymentVoucherModelEntity.getNumero()+", ha sido aceptada";
+                            messageResponse = "La Factura numero "+ paymentVoucherDtoEntity.getSerie()+"-"+ paymentVoucherDtoEntity.getNumero()+", ha sido aceptada";
 
 
                             RegisterFileUploadModel responseStorage = uploadFileCdr(ruc, voucherPendiente.getNombreDocumento(), voucherPendiente.getTipoComprobante(), ConstantesParameter.REGISTRO_STATUS_NUEVO,
                                     responseSunatCdr.getContentBase64());
 
-                            paymentVoucherModelEntity.setEstado(EstadoComprobanteEnum.ACEPTADO.getCodigo());
-                            paymentVoucherModelEntity.setEstadoSunat(EstadoSunatEnum.ACEPTADO.getAbreviado());
-                            paymentVoucherModelEntity.setMensajeRespuesta(messageResponse);
-                            paymentVoucherModelEntity.setCodigosRespuestaSunat("0");
+                            paymentVoucherDtoEntity.setEstado(EstadoComprobanteEnum.ACEPTADO.getCodigo());
+                            paymentVoucherDtoEntity.setEstadoSunat(EstadoSunatEnum.ACEPTADO.getAbreviado());
+                            paymentVoucherDtoEntity.setMensajeRespuesta(messageResponse);
+                            paymentVoucherDtoEntity.setCodigosRespuestaSunat("0");
                             System.out.println("SEGUIMIENTO 021");
                             if (responseStorage.getIdRegisterFileSend() != null) {
-                                paymentVoucherModelEntity.getPaymentVoucherFileModelList().add(
+                                paymentVoucherDtoEntity.getPaymentVoucherFileModelList().add(
                                     PaymentVoucherFileModel.builder()
                                             .estadoArchivo(EstadoArchivoEnum.INACTIVO.name())
                                             .idRegisterFileSend(responseStorage.getIdRegisterFileSend())

@@ -1,4 +1,4 @@
-package com.certicom.certifact_facturas_service_ng.controller;
+package com.certicom.certifact_facturas_service_ng.controller.web;
 
 import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
@@ -17,11 +17,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 @RestController
-@RequestMapping(FileController.API_PATH)
+@RequestMapping(DescargaController.API_PATH)
 @RequiredArgsConstructor
-public class FileController {
+public class DescargaController {
 
-    public static final String API_PATH = "/api/internal/file";
+    public static final String API_PATH = "/api";
 
     private final AmazonS3ClientService amazonS3ClientService;
 

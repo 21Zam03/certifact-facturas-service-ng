@@ -1,13 +1,13 @@
 package com.certicom.certifact_facturas_service_ng.validation.business;
 
-import com.certicom.certifact_facturas_service_ng.dto.request.VoucherAnnularRequest;
+import com.certicom.certifact_facturas_service_ng.request.VoucherAnnularRequest;
 import com.certicom.certifact_facturas_service_ng.enums.EstadoComprobanteEnum;
 import com.certicom.certifact_facturas_service_ng.exceptions.ValidationException;
 import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
 import com.certicom.certifact_facturas_service_ng.feign.ParameterFeign;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
 import com.certicom.certifact_facturas_service_ng.model.ParameterModel;
-import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherModel;
+import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
@@ -68,7 +68,7 @@ public class VoucherAnnularValidator extends CamposEntrada<Object> {
         EstadoComprobanteEnum estadoComprobante = null;
         System.out.println("tipo de documento: "+tipoDocumento.getClass().getSimpleName());
 
-        PaymentVoucherModel entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+        PaymentVoucherDto entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
         if (entity==null){
             noExiste=true;
         }else {

@@ -1,12 +1,16 @@
-package com.certicom.certifact_facturas_service_ng.dto.request;
+package com.certicom.certifact_facturas_service_ng.dto;
 
-import com.certicom.certifact_facturas_service_ng.deserializer.ComprobanteDeserializer;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.certicom.certifact_facturas_service_ng.enums.EstadoArchivoEnum;
+import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
+import com.certicom.certifact_facturas_service_ng.model.PaymentVoucherFileModel;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -14,11 +18,9 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @ToString
-@JsonDeserialize(using = ComprobanteDeserializer.class)
-public class PaymentVoucherRequest implements Serializable {
+public class PaymentVoucherDto {
 
-    private static final long serialVersionUID = 1L;
-
+    private Long idPaymentVoucher;
     private String tipoComprobante;
     private String serie;
     private Integer numero;
@@ -27,7 +29,6 @@ public class PaymentVoucherRequest implements Serializable {
     private String fechaVencimiento;
     private String codigoMoneda;
     private String codigoTipoOperacion;
-
     private String codigoTipoOperacionCatalogo51;
     private String rucEmisor;
     private String direccionOficinaEmisor;
@@ -59,25 +60,20 @@ public class PaymentVoucherRequest implements Serializable {
     private BigDecimal descuentoGlobales;
     private BigDecimal sumatoriaOtrosCargos;
     private BigDecimal totalAnticipos;
-
     private BigDecimal importeTotalVenta;
-
     private String serieAfectado;
     private Integer numeroAfectado;
     private String tipoComprobanteAfectado;
     private String codigoTipoNotaCredito;
     private String codigoTipoNotaDebito;
     private String motivoNota;
-
     private List<ComprobanteItem> items;
-
     private String denominacionEmisor;
     private String nombreComercialEmisor;
     private String tipoDocumentoEmisor;
     private String identificadorDocumento;
     private String ordenCompra;
     private List<Anticipo> anticipos;
-
     private List<CampoAdicional> camposAdicionales;
     private List<ComprobanteCuota> cuotas;
     private String codigoBienDetraccion;
@@ -92,13 +88,47 @@ public class PaymentVoucherRequest implements Serializable {
     private String codigoHash;
     private Integer oficinaId;
     private Integer retencion;
-
     private BigDecimal tipoTransaccion;
     private BigDecimal montoPendiente;
     private BigDecimal cantidadCuotas;
     private BigDecimal pagoCuenta;
-
     private String idpay;
-    private String fechaRegistro;
+    private String estado;
+    private String estadoAnterior;
+    private Integer estadoItem;
+    private String estadoSunat;
+    private String codigosRespuestaSunat;
+    private String mensajeRespuesta;
+    private Timestamp fechaRegistro;
+    private String userName;
+    private Timestamp fechaModificacion;
+    private String userNameModificacion;
+    private String codigoTipoDocumentoRelacionado;
+    private String serieNumeroDocumentoRelacionado;
+    private String Uuid;
+    private Date fechaEmisionDate;
+
+    private List<PaymentVoucherFileModel> paymentVoucherFileModelList;
+
+    @JsonIgnore
+    public List<PaymentVoucherFileModel> getOrCreatePaymentVoucherFile() {
+        if (this.paymentVoucherFileModelList == null) {
+            this.paymentVoucherFileModelList = new ArrayList<PaymentVoucherFileModel>();
+        }
+        return this.paymentVoucherFileModelList;
+    }
+
+    @JsonIgnore
+    public void addPaymentVoucherFile(PaymentVoucherFileModel paymentVoucherFileModel) {
+        paymentVoucherFileModel.setOrden(getOrCreatePaymentVoucherFile().size()+1);
+        if(paymentVoucherFileModel.getTipoArchivo().equals(TipoArchivoEnum.XML.name())) {
+            getOrCreatePaymentVoucherFile().forEach(f -> {
+                if(f.getTipoArchivo().equals(TipoArchivoEnum.XML.name())) {
+                    f.setEstadoArchivo(EstadoArchivoEnum.INACTIVO.name());
+                }
+            });
+        }
+        getOrCreatePaymentVoucherFile().add(paymentVoucherFileModel);
+    }
 
 }

@@ -1,10 +1,11 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
+import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.Voided;
 import com.certicom.certifact_facturas_service_ng.dto.others.VoidedLine;
-import com.certicom.certifact_facturas_service_ng.dto.request.VoucherAnnularRequest;
-import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
-import com.certicom.certifact_facturas_service_ng.dto.response.ResponseSunat;
+import com.certicom.certifact_facturas_service_ng.request.VoucherAnnularRequest;
+import com.certicom.certifact_facturas_service_ng.dto.others.ResponsePSE;
+import com.certicom.certifact_facturas_service_ng.dto.others.ResponseSunat;
 import com.certicom.certifact_facturas_service_ng.enums.EstadoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.model.*;
@@ -108,7 +109,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
             for (VoucherAnnularRequest documento : documents) {
                 String identificadorDocumento = rucEmisor + "-" + documento.getTipoComprobante() + "-" +
                         documento.getSerie().toUpperCase() + "-" + documento.getNumero();
-                PaymentVoucherModel entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+                PaymentVoucherDto entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
                 System.out.println("VOIDED: "+ entity);
                 if (documento.getRucEmisor()==null){
                     documento.setRucEmisor(rucEmisor);
@@ -124,7 +125,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                         document.getSerie().toUpperCase() + "-" + document.getNumero();
                 System.out.println(identificadorDocumento);
                 boolean noExiste = false;
-                PaymentVoucherModel entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+                PaymentVoucherDto entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
                 if (entity==null){
                     noExiste=true;
                 }
@@ -178,7 +179,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                 for (VoucherAnnularRequest document : anulados) {
                     String identificadorDocumento = rucEmisor + "-" + document.getTipoComprobante() + "-" +
                             document.getSerie().toUpperCase() + "-" + document.getNumero();
-                    PaymentVoucherModel entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+                    PaymentVoucherDto entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
                     if (entity.getEstado().equals("08") ){
                         if (messageBuilder == null) {
                             messageBuilder = new StringBuilder();

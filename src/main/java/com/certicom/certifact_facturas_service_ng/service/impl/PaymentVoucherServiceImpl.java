@@ -1,8 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
+import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
-import com.certicom.certifact_facturas_service_ng.dto.others.PaymentVoucherDto;
-import com.certicom.certifact_facturas_service_ng.dto.response.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.entity.*;
 import com.certicom.certifact_facturas_service_ng.enums.*;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
@@ -21,7 +20,6 @@ import com.google.common.collect.ImmutableMap;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -68,15 +66,15 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         Integer numPagina = null;
         String estadoSunat = null;
 
-        List<PaymentVoucherDto> result = null;
+        List<PaymentVoucherDtoFilter> result = null;
         Integer cantidad = null;
-        List<PaymentVoucherDto> tsolespayment = null;
+        List<PaymentVoucherDtoFilter> tsolespayment = null;
         BigDecimal tsolesnew = BigDecimal.ZERO;
         BigDecimal tdolaresnew = BigDecimal.ZERO;
         BigDecimal teurosnew = BigDecimal.ZERO;
-        PaymentVoucherDto comprobanteMonedaSol = null;
-        PaymentVoucherDto comprobanteMonedaDolar = null;
-        PaymentVoucherDto comprobanteMonedaEur = null;
+        PaymentVoucherDtoFilter comprobanteMonedaSol = null;
+        PaymentVoucherDtoFilter comprobanteMonedaDolar = null;
+        PaymentVoucherDtoFilter comprobanteMonedaEur = null;
 
         try {
             UserModel usuarioLogueado = userFeign.findUserById(idUsuario);
@@ -99,19 +97,21 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
             tsolespayment = paymentVoucherFeign.getTotalSoles(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
                     filtroSerie, filtroNumero, idOficina, estadoSunat, pageNumber, perPage);
-
+            System.out.println("TOTALES: "+tsolespayment.size());
             comprobanteMonedaSol = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals(CODSOLES)).findFirst().orElse(null);
+            System.out.println("COMPROBANTES MONEDA SOL: "+comprobanteMonedaSol);
             if(comprobanteMonedaSol!=null) {
-                tsolesnew = comprobanteMonedaSol.getMontoImporteTotalVenta()!=null?comprobanteMonedaSol.getMontoImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
+                tsolesnew = comprobanteMonedaSol.getImporteTotalVenta()!=null?comprobanteMonedaSol.getImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
             }
 
-            comprobanteMonedaDolar = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals("")).findFirst().orElse(null);
+            comprobanteMonedaDolar = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals(CODDOLAR)).findFirst().orElse(null);
             if (comprobanteMonedaDolar!=null) {
-                tdolaresnew = comprobanteMonedaDolar.getMontoImporteTotalVenta()!=null?comprobanteMonedaDolar.getMontoImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
+                tdolaresnew = comprobanteMonedaDolar.getImporteTotalVenta()!=null?comprobanteMonedaDolar.getImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
             }
-            comprobanteMonedaEur = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals("")).findFirst().orElse(null);
+            System.out.println("COMPROBANTES MONEDA DOLAR: "+comprobanteMonedaDolar);
+            comprobanteMonedaEur = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals(CODEURO)).findFirst().orElse(null);
             if (comprobanteMonedaEur!=null) {
-                teurosnew = comprobanteMonedaEur.getMontoImporteTotalVenta()!=null?comprobanteMonedaEur.getMontoImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
+                teurosnew = comprobanteMonedaEur.getImporteTotalVenta()!=null?comprobanteMonedaEur.getImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
             }
         } catch (Exception e) {
             log.error("ERROR: {}", e.getMessage());
@@ -126,13 +126,22 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     }*/
 
     @Override
-    public Map<String, Object> createPaymentVoucher(PaymentVoucherModel paymentVoucherModel, Long idUsuario) {
-        return generateNewDocument(paymentVoucherModel,  idUsuario);
+    public Map<String, Object> createPaymentVoucher(PaymentVoucherDto paymentVoucherDto, Long idUsuario) {
+        return generateNewDocument(paymentVoucherDto,  idUsuario);
     }
 
     @Override
-    public Map<String, Object> updatePaymentVoucher(PaymentVoucherModel paymentVoucherModel, Long idUsuario) {
-        return updateExistingDocument(paymentVoucherModel, idUsuario);
+    public Map<String, Object> updatePaymentVoucher(PaymentVoucherDto paymentVoucherDto, Long idUsuario) {
+        return updateExistingDocument(paymentVoucherDto, idUsuario);
+    }
+
+    @Override
+    public Integer getSiguienteNumeroComprobante(String tipoDocumento, String serie, String ruc) {
+        Integer ultimoComprobante = paymentVoucherFeign.getUltimoNumeroForNumeracion(tipoDocumento, serie, ruc);
+        if (ultimoComprobante != null) {
+            return ultimoComprobante + 1;
+        }
+        return 1;
     }
 
     /*
@@ -206,34 +215,34 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
     * */
 
-    Map<String, Object> generateNewDocument(PaymentVoucherModel paymentVoucherModel, Long idUsuario) {
+    Map<String, Object> generateNewDocument(PaymentVoucherDto paymentVoucherDto, Long idUsuario) {
         Map<String, Object> resultado = new HashMap<>();
         String messageResponse = ConstantesParameter.MSG_REGISTRO_DOCUMENTO_OK;
-        PaymentVoucherModel comprobanteCreado = null;
+        PaymentVoucherDto comprobanteCreado = null;
         ResponsePSE response;
-        boolean status = false;
+        boolean status = true;
         try {
-            paymentVoucherFormatter.formatPaymentVoucher(paymentVoucherModel);
+            paymentVoucherFormatter.formatPaymentVoucher(paymentVoucherDto);
             UserModel userLogged = userFeign.findUserById(idUsuario);
-            CompanyModel companyModel = completarDatosEmisor(paymentVoucherModel);
-            setCodigoTipoOperacionCatalog(paymentVoucherModel);
-            setOficinaId(paymentVoucherModel, companyModel);
-            setLeyenda(paymentVoucherModel);
+            CompanyModel companyModel = completarDatosEmisor(paymentVoucherDto);
+            setCodigoTipoOperacionCatalog(paymentVoucherDto);
+            setOficinaId(paymentVoucherDto, companyModel);
+            setLeyenda(paymentVoucherDto);
 
             if ((companyModel.getSimultaneo() != null && companyModel.getSimultaneo())) {
                 Integer proximoNumero;
-                proximoNumero = getProximoNumero(paymentVoucherModel.getTipoComprobante(), paymentVoucherModel.getSerie(), paymentVoucherModel.getRucEmisor());
-                if (proximoNumero > paymentVoucherModel.getNumero()) {
-                    paymentVoucherModel.setNumero(proximoNumero);
+                proximoNumero = getProximoNumero(paymentVoucherDto.getTipoComprobante(), paymentVoucherDto.getSerie(), paymentVoucherDto.getRucEmisor());
+                if (proximoNumero > paymentVoucherDto.getNumero()) {
+                    paymentVoucherDto.setNumero(proximoNumero);
                 }
             }
 
-            Map<String, String> plantillaGenerado = generarPlantillaXml(companyModel, paymentVoucherModel);
-            paymentVoucherModel.setCodigoHash(plantillaGenerado.get(ConstantesParameter.CODIGO_HASH));
+            Map<String, String> plantillaGenerado = generarPlantillaXml(companyModel, paymentVoucherDto);
+            paymentVoucherDto.setCodigoHash(plantillaGenerado.get(ConstantesParameter.CODIGO_HASH));
 
             RegisterFileUploadModel archivoSubido = subirXmlComprobante(companyModel, plantillaGenerado);
 
-            comprobanteCreado = saveVoucher(paymentVoucherModel, archivoSubido.getIdRegisterFileSend(), userLogged.getNombreUsuario());
+            comprobanteCreado = saveVoucher(paymentVoucherDto, archivoSubido.getIdRegisterFileSend(), userLogged.getNombreUsuario());
 
             createTmpVoucher(comprobanteCreado);
             SendBillDto dataSendBill = SendBillDto.builder()
@@ -243,13 +252,13 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
                     .envioAutomaticoSunat(companyModel.getEnvioAutomaticoSunat() == null || companyModel.getEnvioAutomaticoSunat())
                     .build();
             resultado.put(ConstantesParameter.PARAM_BEAN_SEND_BILL, dataSendBill);
-            status = true;
         } catch (TemplateException | SignedException e) {
-            messageResponse = "Error al generar plantilla del documento[" + paymentVoucherModel.getIdentificadorDocumento() + "] " + e.getMessage();
+            status = false;
+            messageResponse = "Error al generar plantilla del documento[" + paymentVoucherDto.getIdentificadorDocumento() + "] " + e.getMessage();
         }  catch (Exception e) {
+            status = false;
             messageResponse = e.getMessage();
         }
-
         if(!status) {
             throw new ServiceException(messageResponse);
         }
@@ -262,39 +271,39 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         return resultado;
     }
 
-    Map<String, Object> updateExistingDocument(PaymentVoucherModel paymentVoucherModel, Long idUsuario) {
+    Map<String, Object> updateExistingDocument(PaymentVoucherDto paymentVoucherDto, Long idUsuario) {
         Map<String, Object> resultado = new HashMap<>();
-        String messageResponse = "";
-        PaymentVoucherModel comprobanteCreado = null;
+        String messageResponse = ConstantesParameter.MSG_EDICION_DOCUMENTO_OK;
+        PaymentVoucherDto comprobanteCreado = null;
         ResponsePSE response;
         boolean status = true;
         try {
-            paymentVoucherFormatter.formatPaymentVoucher(paymentVoucherModel);
+            paymentVoucherFormatter.formatPaymentVoucher(paymentVoucherDto);
             UserModel userLogged = userFeign.findUserById(idUsuario);
-            CompanyModel companyModel = completarDatosEmisor(paymentVoucherModel);
-            setCodigoTipoOperacionCatalog(paymentVoucherModel);
-            setOficinaId(paymentVoucherModel, companyModel);
-            setLeyenda(paymentVoucherModel);
+            CompanyModel companyModel = completarDatosEmisor(paymentVoucherDto);
+            setCodigoTipoOperacionCatalog(paymentVoucherDto);
+            setOficinaId(paymentVoucherDto, companyModel);
+            setLeyenda(paymentVoucherDto);
 
-            PaymentVoucherModel paymentVoucherModelOld = paymentVoucherFeign.findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
-                    paymentVoucherModel.getRucEmisor(), paymentVoucherModel.getTipoComprobante(), paymentVoucherModel.getSerie(), paymentVoucherModel.getNumero());
-            if (paymentVoucherModelOld == null)
+            PaymentVoucherDto paymentVoucherDtoOld = paymentVoucherFeign.findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
+                    paymentVoucherDto.getRucEmisor(), paymentVoucherDto.getTipoComprobante(), paymentVoucherDto.getSerie(), paymentVoucherDto.getNumero());
+            if (paymentVoucherDtoOld == null)
                 throw new ServiceException("Este comprobante que desea editar, no existe en la base de datos del PSE");
 
-            if ((!paymentVoucherModelOld.getEstado().equals(EstadoComprobanteEnum.REGISTRADO.getCodigo()) &&
-                    !paymentVoucherModelOld.getEstado().equals(EstadoComprobanteEnum.ERROR.getCodigo()))
-                    || paymentVoucherModelOld.getEstadoSunat().equals(EstadoSunatEnum.ACEPTADO.getAbreviado())
-                    || paymentVoucherModelOld.getEstadoSunat().equals(EstadoSunatEnum.ANULADO.getAbreviado())
+            if ((!paymentVoucherDtoOld.getEstado().equals(EstadoComprobanteEnum.REGISTRADO.getCodigo()) &&
+                    !paymentVoucherDtoOld.getEstado().equals(EstadoComprobanteEnum.ERROR.getCodigo()))
+                    || paymentVoucherDtoOld.getEstadoSunat().equals(EstadoSunatEnum.ACEPTADO.getAbreviado())
+                    || paymentVoucherDtoOld.getEstadoSunat().equals(EstadoSunatEnum.ANULADO.getAbreviado())
             ) {
                 throw new ServiceException("Este comprobante no se puede editar, ya fue declarado a Sunat.");
             }
 
-            Map<String, String> plantillaGenerado = generarPlantillaXml(companyModel, paymentVoucherModel);
-            paymentVoucherModel.setCodigoHash(plantillaGenerado.get(ConstantesParameter.CODIGO_HASH));
+            Map<String, String> plantillaGenerado = generarPlantillaXml(companyModel, paymentVoucherDto);
+            paymentVoucherDto.setCodigoHash(plantillaGenerado.get(ConstantesParameter.CODIGO_HASH));
 
             RegisterFileUploadModel archivoSubido = subirXmlComprobante(companyModel, plantillaGenerado);
 
-            comprobanteCreado = updateVoucher(paymentVoucherModel, paymentVoucherModelOld, archivoSubido.getIdRegisterFileSend(), userLogged.getNombreUsuario());
+            comprobanteCreado = updateVoucher(paymentVoucherDto, paymentVoucherDtoOld, archivoSubido.getIdRegisterFileSend(), userLogged.getNombreUsuario());
 
             updateTmpVoucher(comprobanteCreado);
             SendBillDto dataSendBill = SendBillDto.builder()
@@ -306,15 +315,13 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             resultado.put(ConstantesParameter.PARAM_BEAN_SEND_BILL, dataSendBill);
         } catch (TemplateException | SignedException e) {
             status = false;
-            messageResponse = "Error al generar plantilla del documento[" + paymentVoucherModel.getIdentificadorDocumento() + "] " + e.getMessage();
+            messageResponse = "Error al generar plantilla del documento[" + paymentVoucherDto.getIdentificadorDocumento() + "] " + e.getMessage();
         }  catch (Exception e) {
             status = false;
             messageResponse = e.getMessage();
         }
         if(!status) {
             throw new ServiceException(messageResponse);
-        } else {
-            messageResponse = ConstantesParameter.MSG_EDICION_DOCUMENTO_OK;
         }
         response = createResponsePse(messageResponse, status, comprobanteCreado);
 
@@ -325,22 +332,22 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         return resultado;
     }
 
-    private PaymentVoucherModel saveVoucher(PaymentVoucherModel paymentVoucherModel, Long idRegisterFile, String username) {
+    private PaymentVoucherDto saveVoucher(PaymentVoucherDto paymentVoucherDto, Long idRegisterFile, String username) {
 
-        paymentVoucherModel.setIdentificadorDocumento(paymentVoucherModel.getRucEmisor()+ "-" +paymentVoucherModel.getTipoComprobante()+ "-" +
-                paymentVoucherModel.getSerie()+ "-" +paymentVoucherModel.getNumero());
-        paymentVoucherModel.setEstado(EstadoComprobanteEnum.REGISTRADO.getCodigo());
-        paymentVoucherModel.setEstadoAnterior(EstadoComprobanteEnum.REGISTRADO.getCodigo());
-        paymentVoucherModel.setEstadoItem(null);
-        paymentVoucherModel.setEstadoSunat(EstadoSunatEnum.NO_ENVIADO.getAbreviado());
-        paymentVoucherModel.setMensajeRespuesta(ConstantesParameter.MSG_REGISTRO_DOCUMENTO_OK);
-        paymentVoucherModel.setFechaRegistro(new Timestamp(Calendar.getInstance().getTime().getTime()));
-        paymentVoucherModel.setUserName(username);
-        paymentVoucherModel.setFechaModificacion(null);
-        paymentVoucherModel.setUserNameModificacion(null);
+        paymentVoucherDto.setIdentificadorDocumento(paymentVoucherDto.getRucEmisor()+ "-" + paymentVoucherDto.getTipoComprobante()+ "-" +
+                paymentVoucherDto.getSerie()+ "-" + paymentVoucherDto.getNumero());
+        paymentVoucherDto.setEstado(EstadoComprobanteEnum.REGISTRADO.getCodigo());
+        paymentVoucherDto.setEstadoAnterior(EstadoComprobanteEnum.REGISTRADO.getCodigo());
+        paymentVoucherDto.setEstadoItem(null);
+        paymentVoucherDto.setEstadoSunat(EstadoSunatEnum.NO_ENVIADO.getAbreviado());
+        paymentVoucherDto.setMensajeRespuesta(ConstantesParameter.MSG_REGISTRO_DOCUMENTO_OK);
+        paymentVoucherDto.setFechaRegistro(new Timestamp(Calendar.getInstance().getTime().getTime()));
+        paymentVoucherDto.setUserName(username);
+        paymentVoucherDto.setFechaModificacion(null);
+        paymentVoucherDto.setUserNameModificacion(null);
 
         if (idRegisterFile != null) {
-            paymentVoucherModel.addPaymentVoucherFile(PaymentVoucherFileModel.builder()
+            paymentVoucherDto.addPaymentVoucherFile(PaymentVoucherFileModel.builder()
                     .orden(1)
                     .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
                     .idRegisterFileSend(idRegisterFile)
@@ -348,29 +355,29 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
                     .build());
         }
 
-        for (ComprobanteItem item : paymentVoucherModel.getItems()) {
+        for (ComprobanteItem item : paymentVoucherDto.getItems()) {
             item.setEstado(ConstantesParameter.REGISTRO_ACTIVO);
         }
 
-        if (username != null && paymentVoucherModel.getOficinaId() == null) {
+        if (username != null && paymentVoucherDto.getOficinaId() == null) {
             if (!username.equals(ConstantesSunat.SUPERADMIN)) {
                 UserEntity user = userFeign.findUserByUsername(username);
-                paymentVoucherModel.setOficinaId(user.getOficinaId());
+                paymentVoucherDto.setOficinaId(user.getOficinaId());
             }
         }
 
-        paymentVoucherModel.setUuid(UUIDGen.generate());
-        paymentVoucherModel.setFechaEmisionDate(new Date());
+        paymentVoucherDto.setUuid(UUIDGen.generate());
+        paymentVoucherDto.setFechaEmisionDate(new Date());
 
-        return paymentVoucherFeign.savePaymentVoucher(paymentVoucherModel);
+        return paymentVoucherFeign.savePaymentVoucher(paymentVoucherDto);
     }
 
-    private PaymentVoucherModel updateVoucher(PaymentVoucherModel paymentVoucherModel, PaymentVoucherModel paymentVoucherModelOld, Long idRegisterFile, String username) {
-        List<ComprobanteItem> items = paymentVoucherModelOld.getItems();
-        List<Anticipo> anticipos = paymentVoucherModelOld.getAnticipos();
-        List<CampoAdicional> adicionales = paymentVoucherModelOld.getCamposAdicionales();
-        List<ComprobanteCuota> cuotas = paymentVoucherModelOld.getCuotas();
-        List<GuiaRelacionada> guias = paymentVoucherModelOld.getGuiasRelacionadas();
+    private PaymentVoucherDto updateVoucher(PaymentVoucherDto paymentVoucherDto, PaymentVoucherDto paymentVoucherDtoOld, Long idRegisterFile, String username) {
+        List<ComprobanteItem> items = paymentVoucherDtoOld.getItems();
+        List<Anticipo> anticipos = paymentVoucherDtoOld.getAnticipos();
+        List<CampoAdicional> adicionales = paymentVoucherDtoOld.getCamposAdicionales();
+        List<ComprobanteCuota> cuotas = paymentVoucherDtoOld.getCuotas();
+        List<GuiaRelacionada> guias = paymentVoucherDtoOld.getGuiasRelacionadas();
 
         if (items != null && !items.isEmpty()) {
             for (ComprobanteItem item : items) {
@@ -406,100 +413,100 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
                 System.out.println("Eliminar guias relacionadas del comprobante");
             }
         }
-        paymentVoucherModel.setIdPaymentVoucher(paymentVoucherModelOld.getIdPaymentVoucher());
-        paymentVoucherModel.setUuid(paymentVoucherModelOld.getUuid());
-        paymentVoucherModel.setPaymentVoucherFileModelList(paymentVoucherModelOld.getPaymentVoucherFileModelList());
-        paymentVoucherModel.setFechaRegistro(new Timestamp(Calendar.getInstance().getTime().getTime()));
+        paymentVoucherDto.setIdPaymentVoucher(paymentVoucherDtoOld.getIdPaymentVoucher());
+        paymentVoucherDto.setUuid(paymentVoucherDtoOld.getUuid());
+        paymentVoucherDto.setPaymentVoucherFileModelList(paymentVoucherDtoOld.getPaymentVoucherFileModelList());
+        paymentVoucherDto.setFechaRegistro(new Timestamp(Calendar.getInstance().getTime().getTime()));
 
-        paymentVoucherModel.setIdentificadorDocumento(paymentVoucherModel.getRucEmisor()+ "-" +paymentVoucherModel.getTipoComprobante()+ "-" +
-                paymentVoucherModel.getSerie()+ "-" +paymentVoucherModel.getNumero());
+        paymentVoucherDto.setIdentificadorDocumento(paymentVoucherDto.getRucEmisor()+ "-" + paymentVoucherDto.getTipoComprobante()+ "-" +
+                paymentVoucherDto.getSerie()+ "-" + paymentVoucherDto.getNumero());
 
-        paymentVoucherModel.setEstado(EstadoComprobanteEnum.REGISTRADO.getCodigo());
-        paymentVoucherModel.setEstadoAnterior(EstadoComprobanteEnum.REGISTRADO.getCodigo());
-        paymentVoucherModel.setEstadoItem(null);
-        paymentVoucherModel.setEstadoSunat(EstadoSunatEnum.NO_ENVIADO.getAbreviado());
-        paymentVoucherModel.setMensajeRespuesta(ConstantesParameter.MSG_EDICION_DOCUMENTO_OK);
+        paymentVoucherDto.setEstado(EstadoComprobanteEnum.REGISTRADO.getCodigo());
+        paymentVoucherDto.setEstadoAnterior(EstadoComprobanteEnum.REGISTRADO.getCodigo());
+        paymentVoucherDto.setEstadoItem(null);
+        paymentVoucherDto.setEstadoSunat(EstadoSunatEnum.NO_ENVIADO.getAbreviado());
+        paymentVoucherDto.setMensajeRespuesta(ConstantesParameter.MSG_EDICION_DOCUMENTO_OK);
 
-        paymentVoucherModel.setFechaModificacion(paymentVoucherModelOld.getFechaModificacion());
-        paymentVoucherModel.setUserName(paymentVoucherModelOld.getUserName());
-        paymentVoucherModel.setUserNameModificacion(username);
+        paymentVoucherDto.setFechaModificacion(paymentVoucherDtoOld.getFechaModificacion());
+        paymentVoucherDto.setUserName(paymentVoucherDtoOld.getUserName());
+        paymentVoucherDto.setUserNameModificacion(username);
 
         if (idRegisterFile != null) {
-            paymentVoucherModel.addPaymentVoucherFile(PaymentVoucherFileModel.builder()
+            paymentVoucherDto.addPaymentVoucherFile(PaymentVoucherFileModel.builder()
                     .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
                     .idRegisterFileSend(idRegisterFile)
                     .tipoArchivo(TipoArchivoEnum.XML.name())
                     .build());
         }
 
-        for (ComprobanteItem item : paymentVoucherModel.getItems()) {
+        for (ComprobanteItem item : paymentVoucherDto.getItems()) {
             item.setEstado(ConstantesParameter.REGISTRO_ACTIVO);
         }
 
-        if (username != null && paymentVoucherModel.getOficinaId() == null) {
+        if (username != null && paymentVoucherDto.getOficinaId() == null) {
             if (!username.equals(ConstantesSunat.SUPERADMIN)) {
                 UserEntity user = userFeign.findUserByUsername(username);
-                paymentVoucherModel.setOficinaId(user.getOficinaId());
+                paymentVoucherDto.setOficinaId(user.getOficinaId());
             }
         }
 
-        paymentVoucherModel.setUuid(UUIDGen.generate());
-        paymentVoucherModel.setFechaEmisionDate(new Date());
+        paymentVoucherDto.setUuid(UUIDGen.generate());
+        paymentVoucherDto.setFechaEmisionDate(new Date());
 
-        return paymentVoucherFeign.savePaymentVoucher(paymentVoucherModel);
+        return paymentVoucherFeign.savePaymentVoucher(paymentVoucherDto);
     }
 
-    private void createTmpVoucher(PaymentVoucherModel paymentVoucherModel) {
-        System.out.println("id: "+paymentVoucherModel.getIdPaymentVoucher());
+    private void createTmpVoucher(PaymentVoucherDto paymentVoucherDto) {
+        System.out.println("id: "+ paymentVoucherDto.getIdPaymentVoucher());
         TmpVoucherSendBillEntity tmpEntity = new TmpVoucherSendBillEntity();
         tmpEntity.setEstado(EstadoVoucherTmpEnum.PENDIENTE.getEstado());
-        tmpEntity.setIdPaymentVoucher(paymentVoucherModel.getIdPaymentVoucher());
-        tmpEntity.setNombreDocumento(paymentVoucherModel.getIdentificadorDocumento());
+        tmpEntity.setIdPaymentVoucher(paymentVoucherDto.getIdPaymentVoucher());
+        tmpEntity.setNombreDocumento(paymentVoucherDto.getIdentificadorDocumento());
         tmpEntity.setUuidSaved(UUIDGen.generate());
-        tmpEntity.setTipoComprobante(paymentVoucherModel.getTipoComprobante());
+        tmpEntity.setTipoComprobante(paymentVoucherDto.getTipoComprobante());
 
         tmpVoucherFeign.saveTmpVoucher(tmpEntity);
     }
 
-    private void updateTmpVoucher(PaymentVoucherModel paymentVoucherModel) {
-        TmpVoucherSendBillEntity tmpEntity = tmpVoucherFeign.findTmpVoucherByIdPaymentVoucher(paymentVoucherModel.getIdPaymentVoucher());
+    private void updateTmpVoucher(PaymentVoucherDto paymentVoucherDto) {
+        TmpVoucherSendBillEntity tmpEntity = tmpVoucherFeign.findTmpVoucherByIdPaymentVoucher(paymentVoucherDto.getIdPaymentVoucher());
         if (tmpEntity == null) {
-            throw new ServiceException("No existe un registro temporal para el comprobante con ID " + paymentVoucherModel.getIdPaymentVoucher());
+            throw new ServiceException("No existe un registro temporal para el comprobante con ID " + paymentVoucherDto.getIdPaymentVoucher());
         }
         tmpEntity.setEstado(EstadoVoucherTmpEnum.PENDIENTE.getEstado());
-        tmpEntity.setNombreDocumento(paymentVoucherModel.getIdentificadorDocumento());
+        tmpEntity.setNombreDocumento(paymentVoucherDto.getIdentificadorDocumento());
         tmpEntity.setUuidSaved(UUIDGen.generate());
-        tmpEntity.setTipoComprobante(paymentVoucherModel.getTipoComprobante());
+        tmpEntity.setTipoComprobante(paymentVoucherDto.getTipoComprobante());
         tmpVoucherFeign.saveTmpVoucher(tmpEntity);
     }
 
     private ResponsePSE createResponsePse(
             String messageResponse, boolean status,
-            PaymentVoucherModel paymentVoucherModel) {
+            PaymentVoucherDto paymentVoucherDto) {
         ResponsePSE response = ResponsePSE.builder()
                 .mensaje(messageResponse)
                 .estado(status)
-                .nombre(paymentVoucherModel.getIdentificadorDocumento())
+                .nombre(paymentVoucherDto.getIdentificadorDocumento())
                 .build();
-        transformarUrlsAResponse(response, paymentVoucherModel);
+        transformarUrlsAResponse(response, paymentVoucherDto);
         return response;
     }
 
-    private void setLeyenda(PaymentVoucherModel paymentVoucherModel) {
-        if(paymentVoucherModel.getCodigoTipoOperacion() != null) {
-            if (paymentVoucherModel.getCodigoTipoOperacion().equals("1001") || paymentVoucherModel.getCodigoTipoOperacion().equals("1002") ||
-                    paymentVoucherModel.getCodigoTipoOperacion().equals("1003") || paymentVoucherModel.getCodigoTipoOperacion().equals("1004")) {
+    private void setLeyenda(PaymentVoucherDto paymentVoucherDto) {
+        if(paymentVoucherDto.getCodigoTipoOperacion() != null) {
+            if (paymentVoucherDto.getCodigoTipoOperacion().equals("1001") || paymentVoucherDto.getCodigoTipoOperacion().equals("1002") ||
+                    paymentVoucherDto.getCodigoTipoOperacion().equals("1003") || paymentVoucherDto.getCodigoTipoOperacion().equals("1004")) {
                 Leyenda leyendaDto = Leyenda.builder()
                         .descripcion("Operación sujeta al Sistema de Pago de Obligaciones Tributarias con el Gobierno Central")
                         .codigo("2006")
                         .build();
-                paymentVoucherModel.setLeyendas(new ArrayList<>());
-                paymentVoucherModel.getLeyendas().add(leyendaDto);
+                paymentVoucherDto.setLeyendas(new ArrayList<>());
+                paymentVoucherDto.getLeyendas().add(leyendaDto);
             }
         }
     }
 
-    private Map<String, String> generarPlantillaXml(CompanyModel companyModel, PaymentVoucherModel comprobante) throws IOException, NoSuchAlgorithmException {
+    private Map<String, String> generarPlantillaXml(CompanyModel companyModel, PaymentVoucherDto comprobante) throws IOException, NoSuchAlgorithmException {
         Map<String, String> plantillaGenerado = new HashMap<>();
         if (companyModel.getOseId() != null && companyModel.getOseId() == 1) {
             plantillaGenerado = templateService.buildPaymentVoucherSignOse(comprobante);
@@ -514,7 +521,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         return plantillaGenerado;
     }
 
-    private void setOficinaId(PaymentVoucherModel comprobante, CompanyModel companyModel) {
+    private void setOficinaId(PaymentVoucherDto comprobante, CompanyModel companyModel) {
         if (Boolean.TRUE.equals(companyModel.getAllowSaveOficina()) && comprobante.getOficinaId() == null) {
             try {
                 BranchOfficesModel branchOfficesModel = branchOfficeFeign.obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
@@ -536,19 +543,19 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             "04", "0502"
     );
 
-    private void setCodigoTipoOperacionCatalog(PaymentVoucherModel paymentVoucherModel) {
-        String codigo = paymentVoucherModel.getCodigoTipoOperacion();
+    private void setCodigoTipoOperacionCatalog(PaymentVoucherDto paymentVoucherDto) {
+        String codigo = paymentVoucherDto.getCodigoTipoOperacion();
         if (codigo != null) {
             codigo = codigo.trim();
             if (codigo.length() == 4) {
-                paymentVoucherModel.setCodigoTipoOperacionCatalogo51(codigo);
+                paymentVoucherDto.setCodigoTipoOperacionCatalogo51(codigo);
             } else {
-                paymentVoucherModel.setCodigoTipoOperacionCatalogo51(
+                paymentVoucherDto.setCodigoTipoOperacionCatalogo51(
                         OPERACION_MAP.getOrDefault(codigo, "0101")
                 );
             }
         } else {
-            paymentVoucherModel.setCodigoTipoOperacionCatalogo51("0101");
+            paymentVoucherDto.setCodigoTipoOperacionCatalogo51("0101");
         }
     }
 
@@ -559,19 +566,19 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         }
     }
 
-    private CompanyModel completarDatosEmisor(PaymentVoucherModel paymentVoucherModel) {
-        if (paymentVoucherModel.getRucEmisor() == null) {
+    private CompanyModel completarDatosEmisor(PaymentVoucherDto paymentVoucherDto) {
+        if (paymentVoucherDto.getRucEmisor() == null) {
             throw new IllegalArgumentException("El RUC del emisor no puede ser nulo");
         }
-        CompanyModel companyModel = companyFeign.findCompanyByRuc(paymentVoucherModel.getRucEmisor());
+        CompanyModel companyModel = companyFeign.findCompanyByRuc(paymentVoucherDto.getRucEmisor());
         if (companyModel == null) {
-            throw new ServiceException("No se encontró la empresa con RUC: " + paymentVoucherModel.getRucEmisor());
+            throw new ServiceException("No se encontró la empresa con RUC: " + paymentVoucherDto.getRucEmisor());
         }
-        paymentVoucherModel.setRucEmisor(companyModel.getRuc());
-        paymentVoucherModel.setDenominacionEmisor(companyModel.getRazon());
-        paymentVoucherModel.setTipoDocumentoEmisor(ConstantesSunat.TIPO_DOCUMENTO_IDENTIDAD_RUC);
-        paymentVoucherModel.setNombreComercialEmisor(companyModel.getNombreComer());
-        paymentVoucherModel.setUblVersion(companyModel.getUblVersion() != null ? companyModel.getUblVersion() : ConstantesSunat.UBL_VERSION_2_0);
+        paymentVoucherDto.setRucEmisor(companyModel.getRuc());
+        paymentVoucherDto.setDenominacionEmisor(companyModel.getRazon());
+        paymentVoucherDto.setTipoDocumentoEmisor(ConstantesSunat.TIPO_DOCUMENTO_IDENTIDAD_RUC);
+        paymentVoucherDto.setNombreComercialEmisor(companyModel.getNombreComer());
+        paymentVoucherDto.setUblVersion(companyModel.getUblVersion() != null ? companyModel.getUblVersion() : ConstantesSunat.UBL_VERSION_2_0);
         return companyModel;
     }
 
@@ -593,9 +600,9 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         return archivo;
     }
 
-    private PaymentVoucherModel registrarComprobante(
-            PaymentVoucherModel comprobante, Long idArchivoRegistro, Boolean isEdit,
-            PaymentVoucherModel antiguoComprobante, String estado, String estadoAnterior, String estadoEnSunat,
+    private PaymentVoucherDto registrarComprobante(
+            PaymentVoucherDto comprobante, Long idArchivoRegistro, Boolean isEdit,
+            PaymentVoucherDto antiguoComprobante, String estado, String estadoAnterior, String estadoEnSunat,
             Integer estadoItem, String mensajeRespuesta, String registroUsuario, String usuarioModificacion,
             Timestamp fechaRegistro, Timestamp fechaModificacion, OperacionLogEnum operacionLogEnum) {
 
@@ -907,21 +914,21 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         //entity.setUuid(UUIDGen.generate());
         comprobante.setUuid(UUIDGen.generate());
         comprobante.setFechaEmisionDate(new Date());
-        PaymentVoucherModel comprobanteCreado = paymentVoucherFeign.savePaymentVoucher(comprobante);
+        PaymentVoucherDto comprobanteCreado = paymentVoucherFeign.savePaymentVoucher(comprobante);
 
         log.info("COMPROBANTE CREADO: {}", comprobanteCreado.toString());
         return comprobanteCreado;
     }
 
-    private void transformarUrlsAResponse(ResponsePSE response, PaymentVoucherModel paymentVoucherModel) {
-        if (paymentVoucherModel != null) {
-            String urlTicket = urlServiceDownload + "descargapdfuuid/" + paymentVoucherModel.getIdPaymentVoucher() + "/" + paymentVoucherModel.getUuid() + "/ticket/" + paymentVoucherModel.getIdentificadorDocumento();
-            String urlA4 = urlServiceDownload + "descargapdfuuid/" + paymentVoucherModel.getIdPaymentVoucher() + "/" + paymentVoucherModel.getUuid() + "/a4/" + paymentVoucherModel.getIdentificadorDocumento();
-            String urlXml = urlServiceDownload + "descargaxmluuid/" + paymentVoucherModel.getIdPaymentVoucher() + "/" + paymentVoucherModel.getUuid() + "/" + paymentVoucherModel.getIdentificadorDocumento();
+    private void transformarUrlsAResponse(ResponsePSE response, PaymentVoucherDto paymentVoucherDto) {
+        if (paymentVoucherDto != null) {
+            String urlTicket = urlServiceDownload + "descargapdfuuid/" + paymentVoucherDto.getIdPaymentVoucher() + "/" + paymentVoucherDto.getUuid() + "/ticket/" + paymentVoucherDto.getIdentificadorDocumento();
+            String urlA4 = urlServiceDownload + "descargapdfuuid/" + paymentVoucherDto.getIdPaymentVoucher() + "/" + paymentVoucherDto.getUuid() + "/a4/" + paymentVoucherDto.getIdentificadorDocumento();
+            String urlXml = urlServiceDownload + "descargaxmluuid/" + paymentVoucherDto.getIdPaymentVoucher() + "/" + paymentVoucherDto.getUuid() + "/" + paymentVoucherDto.getIdentificadorDocumento();
             response.setUrlPdfTicket(urlTicket);
             response.setUrlPdfA4(urlA4);
             response.setUrlXml(urlXml);
-            response.setCodigoHash(paymentVoucherModel.getCodigoHash());
+            response.setCodigoHash(paymentVoucherDto.getCodigoHash());
         }
     }
 

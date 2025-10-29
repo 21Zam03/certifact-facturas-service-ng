@@ -1,6 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.config;
 
-import com.certicom.certifact_facturas_service_ng.dto.response.ErrorResponse;
+import com.certicom.certifact_facturas_service_ng.dto.others.ErrorResponse;
 import com.certicom.certifact_facturas_service_ng.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

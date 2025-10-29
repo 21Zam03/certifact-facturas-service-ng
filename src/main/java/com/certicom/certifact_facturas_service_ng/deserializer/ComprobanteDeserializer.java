@@ -1,7 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.deserializer;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
-import com.certicom.certifact_facturas_service_ng.dto.request.PaymentVoucherRequest;
+import com.certicom.certifact_facturas_service_ng.request.PaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.exceptions.DeserializerException;
 import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
