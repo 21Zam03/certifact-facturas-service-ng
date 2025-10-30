@@ -26,7 +26,7 @@ import java.util.Map;
 @Slf4j
 public class PaymentVoucherController {
 
-    public static final String API_PATH = "/api";
+    public static final String API_PATH = "/api/web/facturas";
     private final PaymentVoucherService paymentVoucherService;
     private final PaymentVoucherValidator paymentVoucherValidator;
     private final ComunicationSunatService comunicationSunatService;
@@ -45,15 +45,14 @@ public class PaymentVoucherController {
             @RequestParam(name = "estadoSunat", required = false) Integer estadoSunat
     ) {
         Long idUsuario = 2L;
-        log.info("ComprobanteController - listarComprobantesConfiltros - [filtroDesde={}, filtroHasta={}, filtroTipoComprobante={}, fltroRuc={}, " +
-                        "filtroSerie={}, filtroNumero={}, pageNumber={}, perPage={}, estadoSunat={}, idUsuario={}]",
-                filtroDesde, filtroHasta, filtroTipoComprobante, filtroRuc, filtroSerie, filtroNumero, pageNumber, perPage, estadoSunat, idUsuario);
+
         Map<String, Object> paginacionComprobantes = paymentVoucherService.findPaymentVoucherWithFilter(
-                filtroDesde, filtroHasta, filtroTipoComprobante, filtroRuc, filtroSerie, filtroNumero, pageNumber, perPage, estadoSunat, idUsuario);
+                filtroDesde, filtroHasta, filtroTipoComprobante, filtroRuc, filtroSerie, filtroNumero, pageNumber, perPage, estadoSunat, idUsuario
+        );
         return new ResponseEntity<>(paginacionComprobantes, HttpStatus.OK);
     }
 
-    @PostMapping("/v1/factura/comprobantes-pago")
+    @PostMapping("/comprobantes-pago")
     public ResponseEntity<?> savePaymentVoucher(@RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest) {
         //Id usuario por defecto va ir en duro hasta saber como identificar al usuario que haral a peticion desde el gateway
         Long idUsuario = 2L;
@@ -66,7 +65,7 @@ public class PaymentVoucherController {
         return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
     }
 
-    @PutMapping("/v1/factura/editar-comprobante")
+    @PutMapping("/editar-comprobante")
     public ResponseEntity<?> editPaymentVoucher(@RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest) {
         //Id usuario por defecto va ir en duro hasta saber como identificar al usuario que haral a peticion desde el gateway
         Long idUsuario = 2L;
@@ -79,7 +78,7 @@ public class PaymentVoucherController {
         return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
     }
 
-    @PostMapping("/v1/factura/comprobantes/enviar-sunat")
+    @PostMapping("/comprobantes/enviar-sunat")
     public ResponseEntity<?> sendPaymentVoucherToSunat(
             @RequestBody IdentificadorPaymentVoucherRequest paymentVoucher
     ) {
@@ -99,7 +98,7 @@ public class PaymentVoucherController {
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
-    @GetMapping("/v1/factura/siguienteNumero/{tipoDocumento}/{serie}")
+    @GetMapping("/siguienteNumero/{tipoDocumento}/{serie}")
     public ResponseEntity<?> ultimoComprobante(
             @PathVariable String tipoDocumento,
             @PathVariable String serie) {
@@ -107,14 +106,14 @@ public class PaymentVoucherController {
         return new ResponseEntity<Object>(paymentVoucherService.getSiguienteNumeroComprobante(tipoDocumento, serie, ruc), HttpStatus.OK);
     }
 
-    @GetMapping("/v1/factura/comprobantes-anticipo")
+    @GetMapping("/comprobantes-anticipo")
     public ResponseEntity<List<PaymentVoucherDto>> comprobantesAnticipo(
             @RequestParam(name = "filtroNumDoc", required = true) String filtroNumDoc) {
         String ruc = "20204040303";
         return new ResponseEntity<List<PaymentVoucherDto>>(paymentVoucherService.findComprobanteByAnticipo(filtroNumDoc, ruc), HttpStatus.OK);
     }
 
-    @GetMapping("/v1/factura/comprobantes-credito")
+    @GetMapping("/comprobantes-credito")
     public ResponseEntity<List<PaymentVoucherDto>> comprobantesCredito(
             @RequestParam(name = "filtroNumDoc", required = true) String filtroNumDoc) {
         String ruc = "20204040303";
@@ -123,7 +122,6 @@ public class PaymentVoucherController {
 
     @PostMapping("/getEstadosSunat")
     public ResponseEntity<?> getEstadosSunat(@RequestBody List<Long> idsPaymentVouchers) {
-
         return new ResponseEntity<Object>(paymentVoucherService.getEstadoSunatByListaIdsInter(idsPaymentVouchers), HttpStatus.OK);
     }
 

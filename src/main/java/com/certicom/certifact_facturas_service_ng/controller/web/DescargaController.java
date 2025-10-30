@@ -21,7 +21,7 @@ import java.io.InputStream;
 @RequiredArgsConstructor
 public class DescargaController {
 
-    public static final String API_PATH = "/api";
+    public static final String API_PATH = "/api/web/facturas";
 
     private final AmazonS3ClientService amazonS3ClientService;
 
