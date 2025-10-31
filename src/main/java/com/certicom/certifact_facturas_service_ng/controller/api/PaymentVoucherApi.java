@@ -31,7 +31,7 @@ public class PaymentVoucherApi {
 
     @PostMapping("/comprobantes-pago")
     public ResponseEntity<?> savePaymentVoucher(@RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest) {
-        //Id usuario por defecto va ir en duro hasta saber como identificar al usuario que haral a peticion desde el gateway
+        //Id usuario por defecto va ir en duro hasta saber como identificar al usuario que hara la peticion desde el gateway
         Long idUsuario = 2L;
         String rucEmisor = "20204040303";
         paymentVoucherRequest.setRucEmisor(rucEmisor);

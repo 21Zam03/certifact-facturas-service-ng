@@ -12,9 +12,7 @@ import com.certicom.certifact_facturas_service_ng.formatter.PaymentVoucherFormat
 import com.certicom.certifact_facturas_service_ng.model.*;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.TemplateService;
-import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
-import com.certicom.certifact_facturas_service_ng.util.UUIDGen;
-import com.certicom.certifact_facturas_service_ng.util.UtilArchivo;
+import com.certicom.certifact_facturas_service_ng.util.*;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import com.google.common.collect.ImmutableMap;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
@@ -79,6 +77,8 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         try {
             UserModel usuarioLogueado = userFeign.findUserById(idUsuario);
             if(usuarioLogueado == null) {
+                LogHelper.errorLog(LogTitle.ERROR_NOT_NULL.getType(),
+                        LogMessages.currentMethod(), "El parametro usuario es nulo");
                 throw new ServiceException("Usuario no encontrado");
             }
             if(usuarioLogueado.getIdUser()!=null){
@@ -97,9 +97,9 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
             tsolespayment = paymentVoucherFeign.getTotalSoles(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
                     filtroSerie, filtroNumero, idOficina, estadoSunat, pageNumber, perPage);
-            System.out.println("TOTALES: "+tsolespayment.size());
+
             comprobanteMonedaSol = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals(CODSOLES)).findFirst().orElse(null);
-            System.out.println("COMPROBANTES MONEDA SOL: "+comprobanteMonedaSol);
+
             if(comprobanteMonedaSol!=null) {
                 tsolesnew = comprobanteMonedaSol.getImporteTotalVenta()!=null?comprobanteMonedaSol.getImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
             }
@@ -108,22 +108,18 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             if (comprobanteMonedaDolar!=null) {
                 tdolaresnew = comprobanteMonedaDolar.getImporteTotalVenta()!=null?comprobanteMonedaDolar.getImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
             }
-            System.out.println("COMPROBANTES MONEDA DOLAR: "+comprobanteMonedaDolar);
+
             comprobanteMonedaEur = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals(CODEURO)).findFirst().orElse(null);
             if (comprobanteMonedaEur!=null) {
                 teurosnew = comprobanteMonedaEur.getImporteTotalVenta()!=null?comprobanteMonedaEur.getImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
             }
         } catch (Exception e) {
-            log.error("ERROR: {}", e.getMessage());
+            LogHelper.errorLog(LogTitle.ERROR_UNEXPECTED.getType(),
+                    LogMessages.currentMethod(), "Ocurrio un error inesperado", e);
+            throw new ServiceException(LogMessages.ERROR_UNEXPECTED, e);
         }
         return ImmutableMap.of("comprobantesList", result, "cantidad", cantidad, "totalsoles", tsolesnew, "totaldolares", tdolaresnew, "totaleuros", teurosnew);
     }
-
-    /*
-    @Override
-    public Map<String, Object> generatePaymentVoucher(PaymentVoucherModel paymentVoucherModel, boolean isEdit, Long idUsuario) {
-        return generateDocument(paymentVoucherModel, isEdit, idUsuario);
-    }*/
 
     @Override
     public Map<String, Object> createPaymentVoucher(PaymentVoucherDto paymentVoucherDto, Long idUsuario) {
