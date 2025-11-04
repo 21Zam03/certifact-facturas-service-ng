@@ -21,6 +21,7 @@ public class LogHelper {
 
     public static void infoLog(String title, String currentMethod, String detail) {
         getLogger().info(LogTemplates.INFO_LOG_TEMPLATE,
+                title,
                 currentMethod,
                 detail);
     }

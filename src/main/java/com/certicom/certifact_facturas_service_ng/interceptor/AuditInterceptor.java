@@ -8,9 +8,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
-@Component
+//@Component
 public class AuditInterceptor implements HandlerInterceptor {
 
+    /*
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String user = request.getHeader("X-User-Id");
@@ -25,5 +26,6 @@ public class AuditInterceptor implements HandlerInterceptor {
         LogHelper.infoLog(LogTitle.INFO.getType(), LogMessages.currentMethod(),
                 "[INTERCEPTOR-END] endpoint="+request.getRequestURI()+" method="+request.getMethod());
     }
+    * */
 
 }

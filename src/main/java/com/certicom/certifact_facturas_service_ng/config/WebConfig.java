@@ -6,9 +6,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Configuration
+//@Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    /*
     private final AuditInterceptor auditInterceptor;
 
     @Autowired
@@ -22,5 +23,6 @@ public class WebConfig implements WebMvcConfigurer {
                 .addPathPatterns("/**")  // interceptar todos los endpoints
                 .excludePathPatterns("/actuator/**", "/favicon.ico"); // opcional
     }
+    * */
 
 }

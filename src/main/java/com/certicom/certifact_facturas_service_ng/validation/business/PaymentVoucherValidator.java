@@ -664,7 +664,6 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
         try {
             int proximo = paymentVoucherFeign.
                     obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(tipoComprobante, serie, rucEmisor);
-            System.out.println("PROXIMO: "+proximo);
             if (proximo > 1){
                 int diferencia = numero - proximo;
                 if (diferencia > 120){

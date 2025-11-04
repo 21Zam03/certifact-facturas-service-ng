@@ -2,8 +2,11 @@ package com.certicom.certifact_facturas_service_ng.enums;
 
 public enum LogTitle {
 
-    ERROR_DATABASE("Error in database"),
     ERROR_UNEXPECTED("Error unexpected"),
+    ERROR_HTTP_CLIENT("Error httpclient"),
+    ERROR_HTTP_RED("Error httpred"),
+    ERROR_HTTP_SERVER("Error httpserver"),
+    ERROR_HTTP("Error httpgeneral"),
 
     //Advertencia para validaciones, no corta el flujo de la peticion pero si es una observacion a tener en cuenta si se presenta.
     WARN_VALIDATION("Validation"),

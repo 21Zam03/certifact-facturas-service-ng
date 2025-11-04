@@ -3,7 +3,9 @@ package com.certicom.certifact_facturas_service_ng.templates.template21;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.enums.AfectacionIgvEnum;
+import com.certicom.certifact_facturas_service_ng.enums.LogTitle;
 import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
+import com.certicom.certifact_facturas_service_ng.util.LogHelper;
 import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
 import com.certicom.certifact_facturas_service_ng.util.UtilGenerateLetraNumber;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
@@ -28,6 +30,8 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.certicom.certifact_facturas_service_ng.util.LogMessages;
 
 import static com.certicom.certifact_facturas_service_ng.util.UtilXml.*;
 
@@ -629,8 +633,9 @@ public class FacturaTemplate21 {
 
             xml = formatXML(writer.toString());
         } catch (Exception ex) {
-            ex.printStackTrace();
-            throw new TemplateException(ex.getMessage());
+            LogHelper.errorLog(LogTitle.ERROR_UNEXPECTED.getType(),
+                    LogMessages.currentMethod(), "Error al generar plantilla xml", ex);
+            throw new TemplateException("Error al generar plantilla xml"+ex.getMessage());
         }
         return xml;
     }
@@ -978,7 +983,7 @@ public class FacturaTemplate21 {
         attributes.put(ConstantesSunat.ATTRIBUTE_LIST_URI, "urn:pe:gob:sunat:cpe:see:gem:catalogos:catalogo55");
         Element itemElement = appendChild(document, invoiceLineElement, "cac:Item");
         //DETRACCION CODIGO BIEN DETRACION 004
-        System.out.println("INGRESANDO A TEMPLATE HIDRO");
+
         // if ((StringUtils.isNotBlank(invoice.getCodigoBienDetraccion()) && invoice.getCodigoBienDetraccion().equals("004")) &&
         //        ((StringUtils.isNotBlank(invoice.getCodigoTipoOperacion()) && invoice.getCodigoTipoOperacion().equals("1001")))) {
         appendChild(document, itemElement, "cbc:Description", descripcion);

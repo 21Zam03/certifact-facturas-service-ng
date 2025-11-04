@@ -46,7 +46,6 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
 
     @Override
     public RegisterFileUploadModel subirArchivoAlStorage(InputStream inputStream, String nameFile, String folder, CompanyModel companyModel) {
-        System.out.println("NOMBRE DEL ARCHIVO "+nameFile);
         String periodo = UtilDate.dateNowToString("MMyyyy ");
 
         String fileNameKey = String.format("%s-%s", UUID.randomUUID(), nameFile);

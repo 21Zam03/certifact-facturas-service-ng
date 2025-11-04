@@ -1,6 +1,7 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
 import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
+import com.certicom.certifact_facturas_service_ng.dto.UserDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.*;
 import com.certicom.certifact_facturas_service_ng.entity.*;
 import com.certicom.certifact_facturas_service_ng.enums.*;
@@ -18,6 +19,7 @@ import com.google.common.collect.ImmutableMap;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +30,6 @@ import java.sql.Timestamp;
 import java.util.*;
 
 @Service
-@RequiredArgsConstructor
 @Slf4j
 public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
@@ -36,25 +37,54 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     private static final String CODDOLAR = "USD";
     private static final String CODEURO = "EUR";
 
+    private final UserData userData;
     private final PaymentVoucherFeign paymentVoucherFeign;
-    private final UserFeign userFeign;
     private final CompanyFeign companyFeign;
     private final BranchOfficeFeign branchOfficeFeign;
     private final AdditionalFieldFeign additionalFieldFeign;
     private final TmpVoucherFeign tmpVoucherFeign;
     private final DetailPaymentVoucherFeign detailPaymentVoucherFeign;
     private final AnticipoFeign anticipoFeign;
-    private final AdditionalFieldFeign aditionalFieldFeign;
     private final CuotaPaymentVoucherFeign cuotaPaymentVoucherFeign;
     private final GuiaPaymentFeign guiaPaymentFeign;
 
     private final PaymentVoucherFormatter paymentVoucherFormatter;
 
-    @Value("${urlspublicas.descargaComprobante}")
-    private String urlServiceDownload;
-
     private final TemplateService templateService;
     private final AmazonS3ClientService amazonS3ClientService;
+
+    @Autowired
+    public PaymentVoucherServiceImpl(
+            UserData userData,
+            PaymentVoucherFeign paymentVoucherFeign,
+            CompanyFeign companyFeign,
+            BranchOfficeFeign branchOfficeFeign,
+            AdditionalFieldFeign additionalFieldFeign,
+            TmpVoucherFeign tmpVoucherFeign,
+            DetailPaymentVoucherFeign detailPaymentVoucherFeign,
+            AnticipoFeign anticipoFeign,
+            CuotaPaymentVoucherFeign cuotaPaymentVoucherFeign,
+            GuiaPaymentFeign guiaPaymentFeign,
+            PaymentVoucherFormatter paymentVoucherFormatter,
+            TemplateService templateService,
+            AmazonS3ClientService amazonS3ClientService) {
+        this.userData = userData;
+        this.paymentVoucherFeign = paymentVoucherFeign;
+        this.companyFeign = companyFeign;
+        this.branchOfficeFeign = branchOfficeFeign;
+        this.additionalFieldFeign = additionalFieldFeign;
+        this.tmpVoucherFeign = tmpVoucherFeign;
+        this.detailPaymentVoucherFeign = detailPaymentVoucherFeign;
+        this.anticipoFeign = anticipoFeign;
+        this.cuotaPaymentVoucherFeign = cuotaPaymentVoucherFeign;
+        this.guiaPaymentFeign = guiaPaymentFeign;
+        this.paymentVoucherFormatter = paymentVoucherFormatter;
+        this.templateService = templateService;
+        this.amazonS3ClientService = amazonS3ClientService;
+    }
+
+    @Value("${urlspublicas.descargaComprobante}")
+    private String urlServiceDownload;
 
     @Override
     public Map<String, Object> findPaymentVoucherWithFilter(
@@ -75,7 +105,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         PaymentVoucherDtoFilter comprobanteMonedaEur = null;
 
         try {
-            UserModel usuarioLogueado = userFeign.findUserById(idUsuario);
+            UserDto usuarioLogueado = userData.findUserById(idUsuario);
             if(usuarioLogueado == null) {
                 LogHelper.errorLog(LogTitle.ERROR_NOT_NULL.getType(),
                         LogMessages.currentMethod(), "El parametro usuario es nulo");
@@ -289,7 +319,6 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         boolean status = true;
         try {
             paymentVoucherFormatter.formatPaymentVoucher(paymentVoucherDto);
-            UserModel userLogged = userFeign.findUserById(idUsuario);
             CompanyModel companyModel = completarDatosEmisor(paymentVoucherDto);
             setCodigoTipoOperacionCatalog(paymentVoucherDto);
             setOficinaId(paymentVoucherDto, companyModel);
@@ -308,7 +337,8 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
             RegisterFileUploadModel archivoSubido = subirXmlComprobante(companyModel, plantillaGenerado);
 
-            comprobanteCreado = saveVoucher(paymentVoucherDto, archivoSubido.getIdRegisterFileSend(), userLogged.getNombreUsuario());
+            String username = userData.getUsernameById(idUsuario);
+            comprobanteCreado = saveVoucher(paymentVoucherDto, archivoSubido.getIdRegisterFileSend(), username);
 
             createTmpVoucher(comprobanteCreado);
             SendBillDto dataSendBill = SendBillDto.builder()
@@ -345,7 +375,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         boolean status = true;
         try {
             paymentVoucherFormatter.formatPaymentVoucher(paymentVoucherDto);
-            UserModel userLogged = userFeign.findUserById(idUsuario);
+            UserDto userLogged = userData.findUserById(idUsuario);
             CompanyModel companyModel = completarDatosEmisor(paymentVoucherDto);
             setCodigoTipoOperacionCatalog(paymentVoucherDto);
             setOficinaId(paymentVoucherDto, companyModel);
@@ -427,8 +457,8 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
         if (username != null && paymentVoucherDto.getOficinaId() == null) {
             if (!username.equals(ConstantesSunat.SUPERADMIN)) {
-                UserEntity user = userFeign.findUserByUsername(username);
-                paymentVoucherDto.setOficinaId(user.getOficinaId());
+                UserDto user = userData.findUserByUsername(username);
+                paymentVoucherDto.setOficinaId(user.getIdOficina());
             }
         }
 
@@ -463,7 +493,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         }
         if (adicionales != null && !adicionales.isEmpty()) {
             for (CampoAdicional adicional : adicionales) {
-                aditionalFieldFeign.deleteAditionalFieldPaymentById(Long.valueOf(adicional.getId()));
+                additionalFieldFeign.deleteAditionalFieldPaymentById(Long.valueOf(adicional.getId()));
                 System.out.println("Eliminar campos adicionales del comprobante");
             }
         }
@@ -511,8 +541,8 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
         if (username != null && paymentVoucherDto.getOficinaId() == null) {
             if (!username.equals(ConstantesSunat.SUPERADMIN)) {
-                UserEntity user = userFeign.findUserByUsername(username);
-                paymentVoucherDto.setOficinaId(user.getOficinaId());
+                UserDto user = userData.findUserByUsername(username);
+                paymentVoucherDto.setOficinaId(user.getIdOficina());
             }
         }
 
@@ -583,7 +613,15 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         } else {
             plantillaGenerado = templateService.buildPaymentVoucherSign(comprobante);
         }
-        log.info("PLANTILLA GENERADA: {}", plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64));
+
+        String preview = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64) != null &&
+                plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64).length() > 200
+                ? plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64).substring(0, 100) + "..."
+                : plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64);
+
+        LogHelper.infoLog(LogTitle.INFO.getType(),
+                LogMessages.currentMethod(), "Plantilla xml generada y firmada exitosamente "+preview);
+
         return plantillaGenerado;
     }
 
@@ -598,7 +636,9 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
                     }
                 }
             } catch (Exception e) {
-                log.error(e.getMessage());
+                LogHelper.errorLog(LogTitle.ERROR_UNEXPECTED.getType(),
+                        LogMessages.currentMethod(), "Ocurrio un error inesperado", e);
+                throw new ServiceException(LogMessages.ERROR_UNEXPECTED, e);
             }
         }
     }
@@ -634,10 +674,14 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
     private CompanyModel completarDatosEmisor(PaymentVoucherDto paymentVoucherDto) {
         if (paymentVoucherDto.getRucEmisor() == null) {
-            throw new IllegalArgumentException("El RUC del emisor no puede ser nulo");
+            LogHelper.warnLog(LogTitle.WARN_VALIDATION.getType(),
+                    LogMessages.currentMethod(), "El ruc emisor es null");
+            throw new ServiceException("El RUC del emisor no puede ser nulo");
         }
         CompanyModel companyModel = companyFeign.findCompanyByRuc(paymentVoucherDto.getRucEmisor());
         if (companyModel == null) {
+            LogHelper.warnLog(LogTitle.WARN_VALIDATION.getType(),
+                    LogMessages.currentMethod(), "Company es null");
             throw new ServiceException("No se encontró la empresa con RUC: " + paymentVoucherDto.getRucEmisor());
         }
         paymentVoucherDto.setRucEmisor(companyModel.getRuc());
@@ -702,7 +746,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             }
             if (adicionales != null && !adicionales.isEmpty()) {
                 for (CampoAdicional adicional : adicionales) {
-                    aditionalFieldFeign.deleteAditionalFieldPaymentById(Long.valueOf(adicional.getId()));
+                    additionalFieldFeign.deleteAditionalFieldPaymentById(Long.valueOf(adicional.getId()));
                     System.out.println("Eliminar campos adicionales del comprobante");
                 }
             }
@@ -972,8 +1016,8 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
         if (registroUsuario != null && entity.getOficinaId() == null) {
             if (!registroUsuario.equals(ConstantesSunat.SUPERADMIN)) {
-                UserEntity user = userFeign.findUserByUsername(registroUsuario);
-                comprobante.setOficinaId(user.getOficinaId());
+                UserDto user = userData.findUserByUsername(registroUsuario);
+                comprobante.setOficinaId(user.getIdOficina());
                 //entity.setOficinaId(user.getOficinaId());
             }
         }

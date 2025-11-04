@@ -1,7 +1,10 @@
 package com.certicom.certifact_facturas_service_ng.signed;
 
 import com.certicom.certifact_facturas_service_ng.dto.others.SignatureResp;
+import com.certicom.certifact_facturas_service_ng.enums.LogTitle;
 import com.certicom.certifact_facturas_service_ng.exceptions.SignedException;
+import com.certicom.certifact_facturas_service_ng.util.LogHelper;
+import com.certicom.certifact_facturas_service_ng.util.LogMessages;
 import com.certicom.certifact_facturas_service_ng.util.UtilConversion;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -123,7 +126,8 @@ public class Firmado {
             response.setStatus(!signatureFile.toString().trim().isEmpty() && digestValue != null && !digestValue.trim().isEmpty());
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LogHelper.errorLog(LogTitle.ERROR_UNEXPECTED.getType(),
+                    LogMessages.currentMethod(), "Error al firmar documento xml", ex);
             throw new SignedException("Error al firmar documento xml: " + (ex == null ? "" : ex.getMessage()));
         }
         return response;
