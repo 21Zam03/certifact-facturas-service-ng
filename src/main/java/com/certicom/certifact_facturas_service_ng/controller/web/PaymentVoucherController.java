@@ -13,6 +13,7 @@ import com.certicom.certifact_facturas_service_ng.validation.business.PaymentVou
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -58,6 +59,8 @@ public class PaymentVoucherController {
             @RequestHeader(name = "X-RUC-Client", required = true) String ruc,
             @RequestHeader(name = "X-ID-User", required = true) Long usuarioId
     ) {
+        MDC.put("payment_voucher",  paymentVoucherRequest.getSerie()+"-"+paymentVoucherRequest.getNumero());
+
         paymentVoucherRequest.setRucEmisor(ruc);
 
         PaymentVoucherDto paymentVoucherDto = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);

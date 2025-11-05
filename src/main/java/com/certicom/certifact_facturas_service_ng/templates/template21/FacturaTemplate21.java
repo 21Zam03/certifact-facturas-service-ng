@@ -633,8 +633,7 @@ public class FacturaTemplate21 {
 
             xml = formatXML(writer.toString());
         } catch (Exception ex) {
-            LogHelper.errorLog(LogTitle.ERROR_UNEXPECTED.getType(),
-                    LogMessages.currentMethod(), "Error al generar plantilla xml", ex);
+            LogHelper.errorLog(LogMessages.currentMethod(), "Error al generar plantilla xml", ex);
             throw new TemplateException("Error al generar plantilla xml"+ex.getMessage());
         }
         return xml;

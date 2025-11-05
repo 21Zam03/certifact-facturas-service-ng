@@ -13,6 +13,7 @@ import com.certicom.certifact_facturas_service_ng.formatter.PaymentVoucherFormat
 import com.certicom.certifact_facturas_service_ng.model.*;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.TemplateService;
+import com.certicom.certifact_facturas_service_ng.sqs.SqsProducer;
 import com.certicom.certifact_facturas_service_ng.util.*;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import com.google.common.collect.ImmutableMap;
@@ -53,6 +54,8 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     private final TemplateService templateService;
     private final AmazonS3ClientService amazonS3ClientService;
 
+    private final SqsProducer sqsProducer;
+
     @Autowired
     public PaymentVoucherServiceImpl(
             UserData userData,
@@ -67,7 +70,8 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             GuiaPaymentFeign guiaPaymentFeign,
             PaymentVoucherFormatter paymentVoucherFormatter,
             TemplateService templateService,
-            AmazonS3ClientService amazonS3ClientService) {
+            AmazonS3ClientService amazonS3ClientService,
+            SqsProducer sqsProducer) {
         this.userData = userData;
         this.paymentVoucherFeign = paymentVoucherFeign;
         this.companyFeign = companyFeign;
@@ -81,6 +85,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         this.paymentVoucherFormatter = paymentVoucherFormatter;
         this.templateService = templateService;
         this.amazonS3ClientService = amazonS3ClientService;
+        this.sqsProducer = sqsProducer;
     }
 
     @Value("${urlspublicas.descargaComprobante}")
@@ -107,8 +112,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         try {
             UserDto usuarioLogueado = userData.findUserById(idUsuario);
             if(usuarioLogueado == null) {
-                LogHelper.errorLog(LogTitle.ERROR_NOT_NULL.getType(),
-                        LogMessages.currentMethod(), "El parametro usuario es nulo");
+                LogHelper.errorLog(LogMessages.currentMethod(), "El parametro usuario es nulo");
                 throw new ServiceException("Usuario no encontrado");
             }
             if(usuarioLogueado.getIdUser()!=null){
@@ -144,8 +148,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
                 teurosnew = comprobanteMonedaEur.getImporteTotalVenta()!=null?comprobanteMonedaEur.getImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
             }
         } catch (Exception e) {
-            LogHelper.errorLog(LogTitle.ERROR_UNEXPECTED.getType(),
-                    LogMessages.currentMethod(), "Ocurrio un error inesperado", e);
+            LogHelper.errorLog(LogMessages.currentMethod(), "Ocurrio un error inesperado", e);
             throw new ServiceException(LogMessages.ERROR_UNEXPECTED, e);
         }
         return ImmutableMap.of("comprobantesList", result, "cantidad", cantidad, "totalsoles", tsolesnew, "totaldolares", tdolaresnew, "totaleuros", teurosnew);
@@ -465,7 +468,9 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         paymentVoucherDto.setUuid(UUIDGen.generate());
         paymentVoucherDto.setFechaEmisionDate(new Date());
 
-        return paymentVoucherFeign.savePaymentVoucher(paymentVoucherDto);
+        PaymentVoucherDto result = paymentVoucherFeign.savePaymentVoucher(paymentVoucherDto);
+        LogHelper.infoLog(LogMessages.currentMethod(), "Se registro el paymentvoucher exitosamente");
+        return result;
     }
 
     private PaymentVoucherDto updateVoucher(PaymentVoucherDto paymentVoucherDto, PaymentVoucherDto paymentVoucherDtoOld, Long idRegisterFile, String username) {
@@ -553,7 +558,6 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     }
 
     private void createTmpVoucher(PaymentVoucherDto paymentVoucherDto) {
-        System.out.println("id: "+ paymentVoucherDto.getIdPaymentVoucher());
         TmpVoucherSendBillEntity tmpEntity = new TmpVoucherSendBillEntity();
         tmpEntity.setEstado(EstadoVoucherTmpEnum.PENDIENTE.getEstado());
         tmpEntity.setIdPaymentVoucher(paymentVoucherDto.getIdPaymentVoucher());
@@ -561,7 +565,12 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         tmpEntity.setUuidSaved(UUIDGen.generate());
         tmpEntity.setTipoComprobante(paymentVoucherDto.getTipoComprobante());
 
-        tmpVoucherFeign.saveTmpVoucher(tmpEntity);
+        int result = tmpVoucherFeign.saveTmpVoucher(tmpEntity);
+        if(result == 0){
+            throw new ServiceException("Ocurrio un error al momento de registrar el tmpvoucher");
+        } else {
+            LogHelper.infoLog(LogMessages.currentMethod(), "Se registro el tmpvoucher exitosamente");
+        }
     }
 
     private void updateTmpVoucher(PaymentVoucherDto paymentVoucherDto) {
@@ -619,8 +628,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
                 ? plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64).substring(0, 100) + "..."
                 : plantillaGenerado.get(ConstantesParameter.PARAM_FILE_XML_BASE64);
 
-        LogHelper.infoLog(LogTitle.INFO.getType(),
-                LogMessages.currentMethod(), "Plantilla xml generada y firmada exitosamente "+preview);
+        LogHelper.infoLog(LogMessages.currentMethod(), "Plantilla xml generada y firmada exitosamente "+preview);
 
         return plantillaGenerado;
     }
@@ -636,8 +644,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
                     }
                 }
             } catch (Exception e) {
-                LogHelper.errorLog(LogTitle.ERROR_UNEXPECTED.getType(),
-                        LogMessages.currentMethod(), "Ocurrio un error inesperado", e);
+                LogHelper.errorLog(LogMessages.currentMethod(), "Ocurrio un error inesperado", e);
                 throw new ServiceException(LogMessages.ERROR_UNEXPECTED, e);
             }
         }
@@ -667,21 +674,18 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
     private void validateAutomaticDelivery(SendBillDto dataSendBill) {
         if (dataSendBill.getEnvioAutomaticoSunat()) {
-            System.out.println("Enviar mensaje");
-            //messageProducer.produceSendBill(dataSendBill);
+            sqsProducer.produceSendBill(dataSendBill);
         }
     }
 
     private CompanyModel completarDatosEmisor(PaymentVoucherDto paymentVoucherDto) {
         if (paymentVoucherDto.getRucEmisor() == null) {
-            LogHelper.warnLog(LogTitle.WARN_VALIDATION.getType(),
-                    LogMessages.currentMethod(), "El ruc emisor es null");
+            LogHelper.warnLog(LogMessages.currentMethod(), "El ruc emisor es null");
             throw new ServiceException("El RUC del emisor no puede ser nulo");
         }
         CompanyModel companyModel = companyFeign.findCompanyByRuc(paymentVoucherDto.getRucEmisor());
         if (companyModel == null) {
-            LogHelper.warnLog(LogTitle.WARN_VALIDATION.getType(),
-                    LogMessages.currentMethod(), "Company es null");
+            LogHelper.warnLog(LogMessages.currentMethod(), "Company es null");
             throw new ServiceException("No se encontró la empresa con RUC: " + paymentVoucherDto.getRucEmisor());
         }
         paymentVoucherDto.setRucEmisor(companyModel.getRuc());
@@ -706,7 +710,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         String fileXMLZipBase64 = plantillaGenerado.get(ConstantesParameter.PARAM_FILE_ZIP_BASE64);
         RegisterFileUploadModel archivo = amazonS3ClientService.subirArchivoAlStorage(UtilArchivo.b64ToByteArrayInputStream(fileXMLZipBase64),
                 nombreDocumento, "invoice", companyModel);
-        log.info("ARVHIVO SUBIDO: {}", archivo.toString());
+        LogHelper.infoLog(LogMessages.currentMethod(), "El archivo ha sido subido exitosamente");
         return archivo;
     }
 

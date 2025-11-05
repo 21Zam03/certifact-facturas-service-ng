@@ -3,12 +3,11 @@ package com.certicom.certifact_facturas_service_ng.validation.business;
 import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
+import com.certicom.certifact_facturas_service_ng.enums.LogTitle;
 import com.certicom.certifact_facturas_service_ng.exceptions.ValidationException;
 import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
-import com.certicom.certifact_facturas_service_ng.util.CamposEntrada;
-import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
-import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
+import com.certicom.certifact_facturas_service_ng.util.*;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -103,6 +102,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
             validateTotalOtrosTributos(paymentVoucherDto.getTotalValorBaseOtrosTributos(), paymentVoucherDto.getTotalOtrostributos(), paymentVoucherDto.getItems());
         }
         validateDetracciones(paymentVoucherDto);
+        LogHelper.infoLog(LogMessages.currentMethod(), "La validación paso exitosamente");
     }
 
     private void validateTipoDocumentoReceptorFactura(String tipoDocumentoReceptor) {

@@ -126,8 +126,7 @@ public class Firmado {
             response.setStatus(!signatureFile.toString().trim().isEmpty() && digestValue != null && !digestValue.trim().isEmpty());
 
         } catch (Exception ex) {
-            LogHelper.errorLog(LogTitle.ERROR_UNEXPECTED.getType(),
-                    LogMessages.currentMethod(), "Error al firmar documento xml", ex);
+            LogHelper.errorLog(LogMessages.currentMethod(), "Error al firmar documento xml", ex);
             throw new SignedException("Error al firmar documento xml: " + (ex == null ? "" : ex.getMessage()));
         }
         return response;

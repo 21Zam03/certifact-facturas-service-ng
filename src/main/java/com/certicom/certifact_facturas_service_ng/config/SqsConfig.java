@@ -6,27 +6,27 @@ import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.sqs.SqsClient;
 
 @Configuration
-public class S3Config {
+public class SqsConfig {
 
     @Value("${apifact.aws.iam.access_key_id}")
-    private String awsId;
+    private String accessKey;
 
     @Value("${apifact.aws.iam.secret_access_key}")
-    private String awsKey;
+    private String secretKey;
 
     @Value("${apifact.aws.s3.region}")
     private String region;
 
     @Bean
-    public S3Client s3Client() {
-        AwsBasicCredentials awsCreds = AwsBasicCredentials.create(awsId, awsKey);
-        return S3Client.builder()
+    public SqsClient sqsClient() {
+        return SqsClient.builder()
                 .region(Region.of(region))
-                .credentialsProvider(StaticCredentialsProvider.create(awsCreds))
-                .build();
+                .credentialsProvider(StaticCredentialsProvider.create(
+                        AwsBasicCredentials.create(accessKey, secretKey)
+                )).build();
     }
 
 }
