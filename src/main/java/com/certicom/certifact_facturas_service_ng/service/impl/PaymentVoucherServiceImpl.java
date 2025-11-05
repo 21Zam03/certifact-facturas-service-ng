@@ -18,7 +18,6 @@ import com.certicom.certifact_facturas_service_ng.util.*;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import com.google.common.collect.ImmutableMap;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,15 +38,15 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     private static final String CODEURO = "EUR";
 
     private final UserData userData;
-    private final PaymentVoucherFeign paymentVoucherFeign;
-    private final CompanyFeign companyFeign;
-    private final BranchOfficeFeign branchOfficeFeign;
-    private final AdditionalFieldFeign additionalFieldFeign;
-    private final TmpVoucherFeign tmpVoucherFeign;
-    private final DetailPaymentVoucherFeign detailPaymentVoucherFeign;
-    private final AnticipoFeign anticipoFeign;
-    private final CuotaPaymentVoucherFeign cuotaPaymentVoucherFeign;
-    private final GuiaPaymentFeign guiaPaymentFeign;
+    private final PaymentVoucherData paymentVoucherData;
+    private final CompanyData companyData;
+    private final BranchOfficeData branchOfficeData;
+    private final AdditionalFieldData additionalFieldData;
+    private final TmpVoucherData tmpVoucherData;
+    private final DetailPaymentVoucherData detailPaymentVoucherData;
+    private final AnticipoData anticipoData;
+    private final CuotaPaymentVoucherData cuotaPaymentVoucherData;
+    private final GuiaPaymentData guiaPaymentData;
 
     private final PaymentVoucherFormatter paymentVoucherFormatter;
 
@@ -59,29 +58,29 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     @Autowired
     public PaymentVoucherServiceImpl(
             UserData userData,
-            PaymentVoucherFeign paymentVoucherFeign,
-            CompanyFeign companyFeign,
-            BranchOfficeFeign branchOfficeFeign,
-            AdditionalFieldFeign additionalFieldFeign,
-            TmpVoucherFeign tmpVoucherFeign,
-            DetailPaymentVoucherFeign detailPaymentVoucherFeign,
-            AnticipoFeign anticipoFeign,
-            CuotaPaymentVoucherFeign cuotaPaymentVoucherFeign,
-            GuiaPaymentFeign guiaPaymentFeign,
+            PaymentVoucherData paymentVoucherData,
+            CompanyData companyData,
+            BranchOfficeData branchOfficeData,
+            AdditionalFieldData additionalFieldData,
+            TmpVoucherData tmpVoucherData,
+            DetailPaymentVoucherData detailPaymentVoucherData,
+            AnticipoData anticipoData,
+            CuotaPaymentVoucherData cuotaPaymentVoucherData,
+            GuiaPaymentData guiaPaymentData,
             PaymentVoucherFormatter paymentVoucherFormatter,
             TemplateService templateService,
             AmazonS3ClientService amazonS3ClientService,
             SqsProducer sqsProducer) {
         this.userData = userData;
-        this.paymentVoucherFeign = paymentVoucherFeign;
-        this.companyFeign = companyFeign;
-        this.branchOfficeFeign = branchOfficeFeign;
-        this.additionalFieldFeign = additionalFieldFeign;
-        this.tmpVoucherFeign = tmpVoucherFeign;
-        this.detailPaymentVoucherFeign = detailPaymentVoucherFeign;
-        this.anticipoFeign = anticipoFeign;
-        this.cuotaPaymentVoucherFeign = cuotaPaymentVoucherFeign;
-        this.guiaPaymentFeign = guiaPaymentFeign;
+        this.paymentVoucherData = paymentVoucherData;
+        this.companyData = companyData;
+        this.branchOfficeData = branchOfficeData;
+        this.additionalFieldData = additionalFieldData;
+        this.tmpVoucherData = tmpVoucherData;
+        this.detailPaymentVoucherData = detailPaymentVoucherData;
+        this.anticipoData = anticipoData;
+        this.cuotaPaymentVoucherData = cuotaPaymentVoucherData;
+        this.guiaPaymentData = guiaPaymentData;
         this.paymentVoucherFormatter = paymentVoucherFormatter;
         this.templateService = templateService;
         this.amazonS3ClientService = amazonS3ClientService;
@@ -123,13 +122,13 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             if(idOficina == null) idOficina = 0;
             estadoSunat = estadoSunats.toString();
 
-            result = paymentVoucherFeign.listPaymentVoucherWithFilter(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
+            result = paymentVoucherData.listPaymentVoucherWithFilter(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
                     filtroSerie, filtroNumero, idOficina, estadoSunat, numPagina, perPage);
 
-            cantidad = paymentVoucherFeign.countPaymentVoucher(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
+            cantidad = paymentVoucherData.countPaymentVoucher(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
                     filtroSerie, filtroNumero, idOficina, estadoSunat, numPagina, perPage);
 
-            tsolespayment = paymentVoucherFeign.getTotalSoles(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
+            tsolespayment = paymentVoucherData.getTotalSoles(usuarioLogueado.getRuc(), fechaEmisionDesde, fechaEmisionHasta, filtroTipoComprobante, filtroRuc,
                     filtroSerie, filtroNumero, idOficina, estadoSunat, pageNumber, perPage);
 
             comprobanteMonedaSol = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals(CODSOLES)).findFirst().orElse(null);
@@ -166,7 +165,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
     @Override
     public Integer getSiguienteNumeroComprobante(String tipoDocumento, String serie, String ruc) {
-        Integer ultimoComprobante = paymentVoucherFeign.getUltimoNumeroForNumeracion(tipoDocumento, serie, ruc);
+        Integer ultimoComprobante = paymentVoucherData.getUltimoNumeroForNumeracion(tipoDocumento, serie, ruc);
         if (ultimoComprobante != null) {
             return ultimoComprobante + 1;
         }
@@ -184,11 +183,11 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         }
 
         List<PaymentVoucherDto> result = new ArrayList<>();
-        List<PaymentVoucherDto> list = paymentVoucherFeign
+        List<PaymentVoucherDto> list = paymentVoucherData
                 .findAllByTipoComprobanteInAndNumDocIdentReceptorAndRucEmisorAndTipoOperacionAndEstadoOrderByNumDocIdentReceptor(
                         tipoComprobante, numDocIdentReceptor, rucEmisor, "04", "02");
 
-        List<PaymentVoucherDto> listDetracciones = paymentVoucherFeign
+        List<PaymentVoucherDto> listDetracciones = paymentVoucherData
                 .findAllByTipoComprobanteInAndNumDocIdentReceptorAndRucEmisorAndTipoOperacionAndEstadoOrderByNumDocIdentReceptor(
                         tipoComprobante, numDocIdentReceptor, rucEmisor, "1001", "02");
 
@@ -219,7 +218,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         }
 
         List<PaymentVoucherDto> result = new ArrayList<>();
-        List<PaymentVoucherDto> list = paymentVoucherFeign
+        List<PaymentVoucherDto> list = paymentVoucherData
                 .getPaymentVocuherByCredito(numDocIdentReceptor, rucEmisor);
 
         for (PaymentVoucherDto vouch : list) {
@@ -235,7 +234,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     @Override
     public List<InfoEstadoSunat> getEstadoSunatByListaIdsInter(List<Long> ids) {
         List<InfoEstadoSunat> respuesta = new ArrayList<>();
-        List<PaymentVoucherDto> comprobantes = paymentVoucherFeign.findByIdPaymentVoucherInterList(ids);
+        List<PaymentVoucherDto> comprobantes = paymentVoucherData.findByIdPaymentVoucherInterList(ids);
         comprobantes.forEach(pv -> {
             respuesta.add(InfoEstadoSunat.builder().id(pv.getIdPaymentVoucher()).estado(pv.getEstado())
                     .estadoSunat(pv.getEstadoSunat()).build());
@@ -384,7 +383,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             setOficinaId(paymentVoucherDto, companyModel);
             setLeyenda(paymentVoucherDto);
 
-            PaymentVoucherDto paymentVoucherDtoOld = paymentVoucherFeign.findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
+            PaymentVoucherDto paymentVoucherDtoOld = paymentVoucherData.findPaymentVoucherByRucAndTipoComprobanteAndSerieAndNumero(
                     paymentVoucherDto.getRucEmisor(), paymentVoucherDto.getTipoComprobante(), paymentVoucherDto.getSerie(), paymentVoucherDto.getNumero());
             if (paymentVoucherDtoOld == null)
                 throw new ServiceException("Este comprobante que desea editar, no existe en la base de datos del PSE");
@@ -468,7 +467,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         paymentVoucherDto.setUuid(UUIDGen.generate());
         paymentVoucherDto.setFechaEmisionDate(new Date());
 
-        PaymentVoucherDto result = paymentVoucherFeign.savePaymentVoucher(paymentVoucherDto);
+        PaymentVoucherDto result = paymentVoucherData.savePaymentVoucher(paymentVoucherDto);
         LogHelper.infoLog(LogMessages.currentMethod(), "Se registro el paymentvoucher exitosamente");
         return result;
     }
@@ -486,31 +485,31 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
                 System.out.println("Eliminar items - stock del comprobante");
             }
             for (ComprobanteItem item : items) {
-                detailPaymentVoucherFeign.deleteDetailPaymentVoucherById(item.getIdComprobanteDetalle());
+                detailPaymentVoucherData.deleteDetailPaymentVoucherById(item.getIdComprobanteDetalle());
                 System.out.println("Eliminar items del comprobante");
             }
         }
         if (anticipos != null && !anticipos.isEmpty()) {
             for (Anticipo anticipo : anticipos) {
-                anticipoFeign.deleteAnticipoById(anticipo.getIdAnticipoPayment());
+                anticipoData.deleteAnticipoById(anticipo.getIdAnticipoPayment());
                 System.out.println("Eliminar anticipos del comprobante");
             }
         }
         if (adicionales != null && !adicionales.isEmpty()) {
             for (CampoAdicional adicional : adicionales) {
-                additionalFieldFeign.deleteAditionalFieldPaymentById(Long.valueOf(adicional.getId()));
+                additionalFieldData.deleteAditionalFieldPaymentById(Long.valueOf(adicional.getId()));
                 System.out.println("Eliminar campos adicionales del comprobante");
             }
         }
         if (cuotas != null && !cuotas.isEmpty()) {
             for (ComprobanteCuota cuota : cuotas) {
-                cuotaPaymentVoucherFeign.deletePaymentCuotaById(cuota.getIdCuotas());
+                cuotaPaymentVoucherData.deletePaymentCuotaById(cuota.getIdCuotas());
                 System.out.println("Eliminar cuotas del comprobante");
             }
         }
         if (guias != null && !guias.isEmpty()) {
             for (GuiaRelacionada guia : guias) {
-                guiaPaymentFeign.deleteGuiaPaymentById(guia.getIdPaymentVoucher());
+                guiaPaymentData.deleteGuiaPaymentById(guia.getIdPaymentVoucher());
                 System.out.println("Eliminar guias relacionadas del comprobante");
             }
         }
@@ -554,7 +553,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         paymentVoucherDto.setUuid(UUIDGen.generate());
         paymentVoucherDto.setFechaEmisionDate(new Date());
 
-        return paymentVoucherFeign.savePaymentVoucher(paymentVoucherDto);
+        return paymentVoucherData.savePaymentVoucher(paymentVoucherDto);
     }
 
     private void createTmpVoucher(PaymentVoucherDto paymentVoucherDto) {
@@ -565,7 +564,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         tmpEntity.setUuidSaved(UUIDGen.generate());
         tmpEntity.setTipoComprobante(paymentVoucherDto.getTipoComprobante());
 
-        int result = tmpVoucherFeign.saveTmpVoucher(tmpEntity);
+        int result = tmpVoucherData.saveTmpVoucher(tmpEntity);
         if(result == 0){
             throw new ServiceException("Ocurrio un error al momento de registrar el tmpvoucher");
         } else {
@@ -574,7 +573,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     }
 
     private void updateTmpVoucher(PaymentVoucherDto paymentVoucherDto) {
-        TmpVoucherSendBillEntity tmpEntity = tmpVoucherFeign.findTmpVoucherByIdPaymentVoucher(paymentVoucherDto.getIdPaymentVoucher());
+        TmpVoucherSendBillEntity tmpEntity = tmpVoucherData.findTmpVoucherByIdPaymentVoucher(paymentVoucherDto.getIdPaymentVoucher());
         if (tmpEntity == null) {
             throw new ServiceException("No existe un registro temporal para el comprobante con ID " + paymentVoucherDto.getIdPaymentVoucher());
         }
@@ -582,7 +581,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         tmpEntity.setNombreDocumento(paymentVoucherDto.getIdentificadorDocumento());
         tmpEntity.setUuidSaved(UUIDGen.generate());
         tmpEntity.setTipoComprobante(paymentVoucherDto.getTipoComprobante());
-        tmpVoucherFeign.saveTmpVoucher(tmpEntity);
+        tmpVoucherData.saveTmpVoucher(tmpEntity);
     }
 
     private ResponsePSE createResponsePse(
@@ -636,7 +635,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     private void setOficinaId(PaymentVoucherDto comprobante, CompanyModel companyModel) {
         if (Boolean.TRUE.equals(companyModel.getAllowSaveOficina()) && comprobante.getOficinaId() == null) {
             try {
-                BranchOfficesModel branchOfficesModel = branchOfficeFeign.obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
+                BranchOfficesModel branchOfficesModel = branchOfficeData.obtenerOficinaPorEmpresaIdYSerieYTipoComprobante(
                         companyModel.getId(), comprobante.getSerie(), comprobante.getTipoComprobante());
                 if(branchOfficesModel !=null) {
                     if (branchOfficesModel.getId() != null) {
@@ -683,7 +682,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             LogHelper.warnLog(LogMessages.currentMethod(), "El ruc emisor es null");
             throw new ServiceException("El RUC del emisor no puede ser nulo");
         }
-        CompanyModel companyModel = companyFeign.findCompanyByRuc(paymentVoucherDto.getRucEmisor());
+        CompanyModel companyModel = companyData.findCompanyByRuc(paymentVoucherDto.getRucEmisor());
         if (companyModel == null) {
             LogHelper.warnLog(LogMessages.currentMethod(), "Company es null");
             throw new ServiceException("No se encontró la empresa con RUC: " + paymentVoucherDto.getRucEmisor());
@@ -697,7 +696,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
     }
 
     private Integer getProximoNumero(String tipoDocumento, String serie, String ruc) {
-        Integer ultimoComprobante = paymentVoucherFeign.obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(tipoDocumento, serie, ruc);
+        Integer ultimoComprobante = paymentVoucherData.obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(tipoDocumento, serie, ruc);
         if (ultimoComprobante != null) {
             return ultimoComprobante + 1;
         } else {
@@ -738,31 +737,31 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
                     System.out.println("Eliminar items - stock del comprobante");
                 }
                 for (ComprobanteItem item : items) {
-                    detailPaymentVoucherFeign.deleteDetailPaymentVoucherById(item.getIdComprobanteDetalle());
+                    detailPaymentVoucherData.deleteDetailPaymentVoucherById(item.getIdComprobanteDetalle());
                     System.out.println("Eliminar items del comprobante");
                 }
             }
             if (anticipos != null && !anticipos.isEmpty()) {
                 for (Anticipo anticipo : anticipos) {
-                    anticipoFeign.deleteAnticipoById(anticipo.getIdAnticipoPayment());
+                    anticipoData.deleteAnticipoById(anticipo.getIdAnticipoPayment());
                     System.out.println("Eliminar anticipos del comprobante");
                 }
             }
             if (adicionales != null && !adicionales.isEmpty()) {
                 for (CampoAdicional adicional : adicionales) {
-                    additionalFieldFeign.deleteAditionalFieldPaymentById(Long.valueOf(adicional.getId()));
+                    additionalFieldData.deleteAditionalFieldPaymentById(Long.valueOf(adicional.getId()));
                     System.out.println("Eliminar campos adicionales del comprobante");
                 }
             }
             if (cuotas != null && !cuotas.isEmpty()) {
                 for (ComprobanteCuota cuota : cuotas) {
-                    cuotaPaymentVoucherFeign.deletePaymentCuotaById(cuota.getIdCuotas());
+                    cuotaPaymentVoucherData.deletePaymentCuotaById(cuota.getIdCuotas());
                     System.out.println("Eliminar cuotas del comprobante");
                 }
             }
             if (guias != null && !guias.isEmpty()) {
                 for (GuiaRelacionada guia : guias) {
-                    guiaPaymentFeign.deleteGuiaPaymentById(guia.getIdPaymentVoucher());
+                    guiaPaymentData.deleteGuiaPaymentById(guia.getIdPaymentVoucher());
                     System.out.println("Eliminar guias relacionadas del comprobante");
                 }
             }
@@ -1028,7 +1027,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         //entity.setUuid(UUIDGen.generate());
         comprobante.setUuid(UUIDGen.generate());
         comprobante.setFechaEmisionDate(new Date());
-        PaymentVoucherDto comprobanteCreado = paymentVoucherFeign.savePaymentVoucher(comprobante);
+        PaymentVoucherDto comprobanteCreado = paymentVoucherData.savePaymentVoucher(comprobante);
 
         log.info("COMPROBANTE CREADO: {}", comprobanteCreado.toString());
         return comprobanteCreado;

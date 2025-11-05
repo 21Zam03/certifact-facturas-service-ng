@@ -11,8 +11,8 @@ import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.model.*;
 import com.certicom.certifact_facturas_service_ng.enums.ComunicationSunatEnum;
 import com.certicom.certifact_facturas_service_ng.enums.EstadoComprobanteEnum;
-import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
-import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
+import com.certicom.certifact_facturas_service_ng.feign.CompanyData;
+import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherData;
 import com.certicom.certifact_facturas_service_ng.feign.VoidedDocumentsFeign;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.DocumentsVoidedService;
@@ -35,9 +35,9 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
 
     private final TemplateService templateService;
     private final VoidedDocumentsFeign voidedDocumentsFeign;
-    private final CompanyFeign companyFeign;
+    private final CompanyData companyData;
     private final SendSunatService sendSunatService;
-    private final PaymentVoucherFeign paymentVoucherFeign;
+    private final PaymentVoucherData paymentVoucherData;
     private final AmazonS3ClientService amazonS3ClientService;
     private final VoucherAnnularValidator voucherAnnularValidator;
 
@@ -85,7 +85,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
 
         documentSummary = voidedDocumentsFeign.save(documentSummary);
 
-        paymentVoucherFeign.updateStateToSendSunatForVoidedDocuments(
+        paymentVoucherData.updateStateToSendSunatForVoidedDocuments(
                 identificadorComprobantes,
                 EstadoComprobanteEnum.PENDIENTE_ANULACION.getCodigo(),
                 usuario,
@@ -109,7 +109,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
             for (VoucherAnnularRequest documento : documents) {
                 String identificadorDocumento = rucEmisor + "-" + documento.getTipoComprobante() + "-" +
                         documento.getSerie().toUpperCase() + "-" + documento.getNumero();
-                PaymentVoucherDto entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+                PaymentVoucherDto entity = paymentVoucherData.getIdentificadorDocument(identificadorDocumento);
                 System.out.println("VOIDED: "+ entity);
                 if (documento.getRucEmisor()==null){
                     documento.setRucEmisor(rucEmisor);
@@ -125,7 +125,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                         document.getSerie().toUpperCase() + "-" + document.getNumero();
                 System.out.println(identificadorDocumento);
                 boolean noExiste = false;
-                PaymentVoucherDto entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+                PaymentVoucherDto entity = paymentVoucherData.getIdentificadorDocument(identificadorDocumento);
                 if (entity==null){
                     noExiste=true;
                 }
@@ -179,7 +179,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                 for (VoucherAnnularRequest document : anulados) {
                     String identificadorDocumento = rucEmisor + "-" + document.getTipoComprobante() + "-" +
                             document.getSerie().toUpperCase() + "-" + document.getNumero();
-                    PaymentVoucherDto entity = paymentVoucherFeign.getIdentificadorDocument(identificadorDocumento);
+                    PaymentVoucherDto entity = paymentVoucherData.getIdentificadorDocument(identificadorDocumento);
                     if (entity.getEstado().equals("08") ){
                         if (messageBuilder == null) {
                             messageBuilder = new StringBuilder();
@@ -304,7 +304,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
                 voided.getRucEmisor(), voided.getFechaGeneracion());
         correlativo++;
         voided.setCorrelativoGeneracionDia(correlativo);
-        CompanyModel companyModel = companyFeign.findCompanyByRuc(voided.getRucEmisor());
+        CompanyModel companyModel = companyData.findCompanyByRuc(voided.getRucEmisor());
         voided.setDenominacionEmisor(companyModel.getRazon());
         voided.setTipoDocumentoEmisor(ConstantesSunat.TIPO_DOCUMENTO_IDENTIDAD_RUC);
         voided.setId(baja + "-" +

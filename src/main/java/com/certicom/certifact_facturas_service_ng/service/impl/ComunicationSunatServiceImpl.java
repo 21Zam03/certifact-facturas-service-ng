@@ -29,11 +29,11 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
 
     private static final String RECHA = "RECHA";
 
-    private final PaymentVoucherFeign paymentVoucherFeign;
-    private final CompanyFeign companyFeign;
-    private final TmpVoucherFeign tmpVoucherFeign;
-    private final RegisterFileUploadFeign registerFileUploadFeign;
-    private final PaymentVoucherFileFeign paymentVoucherFileFeign;
+    private final PaymentVoucherData paymentVoucherData;
+    private final CompanyData companyData;
+    private final TmpVoucherData tmpVoucherData;
+    private final RegisterFileUploadData registerFileUploadData;
+    private final PaymentVoucherFileData paymentVoucherFileData;
 
     private final AmazonS3ClientService amazonS3ClientService;
     private final SendSunatService sendSunatService;
@@ -52,17 +52,16 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
         StringBuilder msgLog = new StringBuilder();
 
         try {
-            voucherPendiente = tmpVoucherFeign.findTmpVoucherByIdPaymentVoucher(idPaymentVoucher);
+            voucherPendiente = tmpVoucherData.findTmpVoucherByIdPaymentVoucher(idPaymentVoucher);
 
             if (voucherPendiente != null) {
-                System.out.println("voucher pendiente existe "+voucherPendiente);
 
-                tmpVoucherFeign.updateStatusVoucherTmp(
+                tmpVoucherData.updateStatusVoucherTmp(
                         voucherPendiente.getIdTmpSendBill(),
                         EstadoVoucherTmpEnum.BLOQUEO.getEstado()
                 );
 
-                RegisterFileUploadModel registerFileUploadModelDto = registerFileUploadFeign
+                RegisterFileUploadModel registerFileUploadModelDto = registerFileUploadData
                         .findFirst1ByPaymentVoucherIdPaymentVoucherAndTipoArchivoAndEstadoArchivoOrderByOrdenDesc(idPaymentVoucher, TipoArchivoEnum.XML.name(),
                                 EstadoArchivoEnum.ACTIVO.name());
                 System.out.println("REGISTER FILE UPLOAD: "+ registerFileUploadModelDto);
@@ -130,7 +129,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                         break;
                     case SUCCESS_WITH_ERROR_CONTENT:
                         if(Integer.parseInt(responseSunat.getStatusCode())==1033){
-                            PaymentVoucherDto paymentVoucherDtoEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
+                            PaymentVoucherDto paymentVoucherDtoEntity = paymentVoucherData.findPaymentVoucherById(idPaymentVoucher);
                             GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc, paymentVoucherDtoEntity.getTipoComprobante(), paymentVoucherDtoEntity.getSerie(), paymentVoucherDtoEntity.getNumero(),idPaymentVoucher);
                             responseSunatCdr = sendSunatService.getStatusCDR(statusCdrDTO, ruc);
 
@@ -214,7 +213,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                         break;
                     case WITHOUT_CONNECTION:
                         if(responseSunat.getMessage().contains("1033")){
-                            PaymentVoucherDto paymentVoucherDtoEntity = paymentVoucherFeign.findPaymentVoucherById(idPaymentVoucher);
+                            PaymentVoucherDto paymentVoucherDtoEntity = paymentVoucherData.findPaymentVoucherById(idPaymentVoucher);
 
                             GetStatusCdrDto statusCdrDTO = new GetStatusCdrDto(ruc, paymentVoucherDtoEntity.getTipoComprobante(), paymentVoucherDtoEntity.getSerie(), paymentVoucherDtoEntity.getNumero(),idPaymentVoucher);
 
@@ -286,9 +285,9 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
                 contenidoBase64);
 
         System.out.println("RESPONSE STORAGE: "+responseStorage);
-        tmpVoucherFeign.deleteTmpVoucherById(idTmpVoucher);
+        tmpVoucherData.deleteTmpVoucherById(idTmpVoucher);
 
-        paymentVoucherFeign.updateStatePaymentVoucher(
+        paymentVoucherData.updateStatePaymentVoucher(
                 idPaymentVoucher,
                 estadoComprobante,
                 EstadoSunatEnum.ACEPTADO.getAbreviado(),
@@ -297,7 +296,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
         );
         //AGREGANDO ARCHIVO
         if (responseStorage.getIdRegisterFileSend() != null) {
-            paymentVoucherFileFeign.save(PaymentVoucherFileModel.builder()
+            paymentVoucherFileData.save(PaymentVoucherFileModel.builder()
                     .orden(2)
                     .estadoArchivo(EstadoArchivoEnum.ACTIVO.name())
                     .idPaymentVoucher(idPaymentVoucher)
@@ -313,7 +312,8 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
     public RegisterFileUploadModel uploadFileCdr(String rucEmisor, String nameDocument, String tipoComprobante, String estadoRegistro,
                                                  String fileXMLZipBase64) throws Exception {
 
-        CompanyModel companyModel = companyFeign.findCompanyByRuc(rucEmisor);
+        System.out.println("rucemisor: "+rucEmisor);
+        CompanyModel companyModel = companyData.findCompanyByRuc(rucEmisor);
         RegisterFileUploadModel file = amazonS3ClientService.uploadFileStorage(UtilArchivo.b64ToByteArrayInputStream(fileXMLZipBase64),
                 nameDocument, "cdr", companyModel);
         System.out.println("FILE UPLOAD: "+file);
@@ -333,10 +333,10 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
         String serie;
         Integer numero;
 
-        tmpVoucherFeign.updateStatusVoucherTmp(
+        tmpVoucherData.updateStatusVoucherTmp(
                 idTmpSendBill,
                 EstadoVoucherTmpEnum.VERIFICAR.getEstado());
-        paymentVoucherFeign.updateStatePaymentVoucher(
+        paymentVoucherData.updateStatePaymentVoucher(
                 idPaymentVoucher,
                 EstadoComprobanteEnum.ACEPTADO_POR_VERIFICAR.getCodigo(),
                 messageResponse,
@@ -364,10 +364,10 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
             String messageResponse,
             String codesResponse) {
 
-        tmpVoucherFeign.updateStatusVoucherTmp(
+        tmpVoucherData.updateStatusVoucherTmp(
                 idTmpSendBill,
                 EstadoVoucherTmpEnum.PENDIENTE.getEstado());
-        paymentVoucherFeign.updateStatePaymentVoucher(
+        paymentVoucherData.updateStatePaymentVoucher(
                 idPaymentVoucher,
                 EstadoComprobanteEnum.REGISTRADO.getCodigo(),
                 messageResponse,
@@ -375,10 +375,10 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
     }
 
     private void comunicacionReceptorSendBill(Long idPaymentVoucher, Long idTmpSendBill, String message, String statusCode) {
-        tmpVoucherFeign.updateStatusVoucherTmp(
+        tmpVoucherData.updateStatusVoucherTmp(
                 idTmpSendBill,
                 EstadoVoucherTmpEnum.ERROR.getEstado());
-        paymentVoucherFeign.updateStatePaymentVoucher(
+        paymentVoucherData.updateStatePaymentVoucher(
                 idPaymentVoucher,
                 EstadoComprobanteEnum.RECHAZADO.getCodigo(),
                 RECHA,
@@ -393,10 +393,10 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
             String messageResponse,
             String codesResponse) {
 
-        tmpVoucherFeign.updateStatusVoucherTmp(
+        tmpVoucherData.updateStatusVoucherTmp(
                 idTmpSendBill,
                 EstadoVoucherTmpEnum.ERROR.getEstado());
-        paymentVoucherFeign.updateStatePaymentVoucher(
+        paymentVoucherData.updateStatePaymentVoucher(
                 idPaymentVoucher,
                 EstadoComprobanteEnum.ERROR.getCodigo(),
                 messageResponse,
@@ -405,7 +405,7 @@ public class ComunicationSunatServiceImpl implements ComunicationSunatService {
 
     private void comunicacionWithoutConnectionSendBill(Long idTmpSendBill) {
 
-        tmpVoucherFeign.updateStatusVoucherTmp(
+        tmpVoucherData.updateStatusVoucherTmp(
                 idTmpSendBill,
                 EstadoVoucherTmpEnum.PENDIENTE.getEstado()
         );

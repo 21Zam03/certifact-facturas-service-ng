@@ -5,7 +5,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 @FeignClient(name = "facturas-service-sp", url = "http://localhost:8090", contextId = "tmpVoucher")
-public interface TmpVoucherFeign {
+public interface TmpVoucherData {
 
     @GetMapping("/api/tmp-voucher/{id}")
     public TmpVoucherSendBillEntity findTmpVoucherByIdPaymentVoucher(@PathVariable Long id);

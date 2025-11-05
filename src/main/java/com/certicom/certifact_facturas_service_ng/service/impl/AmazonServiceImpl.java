@@ -4,8 +4,8 @@ import com.certicom.certifact_facturas_service_ng.model.CompanyModel;
 import com.certicom.certifact_facturas_service_ng.model.RegisterFileUploadModel;
 import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
-import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
-import com.certicom.certifact_facturas_service_ng.feign.RegisterFileUploadFeign;
+import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherData;
+import com.certicom.certifact_facturas_service_ng.feign.RegisterFileUploadData;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.util.LogHelper;
 import com.certicom.certifact_facturas_service_ng.util.LogMessages;
@@ -39,8 +39,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AmazonServiceImpl implements AmazonS3ClientService {
 
-    private final PaymentVoucherFeign paymentVoucherFeign;
-    private final RegisterFileUploadFeign registerFileUploadFeign;
+    private final PaymentVoucherData paymentVoucherData;
+    private final RegisterFileUploadData registerFileUploadData;
 
     private final S3Client s3client;
 
@@ -84,7 +84,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
 
             s3client.putObject(putObjectRequest, RequestBody.fromBytes(contentBytes));
 
-            RegisterFileUploadModel resp = registerFileUploadFeign.saveRegisterFileUpload(RegisterFileUploadModel.builder()
+            RegisterFileUploadModel resp = registerFileUploadData.saveRegisterFileUpload(RegisterFileUploadModel.builder()
                     .estado("A")
                     .bucket(bucket)
                     .nombreGenerado(fileNameKey)
@@ -169,7 +169,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
 
             s3client.putObject(putObjectRequest, RequestBody.fromBytes(contentBytes));
 
-            RegisterFileUploadModel resp = registerFileUploadFeign.saveRegisterFileUpload(RegisterFileUploadModel.builder()
+            RegisterFileUploadModel resp = registerFileUploadData.saveRegisterFileUpload(RegisterFileUploadModel.builder()
                     .estado("A")
                     .bucket(bucket)
                     .nombreGenerado(fileNameKey)
@@ -194,7 +194,7 @@ public class AmazonServiceImpl implements AmazonS3ClientService {
     @Override
     public ByteArrayInputStream downloadFileInvoice(Long id, String uuid, TipoArchivoEnum tipoArchivoEnum) {
         String tipo = tipoArchivoEnum.name();
-        RegisterFileUploadModel registerFileUploadModelInterDto = registerFileUploadFeign.findByIdPaymentVoucherAndUuidTipo(id, uuid, tipo);
+        RegisterFileUploadModel registerFileUploadModelInterDto = registerFileUploadData.findByIdPaymentVoucherAndUuidTipo(id, uuid, tipo);
         return downloadFileStorageInter(registerFileUploadModelInterDto);
     }
 

@@ -1,38 +1,36 @@
 package com.certicom.certifact_facturas_service_ng.feign.rest;
 
-import com.certicom.certifact_facturas_service_ng.dto.UserDto;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
-import com.certicom.certifact_facturas_service_ng.feign.UserData;
+import com.certicom.certifact_facturas_service_ng.feign.CompanyData;
+import com.certicom.certifact_facturas_service_ng.model.CompanyModel;
+import com.certicom.certifact_facturas_service_ng.model.OseModel;
 import com.certicom.certifact_facturas_service_ng.util.LogHelper;
 import com.certicom.certifact_facturas_service_ng.util.LogMessages;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.*;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Service
-public class UserDataRestImpl implements UserData {
+public class CompanyDataRestImpl implements CompanyData {
 
     private final RestTemplate restTemplate;
 
     @Value("${external.services.factura-service-sp.base-url}")
     private String baseUrl;
 
-    @Value("${external.services.factura-service-sp.endpoints.api-user-endpoint}")
-    private String apiUserEndpoint;
+    @Value("${external.services.factura-service-sp.endpoints.api-company-endpoint}")
+    private String apiCompanyEndpoint;
 
-    public UserDataRestImpl(RestTemplate restTemplate) {
+    public CompanyDataRestImpl(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
     @Override
-    public UserDto findUserById(Long idUser) {
-        String url = String.format("%s/api/user/%d", getUrlEndpoint(), idUser);
+    public String getStateFromCompanyByRuc(String ruc) {
+        String url = getUrlEndpoint()+"/"+ruc+"/state";
         try {
-            ResponseEntity<UserDto> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, UserDto.class);
+            ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
             return response.getBody();
         } catch (HttpClientErrorException e) {
             LogHelper.warnLog(LogMessages.currentMethod(),
@@ -54,22 +52,18 @@ public class UserDataRestImpl implements UserData {
     }
 
     @Override
-    public UserDto findUserByUsername(String username) {
-        String url = UriComponentsBuilder
-                .fromHttpUrl(getUrlEndpoint() + "/byUsername")
-                .queryParam("username", username)
-                .toUriString();
+    public CompanyModel findCompanyByRuc(String ruc) {
+        String url = getUrlEndpoint()+"/"+ruc;
         try {
-            ResponseEntity<UserDto> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, UserDto.class);
+            ResponseEntity<CompanyModel> response = restTemplate.getForEntity(url, CompanyModel.class);
             return response.getBody();
         } catch (HttpClientErrorException e) {
             LogHelper.warnLog(LogMessages.currentMethod(),
-                    "Error "+e.getStatusCode()+" al comunicarse con el servicio externo, "+e.getMessage());
+                    "Error 4xx al comunicarse con el servicio externo, "+e.getMessage());
             return null;
         } catch (HttpServerErrorException e) {
             LogHelper.errorLog(LogMessages.currentMethod(),
-                    "Error "+e.getStatusCode()+" al comunicarse con el servicio externo, "+ e.getMessage());
+                    "Error 5xx al comunicarse con el servicio externo", e);
             throw new ServiceException(LogMessages.ERROR_HTTP_SERVER, e);
         } catch (ResourceAccessException e) {
             LogHelper.errorLog(LogMessages.currentMethod(),
@@ -83,11 +77,10 @@ public class UserDataRestImpl implements UserData {
     }
 
     @Override
-    public String getUsernameById(Long id) {
-        String url = String.format("%s/%d/username", getUrlEndpoint(), id);
+    public OseModel findOseByRucInter(String ruc) {
+        String url = getUrlEndpoint()+"/ose?ruc="+ruc;
         try {
-            ResponseEntity<String> response = restTemplate.exchange(
-                    url, HttpMethod.GET, null, String.class);
+            ResponseEntity<OseModel> response = restTemplate.getForEntity(url, OseModel.class);
             return response.getBody();
         } catch (HttpClientErrorException e) {
             LogHelper.warnLog(LogMessages.currentMethod(),
@@ -95,7 +88,7 @@ public class UserDataRestImpl implements UserData {
             return null;
         } catch (HttpServerErrorException e) {
             LogHelper.errorLog(LogMessages.currentMethod(),
-                    "Error "+e.getStatusCode()+" al comunicarse con el servicio externo, "+ e.getMessage());
+                    "Error 5xx al comunicarse con el servicio externo", e);
             throw new ServiceException(LogMessages.ERROR_HTTP_SERVER, e);
         } catch (ResourceAccessException e) {
             LogHelper.errorLog(LogMessages.currentMethod(),
@@ -109,7 +102,7 @@ public class UserDataRestImpl implements UserData {
     }
 
     private String getUrlEndpoint() {
-        return this.baseUrl+this.apiUserEndpoint;
+        return this.baseUrl+this.apiCompanyEndpoint;
     }
 
 }

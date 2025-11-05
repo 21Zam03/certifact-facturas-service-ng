@@ -1,6 +1,5 @@
 package com.certicom.certifact_facturas_service_ng.feign;
 
-import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
 import com.certicom.certifact_facturas_service_ng.model.ErrorCatalogModel;
 import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.PaymentVoucherDtoFilter;
@@ -11,7 +10,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @FeignClient(name = "facturas-service-sp", url = "http://localhost:8090", contextId = "paymentVoucher")
-public interface PaymentVoucherFeign {
+public interface PaymentVoucherData {
 
     /**
      * Obtiene la lista de comprobantes electrónicos emitidos por un emisor,

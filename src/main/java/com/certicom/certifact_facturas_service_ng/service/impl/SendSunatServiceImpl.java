@@ -7,9 +7,9 @@ import com.certicom.certifact_facturas_service_ng.enums.ComunicationSunatEnum;
 import com.certicom.certifact_facturas_service_ng.enums.EstadoSunatEnum;
 import com.certicom.certifact_facturas_service_ng.enums.TyperErrorEnum;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
-import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
-import com.certicom.certifact_facturas_service_ng.feign.ErrorCatalogFeign;
-import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
+import com.certicom.certifact_facturas_service_ng.feign.CompanyData;
+import com.certicom.certifact_facturas_service_ng.feign.ErrorCatalogData;
+import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherData;
 import com.certicom.certifact_facturas_service_ng.feign.VoidedDocumentsFeign;
 import com.certicom.certifact_facturas_service_ng.dto.others.GetStatusCdrDto;
 import com.certicom.certifact_facturas_service_ng.model.OseModel;
@@ -48,9 +48,9 @@ import java.util.*;
 @Slf4j
 public class SendSunatServiceImpl implements SendSunatService {
 
-    private final PaymentVoucherFeign paymentVoucherFeign;
-    private final CompanyFeign companyFeign;
-    private final ErrorCatalogFeign errorCatalogFeign;
+    private final PaymentVoucherData paymentVoucherData;
+    private final CompanyData companyData;
+    private final ErrorCatalogData errorCatalogData;
     private final RequestSunatTemplate requestSunatTemplate;
     private final VoucherAnnularValidator voucherAnnularValidator;
     private final VoidedDocumentsFeign voidedDocumentsFeign;
@@ -69,7 +69,7 @@ public class SendSunatServiceImpl implements SendSunatService {
 
     @Override
     public PaymentVoucherDto prepareComprobanteForEnvioSunatInter(String finalRucEmisor, String tipoComprobante, String serieDocumento, Integer numeroDocumento) throws ServiceException {
-        PaymentVoucherDto paymentVoucherDto = paymentVoucherFeign.
+        PaymentVoucherDto paymentVoucherDto = paymentVoucherData.
                 findPaymentVoucherByRucAndTipoComprobanteAndSerieDocumentoAndNumeroDocumento(finalRucEmisor, tipoComprobante, serieDocumento, numeroDocumento);
 
         if (paymentVoucherDto == null)
@@ -105,7 +105,7 @@ public class SendSunatServiceImpl implements SendSunatService {
             System.out.println("--------------");
 
             ResponseServer responseServer = null;
-            OseModel ose = companyFeign.findOseByRucInter(rucEmisor);
+            OseModel ose = companyData.findOseByRucInter(rucEmisor);
             System.out.println("OSE: "+ose);
             if (ose != null) {
                 if (ose.getId() == 1) {
@@ -162,7 +162,7 @@ public class SendSunatServiceImpl implements SendSunatService {
             String formatSoap = obtenerStatusCdr(statusDto,rucEmisor);
 
             ResponseServer responseServer = null;
-            OseModel ose = companyFeign.findOseByRucInter(rucEmisor);
+            OseModel ose = companyData.findOseByRucInter(rucEmisor);
             if (ose != null) {
                 if (ose.getId()==1) {
                     responseServer = send(
@@ -235,7 +235,7 @@ public class SendSunatServiceImpl implements SendSunatService {
                     ConstantesParameter.TAG_SEND_SUMMARY_TICKET
             );*/
             ResponseServer responseServer = null;
-            OseModel ose = companyFeign.findOseByRucInter(rucEmisor);
+            OseModel ose = companyData.findOseByRucInter(rucEmisor);
             if (ose != null) {
                 if (ose.getId()==1){
 
@@ -312,7 +312,7 @@ public class SendSunatServiceImpl implements SendSunatService {
     }
 
     private String obtenerFormatBuildSendSumary(String ruc, String fileName, String contentFileBase64) {
-        OseModel ose = companyFeign.findOseByRucInter(ruc);
+        OseModel ose = companyData.findOseByRucInter(ruc);
         String formato = "";
         if (ose != null) {
             if (ose.getId()==1){
@@ -331,7 +331,7 @@ public class SendSunatServiceImpl implements SendSunatService {
     }
 
     private String obtenerFormat(String ruc, String fileName, String contentFileBase64) {
-        OseModel ose = companyFeign.findOseByRucInter(ruc);
+        OseModel ose = companyData.findOseByRucInter(ruc);
         String formato = "";
         if (ose != null) {
             if (ose.getId()==1){
@@ -403,7 +403,7 @@ public class SendSunatServiceImpl implements SendSunatService {
     }
 
     private String obtenerEndPointSunat(String ruc) {
-        OseModel ose = companyFeign.findOseByRucInter(ruc);
+        OseModel ose = companyData.findOseByRucInter(ruc);
         if (ose != null && ose.getId()!=10) {
             return ose.getUrlFacturas();
         } else {
@@ -561,7 +561,7 @@ public class SendSunatServiceImpl implements SendSunatService {
             return;
         }
 
-        errorRespuesta = errorCatalogFeign.findFirst1ByCodeAndDocument(codigoRespuesta, tipoDocumento);
+        errorRespuesta = errorCatalogData.findFirst1ByCodeAndDocument(codigoRespuesta, tipoDocumento);
 
         if (errorRespuesta != null) {
             if (errorRespuesta.getType().equals(TyperErrorEnum.ERROR.getType())) {
@@ -585,7 +585,7 @@ public class SendSunatServiceImpl implements SendSunatService {
     }
 
     private String obtenerStatusCdr(GetStatusCdrDto statusDto, String ruc) {
-        OseModel ose = companyFeign.findOseByRucInter(ruc);
+        OseModel ose = companyData.findOseByRucInter(ruc);
         String statusstring = "";
         if (ose != null) {
             if (ose.getId()==1){

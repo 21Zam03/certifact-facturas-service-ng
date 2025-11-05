@@ -3,10 +3,9 @@ package com.certicom.certifact_facturas_service_ng.validation.business;
 import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.Anticipo;
 import com.certicom.certifact_facturas_service_ng.dto.others.ComprobanteItem;
-import com.certicom.certifact_facturas_service_ng.enums.LogTitle;
 import com.certicom.certifact_facturas_service_ng.exceptions.ValidationException;
-import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
-import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
+import com.certicom.certifact_facturas_service_ng.feign.CompanyData;
+import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherData;
 import com.certicom.certifact_facturas_service_ng.util.*;
 import com.certicom.certifact_facturas_service_ng.validation.ConstantesSunat;
 import com.fasterxml.jackson.core.JacksonException;
@@ -56,8 +55,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PaymentVoucherValidator extends CamposEntrada<Object> {
 
-    private final PaymentVoucherFeign paymentVoucherFeign;
-    private final CompanyFeign companyFeign;
+    private final PaymentVoucherData paymentVoucherData;
+    private final CompanyData companyData;
 
     private final PaymentVoucherDetailValidator paymentVoucherDetailValidator;
     private final AnticipoValidator anticipoValidator;
@@ -514,7 +513,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
      */
     private void validateRucAtivo(String rucEmisor) {
         try {
-            String estado = companyFeign.getStateFromCompanyByRuc(rucEmisor);
+            String estado = companyData.getStateFromCompanyByRuc(rucEmisor);
             if(!estado.equals(ConstantesParameter.REGISTRO_ACTIVO)) {
                 throw new ValidationException(
                         "El ruc emisor [" + rucEmisor + "] No se encuentra habilitado para ejecutar operaciones al API-REST."
@@ -662,7 +661,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
      */
     private void validateNumeracion(String tipoComprobante, String serie, String rucEmisor, Integer numero) {
         try {
-            int proximo = paymentVoucherFeign.
+            int proximo = paymentVoucherData.
                     obtenerSiguienteNumeracionPorTipoComprobanteYSerieYRucEmisor(tipoComprobante, serie, rucEmisor);
             if (proximo > 1){
                 int diferencia = numero - proximo;
@@ -686,7 +685,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
     private void validateIdentificadorDocumento(String rucEmisor, String tipoComprobante, String serie, Integer numero, boolean isEdit) {
         try {
             String idDocumento = rucEmisor + "-" + tipoComprobante + "-" + serie + "-" + numero;
-            PaymentVoucherDto identificadorEntity = paymentVoucherFeign.getPaymentVoucherByIdentificadorDocumento(idDocumento);
+            PaymentVoucherDto identificadorEntity = paymentVoucherData.getPaymentVoucherByIdentificadorDocumento(idDocumento);
             if (identificadorEntity != null && !isEdit) {
                 throw new ValidationException(
                         "El comprobante ya ha sido registrado [" + rucEmisorLabel + ":" + rucEmisor + "; "

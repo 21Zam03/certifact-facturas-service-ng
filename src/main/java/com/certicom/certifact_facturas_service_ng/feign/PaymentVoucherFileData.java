@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 @FeignClient(name = "facturas-service-sp", url = "http://localhost:8090", contextId = "paymentVoucherFile")
-public interface PaymentVoucherFileFeign {
+public interface PaymentVoucherFileData {
 
     @PostMapping("/api/payment-voucher-file")
     public int save(@RequestBody PaymentVoucherFileModel paymentVoucherFileModel);

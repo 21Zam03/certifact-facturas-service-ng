@@ -2,8 +2,8 @@ package com.certicom.certifact_facturas_service_ng.service.impl;
 
 import com.certicom.certifact_facturas_service_ng.exceptions.QRGenerationException;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
-import com.certicom.certifact_facturas_service_ng.feign.CompanyFeign;
-import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFeign;
+import com.certicom.certifact_facturas_service_ng.feign.CompanyData;
+import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherData;
 import com.certicom.certifact_facturas_service_ng.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,8 +15,8 @@ import java.text.ParseException;
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
 
-    private final PaymentVoucherFeign paymentVoucherFeign;
-    private final CompanyFeign companyFeign;
+    private final PaymentVoucherData paymentVoucherData;
+    private final CompanyData companyData;
 
     @Override
     public ByteArrayInputStream getPdfComprobanteuid(Long idPaymentVoucher, String uuid, String nameDocument, String tipoPdf) throws QRGenerationException, ParseException {
