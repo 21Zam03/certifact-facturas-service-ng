@@ -10,8 +10,8 @@ import java.io.IOException;
 @Component
 public class DataFilter implements Filter {
 
-    public static final String RUC_CLIENT = "X-RUC-Client";
-    public static final String X_ID_USER = "X-ID-User";
+    public static final String RUC_CLIENT = "X-User-Ruc";
+    public static final String X_ID_USER = "X-User-Id";
     public static final String USER_AGENT = "User-Agent";
 
     @Override
@@ -27,11 +27,11 @@ public class DataFilter implements Filter {
         String method = request.getMethod();
 
         if (ruc != null) {
-            MDC.put("ruc", ruc);
+            MDC.put("x_user_ruc", ruc);
         }
 
         if (id != null) {
-            MDC.put("id", id);
+            MDC.put("x_user_id", id);
         }
 
         if (ip != null) {

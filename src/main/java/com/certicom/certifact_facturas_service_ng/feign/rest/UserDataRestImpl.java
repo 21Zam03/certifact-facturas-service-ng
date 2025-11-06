@@ -29,7 +29,7 @@ public class UserDataRestImpl implements UserData {
 
     @Override
     public UserDto findUserById(Long idUser) {
-        String url = String.format("%s/api/user/%d", getUrlEndpoint(), idUser);
+        String url = String.format("%s/%d", getUrlEndpoint(), idUser);
         try {
             ResponseEntity<UserDto> response = restTemplate.exchange(
                     url, HttpMethod.GET, null, UserDto.class);

@@ -44,11 +44,12 @@ public class PaymentVoucherController {
             @RequestParam(name = "pageNumber", required = true) Integer pageNumber,
             @RequestParam(name = "perPage", required = true) Integer perPage,
             @RequestParam(name = "estadoSunat", required = false) Integer estadoSunat,
-            @RequestHeader(name = "X-RUC-Client", required = true) String ruc,
-            @RequestHeader(name = "X-ID-User", required = true) Long usuarioId
+            @RequestHeader(name = "X-User-Ruc", required = true) String userRuc,
+            @RequestHeader(name = "X-User-Id", required = true) Long userId,
+            @RequestHeader(name = "X-User-Roles", required = true) List<String> rol
     ) {
         Map<String, Object> paginacionComprobantes = paymentVoucherService.findPaymentVoucherWithFilter(
-                filtroDesde, filtroHasta, filtroTipoComprobante, filtroRuc, filtroSerie, filtroNumero, pageNumber, perPage, estadoSunat, usuarioId
+                filtroDesde, filtroHasta, filtroTipoComprobante, filtroRuc, filtroSerie, filtroNumero, pageNumber, perPage, estadoSunat, userId
         );
         return new ResponseEntity<>(paginacionComprobantes, HttpStatus.OK);
     }
@@ -56,18 +57,19 @@ public class PaymentVoucherController {
     @PostMapping("/comprobantes-pago")
     public ResponseEntity<?> savePaymentVoucher(
             @RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest,
-            @RequestHeader(name = "X-RUC-Client", required = true) String ruc,
-            @RequestHeader(name = "X-ID-User", required = true) Long usuarioId
+            @RequestHeader(name = "X-User-Ruc", required = true) String userRuc,
+            @RequestHeader(name = "X-User-Id", required = true) String userId,
+            @RequestHeader(name = "X-User-Roles", required = true) String rol
     ) {
         MDC.put("payment_voucher",  paymentVoucherRequest.getSerie()+"-"+paymentVoucherRequest.getNumero());
 
-        paymentVoucherRequest.setRucEmisor(ruc);
+        paymentVoucherRequest.setRucEmisor(userRuc);
 
         PaymentVoucherDto paymentVoucherDto = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);
 
         paymentVoucherValidator.validate(paymentVoucherDto, false);
 
-        Map<String, Object> result = paymentVoucherService.createPaymentVoucher(paymentVoucherDto, usuarioId);
+        Map<String, Object> result = paymentVoucherService.createPaymentVoucher(paymentVoucherDto, Long.valueOf(userId));
 
         return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
     }
@@ -75,8 +77,9 @@ public class PaymentVoucherController {
     @PutMapping("/editar-comprobante")
     public ResponseEntity<?> editPaymentVoucher(
             @RequestBody @Valid PaymentVoucherRequest paymentVoucherRequest,
-            @RequestHeader(name = "X-RUC-Client", required = true) String ruc,
-            @RequestHeader(name = "X-ID-User", required = true) Long usuarioId
+            @RequestHeader(name = "X-User-Ruc", required = true) String ruc,
+            @RequestHeader(name = "X-User-Id", required = true) Long usuarioId,
+            @RequestHeader(name = "X-User-Roles", required = true) List<String> roles
     ) {
 
         paymentVoucherRequest.setRucEmisor(ruc);
@@ -90,8 +93,9 @@ public class PaymentVoucherController {
     @PostMapping("/comprobantes/enviar-sunat")
     public ResponseEntity<?> sendPaymentVoucherToSunat(
             @RequestBody IdentificadorPaymentVoucherRequest paymentVoucher,
-            @RequestHeader(name = "X-RUC-Client", required = true) String ruc,
-            @RequestHeader(name = "X-ID-User", required = true) Long usuarioId
+            @RequestHeader(name = "X-User-Ruc", required = true) String ruc,
+            @RequestHeader(name = "X-User-Id", required = true) Long usuarioId,
+            @RequestHeader(name = "X-User-Roles", required = true) List<String> roles
     ) {
         PaymentVoucherDto paymentVoucherDtoDto = sendSunatService.prepareComprobanteForEnvioSunatInter(ruc, paymentVoucher.getTipo(), paymentVoucher.getSerie(), paymentVoucher.getNumero());
         Map<String, Object> result = comunicationSunatService.sendDocumentBill(paymentVoucherDtoDto.getRucEmisor(), paymentVoucherDtoDto.getIdPaymentVoucher());
@@ -113,32 +117,36 @@ public class PaymentVoucherController {
     public ResponseEntity<?> ultimoComprobante(
             @PathVariable String tipoDocumento,
             @PathVariable String serie,
-            @RequestHeader(name = "X-RUC-Client", required = true) String ruc,
-            @RequestHeader(name = "X-ID-User", required = true) Long usuarioId) {
+            @RequestHeader(name = "X-User-Ruc", required = true) String ruc,
+            @RequestHeader(name = "X-User-Id", required = true) Long usuarioId,
+            @RequestHeader(name = "X-User-Roles", required = true) List<String> roles) {
         return new ResponseEntity<Object>(paymentVoucherService.getSiguienteNumeroComprobante(tipoDocumento, serie, ruc), HttpStatus.OK);
     }
 
     @GetMapping("/comprobantes-anticipo")
     public ResponseEntity<List<PaymentVoucherDto>> comprobantesAnticipo(
             @RequestParam(name = "filtroNumDoc", required = true) String filtroNumDoc,
-            @RequestHeader(name = "X-RUC-Client", required = true) String ruc,
-            @RequestHeader(name = "X-ID-User", required = true) Long usuarioId) {
+            @RequestHeader(name = "X-User-Ruc", required = true) String ruc,
+            @RequestHeader(name = "X-User-Id", required = true) Long usuarioId,
+            @RequestHeader(name = "X-User-Roles", required = true) List<String> roles) {
         return new ResponseEntity<List<PaymentVoucherDto>>(paymentVoucherService.findComprobanteByAnticipo(filtroNumDoc, ruc), HttpStatus.OK);
     }
 
     @GetMapping("/comprobantes-credito")
     public ResponseEntity<List<PaymentVoucherDto>> comprobantesCredito(
             @RequestParam(name = "filtroNumDoc", required = true) String filtroNumDoc,
-            @RequestHeader(name = "X-RUC-Client", required = true) String ruc,
-            @RequestHeader(name = "X-ID-User", required = true) Long usuarioId) {
+            @RequestHeader(name = "X-User-Ruc", required = true) String ruc,
+            @RequestHeader(name = "X-User-Id", required = true) Long usuarioId,
+            @RequestHeader(name = "X-User-Roles", required = true) List<String> roles) {
         return new ResponseEntity<List<PaymentVoucherDto>>(paymentVoucherService.findComprobanteByCredito(filtroNumDoc, ruc), HttpStatus.OK);
     }
 
     @PostMapping("/getEstadosSunat")
     public ResponseEntity<?> getEstadosSunat(
             @RequestBody List<Long> idsPaymentVouchers,
-            @RequestHeader(name = "X-RUC-Client", required = true) String ruc,
-            @RequestHeader(name = "X-ID-User", required = true) Long usuarioId) {
+            @RequestHeader(name = "X-User-Ruc", required = true) String ruc,
+            @RequestHeader(name = "X-User-Id", required = true) Long usuarioId,
+            @RequestHeader(name = "X-User-Roles", required = true) List<String> roles) {
         return new ResponseEntity<Object>(paymentVoucherService.getEstadoSunatByListaIdsInter(idsPaymentVouchers), HttpStatus.OK);
     }
 

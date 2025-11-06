@@ -12,13 +12,13 @@ import java.io.IOException;
 @Component
 public class RestTemplateInterceptor implements ClientHttpRequestInterceptor {
 
-    public static final String X_RUC_CLIENT = "X-RUC-Client";
-    public static final String X_ID_USER = "X-ID-User";
+    public static final String X_RUC_CLIENT = "X-User-Ruc";
+    public static final String X_ID_USER = "X-User-Id";
 
     @Override
     public ClientHttpResponse intercept(HttpRequest request, byte[] body, ClientHttpRequestExecution execution) throws IOException {
-        String ruc = MDC.get("ruc");
-        String id =  MDC.get("id");
+        String ruc = MDC.get("x_user_ruc");
+        String id =  MDC.get("x_user_id");
 
         if (ruc != null) {
             request.getHeaders().add(X_RUC_CLIENT, ruc);

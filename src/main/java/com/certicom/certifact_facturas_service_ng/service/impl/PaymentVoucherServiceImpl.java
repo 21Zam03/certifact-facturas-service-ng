@@ -110,6 +110,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
         try {
             UserDto usuarioLogueado = userData.findUserById(idUsuario);
+            System.out.println("USER: "+usuarioLogueado);
             if(usuarioLogueado == null) {
                 LogHelper.errorLog(LogMessages.currentMethod(), "El parametro usuario es nulo");
                 throw new ServiceException("Usuario no encontrado");
