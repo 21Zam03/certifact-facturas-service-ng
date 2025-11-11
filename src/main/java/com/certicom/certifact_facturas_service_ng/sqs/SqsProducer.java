@@ -1,5 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.sqs;
 
+import com.certicom.certifact_facturas_service_ng.dto.others.EmailSendDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.SendBillDto;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
 import com.certicom.certifact_facturas_service_ng.util.LogHelper;
@@ -26,6 +27,9 @@ public class SqsProducer {
     @Value("${apifact.aws.sqs.sendBill}")
     private String sendBill;
 
+    @Value("${apifact.aws.sqs.emailSender}")
+    private String emailSender;
+
     public void produceSendBill(SendBillDto sendBillDto) {
         try {
             send(sendBill, sendBillDto);
@@ -33,6 +37,16 @@ public class SqsProducer {
             LogHelper.errorLog(LogMessages.currentMethod(), "Ocurrio un error al enviar mensaje a la cola, nameDocument: "+sendBillDto.getNameDocument(), e);
             throw new ServiceException("Ocurrio un error al enviar mensaje a la cola, nameDocument: "+sendBillDto.getNameDocument(), e);
         }
+    }
+
+    public void produceEnviarCorreo(EmailSendDto emailSendDTO) {
+        try {
+            send(emailSender, emailSendDTO);
+        }catch (Exception e){
+            LogHelper.errorLog(LogMessages.currentMethod(), "Ocurrio un error al enviar mensaje a la cola, email: "+emailSendDTO.getEmail(), e);
+            throw new ServiceException("Ocurrio un error al enviar mensaje a la cola, email: "+emailSendDTO.getEmail(), e);
+        }
+
     }
 
     public <MESSAGE extends Serializable> void send(String queueUrl, MESSAGE payload) {

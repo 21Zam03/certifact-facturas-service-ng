@@ -110,10 +110,9 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
 
         try {
             UserDto usuarioLogueado = userData.findUserById(idUsuario);
-            System.out.println("USER: "+usuarioLogueado);
             if(usuarioLogueado == null) {
-                LogHelper.errorLog(LogMessages.currentMethod(), "El parametro usuario es nulo");
-                throw new ServiceException("Usuario no encontrado");
+                LogHelper.errorLog(LogMessages.currentMethod(), "Usuario con id: "+idUsuario+" no existe en la base de datos");
+                throw new ServiceException("Usuario con id: "+idUsuario+" no existe en la base de datos");
             }
             if(usuarioLogueado.getIdUser()!=null){
                 idOficina = usuarioLogueado.getIdOficina();
@@ -148,8 +147,8 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
                 teurosnew = comprobanteMonedaEur.getImporteTotalVenta()!=null?comprobanteMonedaEur.getImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
             }
         } catch (Exception e) {
-            LogHelper.errorLog(LogMessages.currentMethod(), "Ocurrio un error inesperado", e);
-            throw new ServiceException(LogMessages.ERROR_UNEXPECTED, e);
+            LogHelper.errorLog(LogMessages.currentMethod(), "Ocurrio un error, "+ e.getMessage());
+            throw new ServiceException("Ocurrio un error, ", e);
         }
         return ImmutableMap.of("comprobantesList", result, "cantidad", cantidad, "totalsoles", tsolesnew, "totaldolares", tdolaresnew, "totaleuros", teurosnew);
     }

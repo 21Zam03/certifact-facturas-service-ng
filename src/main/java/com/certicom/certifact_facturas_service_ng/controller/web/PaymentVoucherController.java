@@ -2,12 +2,14 @@ package com.certicom.certifact_facturas_service_ng.controller.web;
 
 import com.certicom.certifact_facturas_service_ng.converter.PaymentVoucherConverter;
 import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
+import com.certicom.certifact_facturas_service_ng.dto.others.EmailSendDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.request.IdentificadorPaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.request.PaymentVoucherRequest;
 import com.certicom.certifact_facturas_service_ng.service.ComunicationSunatService;
 import com.certicom.certifact_facturas_service_ng.service.PaymentVoucherService;
 import com.certicom.certifact_facturas_service_ng.service.SendSunatService;
+import com.certicom.certifact_facturas_service_ng.sqs.SqsProducer;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.certicom.certifact_facturas_service_ng.validation.business.PaymentVoucherValidator;
 import jakarta.validation.Valid;
@@ -32,6 +34,7 @@ public class PaymentVoucherController {
     private final PaymentVoucherValidator paymentVoucherValidator;
     private final ComunicationSunatService comunicationSunatService;
     private final SendSunatService sendSunatService;
+    private final SqsProducer sqsProducer;
 
     @GetMapping("/comprobantes")
     public ResponseEntity<?> findPaymentVoucherWithFilter(
@@ -81,12 +84,16 @@ public class PaymentVoucherController {
             @RequestHeader(name = "X-User-Id", required = true) Long usuarioId,
             @RequestHeader(name = "X-User-Roles", required = true) List<String> roles
     ) {
+        MDC.put("payment_voucher",  paymentVoucherRequest.getSerie()+"-"+paymentVoucherRequest.getNumero());
 
         paymentVoucherRequest.setRucEmisor(ruc);
 
         PaymentVoucherDto paymentVoucherDto = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);
+
         paymentVoucherValidator.validate(paymentVoucherDto, true);
+
         Map<String, Object> result = paymentVoucherService.updatePaymentVoucher(paymentVoucherDto,  usuarioId);
+
         return new ResponseEntity<>(result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE), HttpStatus.CREATED);
     }
 
@@ -100,16 +107,17 @@ public class PaymentVoucherController {
         PaymentVoucherDto paymentVoucherDtoDto = sendSunatService.prepareComprobanteForEnvioSunatInter(ruc, paymentVoucher.getTipo(), paymentVoucher.getSerie(), paymentVoucher.getNumero());
         Map<String, Object> result = comunicationSunatService.sendDocumentBill(paymentVoucherDtoDto.getRucEmisor(), paymentVoucherDtoDto.getIdPaymentVoucher());
         ResponsePSE resp = (ResponsePSE) result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE);
+
         if (resp.getEstado()) {
-            System.out.println("ENVIAR correo");
-            //messageProducer.produceEnviarCorreo(EmailSendDTO.builder().id(paymentVoucherEntity.getIdPaymentVoucher()).build());
+            sqsProducer.produceEnviarCorreo(EmailSendDto.builder().id(paymentVoucherDtoDto.getIdPaymentVoucher()).build());
         }
+
         if (result.get(ConstantesParameter.PARAM_BEAN_GET_STATUS_CDR) != null) {
             System.out.println("producir la cdr");
             //GetStatusCdrDTO dataGetStatusCDR = (GetStatusCdrDTO) result.get(ConstantesParameter.PARAM_BEAN_GET_STATUS_CDR);
             //messageProducer.produceGetStatusCDR(dataGetStatusCDR);
         }
-        System.out.println("RESPUESTA: "+resp);
+
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
