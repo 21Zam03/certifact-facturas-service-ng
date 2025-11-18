@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.certicom</groupId>
-	<artifactId>certifact-facturas-service-ng</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
-	<name>certifact-facturas-service-ng</name>
+	<artifactId>facturas-service-ng</artifactId>
+	<version>0.0.1</version>
+	<name>facturas-service-ng</name>
 	<description>Demo project for Spring Boot</description>
 	<url/>
 	<licenses>
