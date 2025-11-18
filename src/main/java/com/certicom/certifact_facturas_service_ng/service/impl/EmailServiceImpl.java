@@ -51,6 +51,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public Boolean sendEmailOnConfirmSunat(EmailSendDto emailSendDTO) {
+        /*
         String rucEmisor = "";
         String receptor = "";
         String serie = "";
@@ -89,19 +90,19 @@ public class EmailServiceImpl implements EmailService {
             System.out.println("GET EMAIL "+(emailSendDTO.getEmail()));
             if (emailSendDTO.getEmail() != null) {
                 String[] emails = (emailSendDTO.getEmail()).split(",");
-                //emailToSend = emailSendDTO.getEmail();
+
                 for (int i=0;i<emails.length;i++){
                     emailsVoucher.add(emails[i].trim());
                 }
-                //emailsVoucher.add(emailSendDTO.getEmail());
+
             }else {
                 String[] emails = arrayEmail;
                 for (int i=0;i<emails.length;i++){
                     emailsVoucher.add(emails[i].trim());
                 }
-            } //emailToSend = comprobante.getEmailReceptor();
+            }
 
-            //EMAIL ADICIONALES
+
             List<EmailCompanyNotifyEntity> emailsAdicionalesNotificar = emailCompanyNotifyRepository.findAllByCompany_RucAndEstadoIsTrue(rucEmisor);
             List<String> emailsList = new ArrayList<>();
 
@@ -111,15 +112,14 @@ public class EmailServiceImpl implements EmailService {
                         .map(e -> e.getEmail()).collect(Collectors.toList());
             }
             System.out.println(emailsList);
-            /*if (emailToSend != null && !emailToSend.isEmpty())
-                emailsList.add(emailToSend);*/
+
             for (int j=0;j<emailsVoucher.size();j++){
                 emailsList.add(emailsVoucher.get(j));
             }
 
-            //for (String emailSend : emailsList) {
+
             if (emailsList.size()>0) {
-                //log.info(emailsList);
+
                 List<String> emailListFinal = emailsList;
 
                 String finalReceptor = receptor;
@@ -233,6 +233,8 @@ public class EmailServiceImpl implements EmailService {
             e.printStackTrace();
             return false;
         }
+        * */
+        return true;
     }
 
     private ByteArrayInputStream extractXmlFromZip(ByteArrayInputStream zipBis, String zipEntryName) throws IOException {
