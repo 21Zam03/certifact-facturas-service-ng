@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(name = "facturas-service-sp", url = "http://localhost:8090", contextId = "voidedDocuments")
+@FeignClient(name = "facturas-service-sp", url = "http://factura-sp:8090", contextId = "voidedDocuments")
 public interface VoidedDocumentsFeign {
 
     @GetMapping("/api/voided-documents/correlativo")

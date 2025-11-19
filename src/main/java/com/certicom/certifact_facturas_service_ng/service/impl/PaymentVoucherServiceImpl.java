@@ -148,7 +148,7 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             }
         } catch (Exception e) {
             LogHelper.errorLog(LogMessages.currentMethod(), "Ocurrio un error, "+ e.getMessage());
-            throw new ServiceException("Ocurrio un error, ", e);
+            throw new ServiceException("Ocurrio un error, ", e.getMessage());
         }
         return ImmutableMap.of("comprobantesList", result, "cantidad", cantidad, "totalsoles", tsolesnew, "totaldolares", tdolaresnew, "totaleuros", teurosnew);
     }
