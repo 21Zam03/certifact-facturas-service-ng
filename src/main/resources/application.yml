@@ -2,6 +2,7 @@ spring:
   application:
     name: factura-service-ng
   profiles:
-    active: dev
+    active: test
   config:
     import: "optional:configserver:http://config-server:8888"
+    #import: "optional:configserver:http//10.162.170.39:8888"
