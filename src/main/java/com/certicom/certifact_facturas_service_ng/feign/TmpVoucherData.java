@@ -4,7 +4,7 @@ import com.certicom.certifact_facturas_service_ng.entity.TmpVoucherSendBillEntit
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
-@FeignClient(name = "facturas-service-sp", url = "http://factura-sp:8090", contextId = "tmpVoucher")
+@FeignClient(name = "facturas-service-sp", url = "${external.services.factura-service-sp.base-url}", contextId = "tmpVoucher")
 public interface TmpVoucherData {
 
     @GetMapping("/api/tmp-voucher/{id}")

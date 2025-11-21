@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.Timestamp;
 import java.util.List;
 
-@FeignClient(name = "facturas-service-sp", url = "http://factura-sp:8090", contextId = "paymentVoucher")
+@FeignClient(name = "facturas-service-sp", url = "${external.services.factura-service-sp.base-url}", contextId = "paymentVoucher")
 public interface PaymentVoucherData {
 
     /**

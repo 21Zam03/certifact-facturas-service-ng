@@ -20,7 +20,7 @@ public class PaymentVoucherFileDataRestImpl implements PaymentVoucherFileData {
     @Value("${external.services.factura-service-sp.base-url}")
     private String baseUrl;
 
-    @Value("${external.services.factura-service-sp.endpoints.api-aditionalfieldpayment-endpoint}")
+    @Value("${external.services.factura-service-sp.endpoints.api-paymentvoucherfile-endpoint}")
     private String apiPaymentVoucherFileEndpoint;
 
     public PaymentVoucherFileDataRestImpl(RestTemplate restTemplate) {
