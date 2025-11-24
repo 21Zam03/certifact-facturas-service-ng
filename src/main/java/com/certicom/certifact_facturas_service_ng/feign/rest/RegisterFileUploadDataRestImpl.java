@@ -105,6 +105,11 @@ public class RegisterFileUploadDataRestImpl implements RegisterFileUploadData {
         }
     }
 
+    @Override
+    public RegisterFileUploadModel findById(Long registerFileSendId) {
+        return null;
+    }
+
     private String getUrlEndpoint() {
         return this.baseUrl+this.apiRegisterFileUploadEndpoint;
     }

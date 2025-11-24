@@ -8,5 +8,6 @@ public interface RegisterFileUploadData {
             (Long idPayment, String tipoArchivo, String estadoArchivo);
     public RegisterFileUploadModel saveRegisterFileUpload(RegisterFileUploadModel registerFileUploadModelDto);
     public RegisterFileUploadModel findByIdPaymentVoucherAndUuidTipo(Long id, String uuid, String tipo);
+    RegisterFileUploadModel findById(Long registerFileSendId);
 
 }

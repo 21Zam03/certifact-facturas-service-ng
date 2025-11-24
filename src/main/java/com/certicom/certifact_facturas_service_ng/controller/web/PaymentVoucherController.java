@@ -109,7 +109,7 @@ public class PaymentVoucherController {
         ResponsePSE resp = (ResponsePSE) result.get(ConstantesParameter.PARAM_BEAN_RESPONSE_PSE);
 
         if (resp.getEstado()) {
-            //sqsProducer.produceEnviarCorreo(EmailSendDto.builder().id(paymentVoucherDtoDto.getIdPaymentVoucher()).build());
+            sqsProducer.produceEnviarCorreo(EmailSendDto.builder().id(paymentVoucherDtoDto.getIdPaymentVoucher()).build());
         }
 
         if (result.get(ConstantesParameter.PARAM_BEAN_GET_STATUS_CDR) != null) {

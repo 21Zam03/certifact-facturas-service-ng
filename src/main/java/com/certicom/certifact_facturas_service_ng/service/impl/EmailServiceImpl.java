@@ -1,17 +1,17 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
 import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
+import com.certicom.certifact_facturas_service_ng.dto.others.EmailCompanyNotifyDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.EmailSendDto;
-import com.certicom.certifact_facturas_service_ng.entity.PaymentVoucherEntity;
-import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherData;
-import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherFileData;
-import com.certicom.certifact_facturas_service_ng.feign.RegisterFileUploadData;
+import com.certicom.certifact_facturas_service_ng.feign.*;
 import com.certicom.certifact_facturas_service_ng.model.CompanyModel;
 import com.certicom.certifact_facturas_service_ng.model.RegisterFileUploadModel;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.EmailService;
+import jakarta.mail.internet.MimeMessage;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
@@ -31,10 +31,14 @@ import java.util.zip.ZipInputStream;
 @Service
 public class EmailServiceImpl implements EmailService {
 
+    @Value("${urlspublicas.imagenes}")
+    private String urlImagenes;
+
     private final PaymentVoucherData paymentVoucherData;
     private final PaymentVoucherFileData paymentVoucherFileData;
     private final RegisterFileUploadData registerFileUploadData;
-
+    private final CompanyData companyData;
+    //private final EmailCompanyNotifyData emailCompanyNotifyData;
     private final AmazonS3ClientService amazonS3ClientService;
 
     @Autowired
@@ -42,10 +46,14 @@ public class EmailServiceImpl implements EmailService {
             PaymentVoucherData paymentVoucherData,
             RegisterFileUploadData registerFileUploadData,
             PaymentVoucherFileData paymentVoucherFileData,
+            CompanyData companyData,
+            //EmailCompanyNotifyData emailCompanyNotifyData,
             AmazonS3ClientService amazonS3ClientService) {
         this.paymentVoucherData = paymentVoucherData;
         this.registerFileUploadData = registerFileUploadData;
         this.paymentVoucherFileData = paymentVoucherFileData;
+        this.companyData = companyData;
+        //this.emailCompanyNotifyData = emailCompanyNotifyData;
         this.amazonS3ClientService = amazonS3ClientService;
     }
 
@@ -79,13 +87,14 @@ public class EmailServiceImpl implements EmailService {
             idp = comprobante.getIdPaymentVoucher();
             uuid = comprobante.getUuid();
 
-            paymentVoucherFileData.
+            Long registerFileSendId = comprobante.getPaymentVoucherFileXmlActiveId();
 
-            uploadEntity = comprobante.getXmlActivo();
+            uploadEntity = registerFileUploadData.findById(registerFileSendId); // <- REVISAR
+
             String nombreComprobanteprev = String.format("%s-%s-%s-%s", rucEmisor, tipo, serie, numDocum);
             isXmlprevio = extractXmlFromZip(amazonS3ClientService.downloadFileStorageDto(uploadEntity), nombreComprobanteprev + ".xml");
 
-            CompanyModel companyEntity = companyRepository.findByRuc(rucEmisor);
+            CompanyModel companyEntity = companyData.findCompanyByRuc(rucEmisor);
             List<String> emailsVoucher = new ArrayList<>();
             System.out.println("GET EMAIL "+(emailSendDTO.getEmail()));
             if (emailSendDTO.getEmail() != null) {
@@ -103,7 +112,7 @@ public class EmailServiceImpl implements EmailService {
             }
 
 
-            List<EmailCompanyNotifyEntity> emailsAdicionalesNotificar = emailCompanyNotifyRepository.findAllByCompany_RucAndEstadoIsTrue(rucEmisor);
+            List<EmailCompanyNotifyDto> emailsAdicionalesNotificar = emailCompanyNotifyData.findAllByCompanyRucAndEstadoIsTrue(rucEmisor); // <- REVISAR
             List<String> emailsList = new ArrayList<>();
 
             if (!emailsAdicionalesNotificar.isEmpty() && (emailSendDTO.getEmail() == null || ((emailSendDTO.getEmail().trim()).length()==0) )){
@@ -138,7 +147,7 @@ public class EmailServiceImpl implements EmailService {
 
                         String textMensajeHtml = mailTemplateService.getFreeMarkerTemplateContent(
                                 new HashMap<String, Object>() {{
-                                    put("urlLogo", companyEntity.getArchivoLogo() == null ? "" : (urlImagenes + companyEntity.getArchivoLogo().getIdRegisterFileSend()));
+                                    put("urlLogo", uploadEntity == null ? "" : (urlImagenes + companyEntity.getArchivoLogo().getIdRegisterFileSend()));
                                     put("nombreReceptor", finalReceptor);
                                     put("nombreDocumento", StringsUtils.getNombreCortoTipoComprobante(finalTipo));
                                     put("serie", finalSerie);
@@ -233,6 +242,7 @@ public class EmailServiceImpl implements EmailService {
             e.printStackTrace();
             return false;
         }
+        return true;
         * */
         return true;
     }

@@ -134,4 +134,18 @@ public class PaymentVoucherDto {
         getOrCreatePaymentVoucherFile().add(paymentVoucherFileModel);
     }
 
+    @JsonIgnore
+    public Long getPaymentVoucherFileXmlActiveId() {
+        if(this.paymentVoucherFileModelList != null) {
+            PaymentVoucherFileModel xmlActivo = paymentVoucherFileModelList.stream()
+                    .filter(p -> EstadoArchivoEnum.ACTIVO.name().equalsIgnoreCase(p.getEstadoArchivo()))
+                    .filter(p -> TipoArchivoEnum.XML.name().equalsIgnoreCase(p.getTipoArchivo()))
+                    .findFirst()
+                    .orElse(null);
+            if (xmlActivo != null) {
+                return xmlActivo.getIdRegisterFileSend();
+            } else return null;
+        } else return null;
+    }
+
 }
