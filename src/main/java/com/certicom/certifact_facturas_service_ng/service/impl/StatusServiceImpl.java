@@ -256,7 +256,7 @@ public class StatusServiceImpl implements StatusService {
         }
 
         System.out.println("VOIDED A GUARDAR: "+voided);
-        VoidedDocumentsModel voidedDocumentsModel = voidedDocumentsFeign.save(voided);
+        VoidedDocumentsModel voidedDocumentsModel = voidedDocumentsFeign.update(voided);
         System.out.println("RESPUESTA DE GUARDAR VOIDED: "+voidedDocumentsModel);
 
         msgLog.append("{").append(ConstantesParameter.MSG_RESP_SUB_PROCESO_OK).append("}").
@@ -318,6 +318,7 @@ public class StatusServiceImpl implements StatusService {
                             SubOperacionLogEnum.UPDATE_BD_PAYMENT_VOUCHER, msgLog.toString());
                     * */
                 }
+                break;
             case ERROR:
                 paymentVoucherData.updateComprobantesOnResumenError(
                         identificadoresComprobantes, usuario, fechaModificacion);
