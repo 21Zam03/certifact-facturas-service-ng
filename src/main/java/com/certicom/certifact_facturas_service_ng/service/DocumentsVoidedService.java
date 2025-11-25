@@ -11,5 +11,6 @@ public interface DocumentsVoidedService {
 
     VoidedDocumentsModel registrarVoidedDocuments(Voided voided, Long idRegisterFile, String usuario, String ticket);
     ResponsePSE anularDocuments(List<VoucherAnnularRequest> documents, String rucEmisor, String userName, List<String> ticketsVoidedProcess);
+    Boolean processVoidedTicket(String ticket, String useName, String rucEmisor);
 
 }

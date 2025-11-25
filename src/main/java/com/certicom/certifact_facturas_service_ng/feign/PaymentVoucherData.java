@@ -176,4 +176,16 @@ public interface PaymentVoucherData {
     @GetMapping("/api/payment-voucher/statusSunat")
     List<PaymentVoucherDto> findByIdPaymentVoucherInterList(List<Long> ids);
 
+    @PutMapping("/api/payment-voucher/baja-documentos")
+    void updateComprobantesByBajaDocumentos(
+            @RequestParam List<String> identificadoresComprobantes,
+            @RequestParam String usuario,
+            @RequestParam Timestamp fechaModificacion);
+
+    @PutMapping("/api/payment-voucher/resumen-error")
+    void updateComprobantesOnResumenError(
+            @RequestParam List<String> identificadoresComprobantes,
+            @RequestParam String usuario,
+            @RequestParam Timestamp fechaModificacion);
+
 }

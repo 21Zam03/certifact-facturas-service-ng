@@ -134,17 +134,17 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
             comprobanteMonedaSol = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals(CODSOLES)).findFirst().orElse(null);
 
             if(comprobanteMonedaSol!=null) {
-                tsolesnew = comprobanteMonedaSol.getImporteTotalVenta()!=null?comprobanteMonedaSol.getImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
+                tsolesnew = comprobanteMonedaSol.getMontoImporteTotalVenta()!=null?comprobanteMonedaSol.getMontoImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
             }
 
             comprobanteMonedaDolar = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals(CODDOLAR)).findFirst().orElse(null);
             if (comprobanteMonedaDolar!=null) {
-                tdolaresnew = comprobanteMonedaDolar.getImporteTotalVenta()!=null?comprobanteMonedaDolar.getImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
+                tdolaresnew = comprobanteMonedaDolar.getMontoImporteTotalVenta()!=null?comprobanteMonedaDolar.getMontoImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
             }
 
             comprobanteMonedaEur = tsolespayment.stream().filter(f -> f.getCodigoMoneda().equals(CODEURO)).findFirst().orElse(null);
             if (comprobanteMonedaEur!=null) {
-                teurosnew = comprobanteMonedaEur.getImporteTotalVenta()!=null?comprobanteMonedaEur.getImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
+                teurosnew = comprobanteMonedaEur.getMontoImporteTotalVenta()!=null?comprobanteMonedaEur.getMontoImporteTotalVenta().setScale(2, BigDecimal.ROUND_HALF_UP):BigDecimal.ZERO;
             }
         } catch (Exception e) {
             LogHelper.errorLog(LogMessages.currentMethod(), "Ocurrio un error, "+ e.getMessage());

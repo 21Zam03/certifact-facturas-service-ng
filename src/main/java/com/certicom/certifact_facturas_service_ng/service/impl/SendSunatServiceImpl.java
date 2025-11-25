@@ -67,6 +67,8 @@ public class SendSunatServiceImpl implements SendSunatService {
     @Value("${sunat.endpointConsultaCDR}")
     private String endPointConsultaCDR;
 
+    private String endPointSunatOld = "https://www.sunat.gob.pe/ol-ti-itcpfegem/billService";
+
     @Override
     public PaymentVoucherDto prepareComprobanteForEnvioSunatInter(String finalRucEmisor, String tipoComprobante, String serieDocumento, Integer numeroDocumento) throws ServiceException {
         PaymentVoucherDto paymentVoucherDto = paymentVoucherData.
@@ -216,6 +218,80 @@ public class SendSunatServiceImpl implements SendSunatService {
     }
 
     @Override
+    public ResponseSunat getStatus(String nroTicket, String tipoResumen, String rucEmisor) {
+        ResponseSunat responseSunat = new ResponseSunat();
+        String formatSoap;
+        try {
+            formatSoap = getFormatGetStatus(rucEmisor,nroTicket);
+            /*ResponseServer responseServer = send(
+                    formatSoap,
+                    obtenerEndPointSunat(rucEmisor),
+                    ConstantesParameter.TAG_GET_STATUS_CONTENT
+            );*/
+            ResponseServer responseServer = null;
+            OseModel ose = companyData.findOseByRucInter(rucEmisor);
+            if (ose != null) {
+                if (ose.getId()==1){
+                    responseServer = send(formatSoap, obtenerEndPointSunat(rucEmisor),
+                            ConstantesParameter.TAG_GET_STATUS_CONTENT);
+                }else if (ose.getId()==2||ose.getId()==12){
+                    RestTemplate template = new RestTemplate();
+                    URI uriget = new URI(ose.getUrlFacturas()+ConstantesParameter.TAG_GET_STATUS_CONTENT);
+                    HttpHeaders requestHeaders = new HttpHeaders();
+                    HttpEntity<String> requestEntity = new HttpEntity<>(formatSoap, requestHeaders);
+                    ResponseEntity<ResponseServer> entity = template.exchange(uriget, HttpMethod.POST, requestEntity, ResponseServer.class);
+                    System.out.println("PUENTE OSE BLIZ");
+                    System.out.println(entity);
+                    if(entity.getStatusCode() == HttpStatus.OK){
+                        responseServer = entity.getBody();
+                        System.out.println("RESULTADO CONSULTA TICKET ");
+                    }
+                }else if (ose.getId()==10){
+                    responseServer = send(formatSoap, obtenerEndPointSunat(rucEmisor),
+                            ConstantesParameter.TAG_GET_STATUS_CONTENT);
+                }
+            } else {
+                responseServer = send(formatSoap, obtenerEndPointSunat(rucEmisor),
+                        ConstantesParameter.TAG_GET_STATUS_CONTENT);
+            }
+
+            /*
+            OperacionLogEnum operLog = (tipoResumen.equals(ConstantesSunat.RESUMEN_DIARIO_BOLETAS)) ?
+                    OperacionLogEnum.STATUS_SUNAT_SUMMARY : OperacionLogEnum.STATUS_SUNAT_VOIDED;
+            Logger.register(TipoLogEnum.INFO, rucEmisor, nroTicket,
+                    operLog, SubOperacionLogEnum.SEND_SUNAT, "{" + ConstantesParameter.MSG_RESP_SUB_PROCESO_OK +
+                            "}{" + responseServer.toString() + "}");
+
+            * */
+
+            buildResponseSendBillStatus(
+                    responseSunat,
+                    responseServer,
+                    ConstantesParameter.TAG_GET_STATUS_CONTENT
+            );
+            if(responseSunat.getStatusCode().equals("1078")){
+                responseServer = send(formatSoap, obtenerEndPointSunatOld(rucEmisor),
+                        ConstantesParameter.TAG_GET_STATUS_CONTENT);
+                buildResponseSendBillStatus(
+                        responseSunat,
+                        responseServer,
+                        ConstantesParameter.TAG_GET_STATUS_CONTENT
+                );
+            }
+        } catch (IOException e) {
+
+            responseSunat.setMessage("Error al comunicarse con la Sunat." + e.getMessage());
+            responseSunat.setSuccess(false);
+            responseSunat.setEstadoComunicacionSunat(ComunicationSunatEnum.ERROR_INTERNO_WS_API);
+        } catch (Exception ex) {
+            responseSunat.setMessage(ex.getMessage());
+            responseSunat.setSuccess(false);
+            responseSunat.setEstadoComunicacionSunat(ComunicationSunatEnum.ERROR_INTERNO_WS_API);
+        }
+        return responseSunat;
+    }
+
+    @Override
     public ResponseSunat sendSummary(String fileName, String contentFileBase64, String rucEmisor) {
         ResponseSunat responseSunat = new ResponseSunat();
         String formatSoap;
@@ -309,6 +385,25 @@ public class SendSunatServiceImpl implements SendSunatService {
             responseSunat.setSuccess(false);
         }
         return responseSunat;
+    }
+
+    private String getFormatGetStatus(String ruc, String nroTicket) {
+        OseModel ose = companyData.findOseByRucInter(ruc);
+        String formato = "";
+        if (ose != null) {
+            if (ose.getId()==1){
+                formato =  requestSunatTemplate.buildGetStatusOse(nroTicket);
+            }else if (ose.getId()==2){
+                formato =  requestSunatTemplate.buildGetStatusOseBliz(nroTicket);
+            }else if (ose.getId()==12){
+                formato =  requestSunatTemplate.buildGetStatusOseBliz12(nroTicket);
+            }else if (ose.getId()==10){
+                formato =  requestSunatTemplate.buildGetStatusCerti(nroTicket);
+            }
+        } else {
+            formato =  requestSunatTemplate.buildGetStatus(nroTicket);
+        }
+        return formato ;
     }
 
     private String obtenerFormatBuildSendSumary(String ruc, String fileName, String contentFileBase64) {
@@ -408,6 +503,15 @@ public class SendSunatServiceImpl implements SendSunatService {
             return ose.getUrlFacturas();
         } else {
             return endPointSunat;
+        }
+    }
+
+    private String obtenerEndPointSunatOld(String ruc) {
+        OseModel ose = companyData.findOseByRucInter(ruc);
+        if (ose != null && ose.getId()!=10) {
+            return ose.getUrlFacturas();
+        } else {
+            return endPointSunatOld;
         }
     }
 

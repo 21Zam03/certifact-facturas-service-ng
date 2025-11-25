@@ -30,6 +30,9 @@ public class SqsProducer {
     @Value("${apifact.aws.sqs.emailSender}")
     private String emailSender;
 
+    @Value("${apifact.aws.sqs.processVoided}")
+    private String processVoided;
+
     public void produceSendBill(SendBillDto sendBillDto) {
         try {
             send(sendBill, sendBillDto);
@@ -46,7 +49,15 @@ public class SqsProducer {
             LogHelper.errorLog(LogMessages.currentMethod(), "Ocurrio un error al enviar mensaje a la cola, email: "+emailSendDTO.getEmail(), e);
             throw new ServiceException("Ocurrio un error al enviar mensaje a la cola, email: "+emailSendDTO.getEmail(), e);
         }
+    }
 
+    public void produceProcessVoided(String ticket, String rucEmisor) {
+        try {
+            send(processVoided, ticket);
+        }catch (Exception e){
+            LogHelper.errorLog(LogMessages.currentMethod(), "Ocurrio un error al enviar mensaje a la cola, ticket: "+processVoided, e);
+            throw new ServiceException("Ocurrio un error al enviar mensaje a la cola, ticket: "+processVoided, e);
+        }
     }
 
     public <MESSAGE extends Serializable> void send(String queueUrl, MESSAGE payload) {

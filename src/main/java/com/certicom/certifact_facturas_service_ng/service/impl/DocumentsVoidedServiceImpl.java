@@ -14,10 +14,7 @@ import com.certicom.certifact_facturas_service_ng.enums.EstadoComprobanteEnum;
 import com.certicom.certifact_facturas_service_ng.feign.CompanyData;
 import com.certicom.certifact_facturas_service_ng.feign.PaymentVoucherData;
 import com.certicom.certifact_facturas_service_ng.feign.VoidedDocumentsFeign;
-import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
-import com.certicom.certifact_facturas_service_ng.service.DocumentsVoidedService;
-import com.certicom.certifact_facturas_service_ng.service.SendSunatService;
-import com.certicom.certifact_facturas_service_ng.service.TemplateService;
+import com.certicom.certifact_facturas_service_ng.service.*;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.certicom.certifact_facturas_service_ng.util.UtilArchivo;
 import com.certicom.certifact_facturas_service_ng.util.UtilFormat;
@@ -40,6 +37,7 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
     private final PaymentVoucherData paymentVoucherData;
     private final AmazonS3ClientService amazonS3ClientService;
     private final VoucherAnnularValidator voucherAnnularValidator;
+    private final StatusService statusService;
 
     @Override
     public VoidedDocumentsModel registrarVoidedDocuments(Voided voided, Long idRegisterFile, String usuario, String ticket) {
@@ -221,6 +219,32 @@ public class DocumentsVoidedServiceImpl implements DocumentsVoidedService {
             System.out.println("ERROR: " + e.getMessage());
         }
         return respuesta;
+    }
+
+    @Override
+    public Boolean processVoidedTicket(String ticket, String useName, String rucEmisor) {
+        System.out.println("PROCESO DE ANULACION");
+        System.out.println("TICKET: "+ticket);
+        System.out.println("username: "+useName);
+        System.out.println("rucEmisor" +rucEmisor);
+        VoidedDocumentsModel voidedDocumentsEntity = voidedDocumentsFeign.getVoidedByTicket(ticket);
+        /*Logger.register(TipoLogEnum.INFO, "-", ticket, OperacionLogEnum.STATUS_SUNAT_VOIDED,
+                SubOperacionLogEnum.SELECT_BD, ConstantesParameter.MSG_RESP_SUB_PROCESO_OK + "[" + voidedDocumentsEntity.toString() + "]");*/
+
+        rucEmisor = voidedDocumentsEntity.getRucEmisor();
+        if (voidedDocumentsEntity.getEstado() != null && (voidedDocumentsEntity.getEstado().equals(
+                ConstantesParameter.STATE_SUMMARY_VOIDED_DOCUMENTS_PROCESO_OK) ||
+                voidedDocumentsEntity.getEstado().equals(ConstantesParameter.STATE_SUMMARY_VOIDED_DOCUMENTS_PROCESO_ERROR))) {
+            return true;
+        }
+
+        ResponsePSE responsePSE = statusService.getStatus(ticket, ConstantesSunat.COMUNICACION_BAJA, useName, rucEmisor);
+        /*Logger.register(TipoLogEnum.INFO, rucEmisor, ticket, OperacionLogEnum.STATUS_SUNAT_VOIDED,
+                SubOperacionLogEnum.COMPLETED, ConstantesParameter.MSG_RESP_SUB_PROCESO_OK + "[" + responsePSE.toString() + "]");*/
+
+        if (responsePSE.getRespuesta() != null && responsePSE.getRespuesta().toString().equals(ConstantesParameter.STATE_SUMMARY_VOIDED_DOCUMENTS_IN_PROCESO))
+            return false;
+        else return true;
     }
 
     public Map<String, String> annularDocumentSendVoidedDocuments(Voided voided, String userName , boolean esRetencion)

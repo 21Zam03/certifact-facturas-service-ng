@@ -6,6 +6,7 @@ import com.certicom.certifact_facturas_service_ng.dto.others.ResponsePSE;
 import com.certicom.certifact_facturas_service_ng.dto.others.SendBillDto;
 import com.certicom.certifact_facturas_service_ng.exceptions.ServiceException;
 import com.certicom.certifact_facturas_service_ng.service.ComunicationSunatService;
+import com.certicom.certifact_facturas_service_ng.service.DocumentsVoidedService;
 import com.certicom.certifact_facturas_service_ng.service.EmailService;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.certicom.certifact_facturas_service_ng.util.LogHelper;
@@ -30,6 +31,7 @@ public class SqsConsumer {
     private final ObjectMapper objectMapper;
     private final SqsClient sqsClient;
     private final ComunicationSunatService comunicationSunatService;
+    private final DocumentsVoidedService documentsVoidedService;
     private final EmailService emailService;
     private final SqsProducer sqsProducer;
 
@@ -38,6 +40,9 @@ public class SqsConsumer {
 
     @Value("${apifact.aws.sqs.emailSender}")
     private String emailSender;
+
+    @Value("${apifact.aws.sqs.processVoided}")
+    private String processVoided;
 
     @Scheduled(fixedDelay = 5000)
     public void receiveMessageQueueSendBill () {
@@ -80,7 +85,7 @@ public class SqsConsumer {
                         //messageProducer.produceGetStatusCDR(dataGetStatusCDR);
                     }
 
-                    deleteMessage(sqsMessage.receiptHandle());
+                    deleteMessage(sqsMessage.receiptHandle(), sendBill);
                     LogHelper.infoLog(LogMessages.currentMethod(), "Mensaje procesado y eliminado correctamente de la cola sendBill");
 
                 } catch (Exception exMsg) {
@@ -105,13 +110,12 @@ public class SqsConsumer {
 
         List<Message> messages = sqsClient.receiveMessage(receiveRequest).messages();
 
-        LogHelper.infoLog(LogMessages.currentMethod(), "Se recibio mensaje Para enviar correo Electronico >>>>>>>>>>>>>>> ");
-
         for (Message sqsMessage : messages) {
+            LogHelper.infoLog(LogMessages.currentMethod(), "Se recibio mensaje Para enviar correo Electronico >>>>>>>>>>>>>>> ");
             try {
                 EmailSendDto emailSendDto = objectMapper.readValue(sqsMessage.body(), EmailSendDto.class);
                 emailService.sendEmailOnConfirmSunat(emailSendDto);
-                deleteMessage(sqsMessage.receiptHandle());
+                deleteMessage(sqsMessage.receiptHandle(), emailSender);
                 LogHelper.infoLog(LogMessages.currentMethod(), "Mensaje procesado y eliminado correctamente de la cola sendBill");
             }catch (Exception e) {
                 e.printStackTrace();
@@ -119,10 +123,55 @@ public class SqsConsumer {
         }
     }
 
-    private void deleteMessage(String receiptHandle) {
+    @Scheduled(fixedDelay = 5000)
+    public void receiveMessageQueueProcessVoided() {
+
+        ReceiveMessageRequest receiveRequest = ReceiveMessageRequest.builder()
+                .queueUrl(processVoided)
+                .maxNumberOfMessages(5)
+                .waitTimeSeconds(10)
+                .messageAttributeNames("All")
+                .build();
+
+        List<Message> messages = sqsClient.receiveMessage(receiveRequest).messages();
+        for (Message sqsMessage : messages) {
+            LogHelper.infoLog(LogMessages.currentMethod(), "Se recibio mensaje Para enviar correo Electronico >>>>>>>>>>>>>>> ");
+
+            try {
+                LogHelper.infoLog(LogMessages.currentMethod(), "Se recibio mensaje Para Procesar baja >>>>>>>>>>>>>>> ");
+
+                Thread.sleep(3000);
+                String userName = ConstantesParameter.USER_API_QUEUE;
+                String rucEmisor = null;
+                String ticket = objectMapper.readValue(sqsMessage.body(), String.class);
+
+                Boolean isProcessTicketVoided = documentsVoidedService.processVoidedTicket(
+                        ticket,
+                        userName,
+                        rucEmisor);
+
+                //SI ESTA EN PROCESO, LO VUELVO A ENCOLAR
+                if (!isProcessTicketVoided) {
+                    LogHelper.infoLog(LogMessages.currentMethod(), "EL TICKET AUN NO ESTA PROCESADO, ENCOLANDO NUEVAMENTE");
+                    sqsProducer.produceProcessVoided(sqsMessage.body(), rucEmisor);
+                } else {
+                    LogHelper.infoLog(LogMessages.currentMethod(), "TICKET PROCESADO "+sqsMessage.body());
+                    //sqsProducer.produceEnviarCorreoAnulacion(message.getPayload());
+                }
+                deleteMessage(sqsMessage.receiptHandle(), processVoided);
+                LogHelper.infoLog(LogMessages.currentMethod(), "Mensaje procesado y eliminado correctamente de la cola sendBill");
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+    }
+
+    private void deleteMessage(String receiptHandle, String queueUrl) {
         try {
             DeleteMessageRequest deleteRequest = DeleteMessageRequest.builder()
-                    .queueUrl(sendBill)
+                    .queueUrl(queueUrl)
                     .receiptHandle(receiptHandle)
                     .build();
             sqsClient.deleteMessage(deleteRequest);

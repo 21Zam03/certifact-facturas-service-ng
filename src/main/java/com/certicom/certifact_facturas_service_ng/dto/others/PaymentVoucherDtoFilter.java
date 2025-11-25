@@ -22,7 +22,7 @@ public class PaymentVoucherDtoFilter {
     private String numDocIdentReceptor;
     private String denominacionReceptor;
     private String codigoMoneda;
-    private BigDecimal importeTotalVenta;
+    private BigDecimal montoImporteTotalVenta;
     private String estado;
     private LocalDate fechaRegistro;
     private String rucEmisor;

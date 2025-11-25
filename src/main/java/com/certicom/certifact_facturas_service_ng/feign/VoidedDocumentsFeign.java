@@ -18,4 +18,10 @@ public interface VoidedDocumentsFeign {
     @PostMapping("/api/voided-documents")
     public VoidedDocumentsModel save(@RequestBody VoidedDocumentsModel voidedDocumentsModel);
 
+    @GetMapping("/api/voided-documents/ticket")
+    VoidedDocumentsModel getVoidedByTicket(@RequestParam String ticket);
+
+    @GetMapping("/api/voided-documents/ticket/state")
+    String getEstadoByNumeroTicket(@RequestParam String ticket);
+
 }
