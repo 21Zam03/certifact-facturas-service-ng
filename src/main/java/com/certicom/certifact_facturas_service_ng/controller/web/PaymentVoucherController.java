@@ -65,7 +65,7 @@ public class PaymentVoucherController {
             @RequestHeader(name = "X-User-Roles", required = true) String rol
     ) {
         MDC.put("payment_voucher",  paymentVoucherRequest.getSerie()+"-"+paymentVoucherRequest.getNumero());
-
+        System.out.println("PAYMENT: "+paymentVoucherRequest);
         paymentVoucherRequest.setRucEmisor(userRuc);
 
         PaymentVoucherDto paymentVoucherDto = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);

@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import software.amazon.awssdk.awscore.util.SignerOverrideUtils;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -209,6 +210,16 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
 
     private void validateTotalGravada(BigDecimal montoBaseGravada, BigDecimal montoIgv, List<ComprobanteItem> items) {
         boolean existeAlmenosUno = false;
+
+        //Solución temporal
+        if(montoBaseGravada.equals(BigDecimal.ZERO)) {
+            montoBaseGravada = null;
+        }
+
+        if(montoIgv.equals(BigDecimal.ZERO)) {
+            montoIgv = null;
+        }
+
         if (montoBaseGravada != null || montoIgv != null) {
             if (montoBaseGravada == null) {
                 throw new ValidationException("El campo [" + totalValorVentaGravadaLabel + "] es obligatorio, si ingresa valor en [" + totalIgvLabel + "]");
@@ -228,7 +239,7 @@ public class PaymentVoucherValidator extends CamposEntrada<Object> {
                         line.getPorcentajeIgv(),
                         line.getCodigoTipoAfectacionIGV()
                 );
-
+                System.out.println("VALOR:" +existeAlmenosUno);
                 if (existeAlmenosUno) {
                     break;
                 }

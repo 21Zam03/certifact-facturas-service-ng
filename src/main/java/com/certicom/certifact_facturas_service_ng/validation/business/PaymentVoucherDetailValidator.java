@@ -27,6 +27,7 @@ public class PaymentVoucherDetailValidator extends CamposEntrada<Object> {
         validateValorVenta(item.getValorVenta(), tipoComprobante);
         if(ublVersion.equals(ConstantesSunat.UBL_VERSION_2_1)) {
             validateDescuento(item.getDescuento(), item.getCodigoDescuento());
+            System.out.println("HOLAA");
             validateOperacionGravada(item.getMontoBaseIgv(), item.getIgv(), item.getPorcentajeIgv(), item.getCodigoTipoAfectacionIGV());
             if (item.getCodigoTipoAfectacionIGV().equals("10") && !ruc.equals("30601762219")){
                 validateGravadaVentaCantidad(item.getCantidad(),item.getValorUnitario(),item.getValorVenta(),item.getDescuento());
@@ -72,6 +73,9 @@ public class PaymentVoucherDetailValidator extends CamposEntrada<Object> {
 
     protected boolean validateOperacionGravada(BigDecimal montoBase, BigDecimal tributo, BigDecimal porcentaje, String codigoAfectacion) {
         boolean existeOperacionGravada = false;
+        System.out.println("MONTOBASE: "+montoBase);
+        System.out.println("TRIBUTO: "+tributo);
+        System.out.println("PORCENTAJE: "+porcentaje);
         if (montoBase != null || tributo != null || porcentaje != null) {
             if (montoBase == null) {
                 throw new ValidationException("El campo [" + montoBaseIgvLabel + "] es obligatorio, al ingresar: " +
