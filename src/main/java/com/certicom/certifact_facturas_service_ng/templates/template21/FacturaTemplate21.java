@@ -548,7 +548,10 @@ public class FacturaTemplate21 {
                 appendChild(doc, cacInvoiceLine, "cbc:InvoicedQuantity", UtilFormat.format3(item.getCantidad()), attributes)
                         .setAttribute("unitCode", item.getCodigoUnidadMedida());
 
-                if (item.getCodigoTipoAfectacionIGV().equals("21")){
+                if (item.getCodigoTipoAfectacionIGV().equals("21") ||
+                        item.getCodigoTipoAfectacionIGV().equals("11") ||
+                        item.getCodigoTipoAfectacionIGV().equals("12") ||
+                        item.getCodigoTipoAfectacionIGV().equals("14")){
                     appendChild(doc, cacInvoiceLine, "cbc:LineExtensionAmount", UtilFormat.format4(item.getValorReferencialUnitario().multiply(item.getCantidad())))
                             .setAttribute(ConstantesSunat.ATTRIBUTE_CURRENCY_ID, factura.getCodigoMoneda());
                     Element pricingReferenceElement = appendChild(doc, cacInvoiceLine, "cac:PricingReference");

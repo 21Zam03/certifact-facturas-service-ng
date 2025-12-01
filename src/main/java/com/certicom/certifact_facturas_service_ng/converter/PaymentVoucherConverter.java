@@ -25,6 +25,11 @@ public class PaymentVoucherConverter {
                 .direccionReceptor(paymentVoucherRequest.getDireccionReceptor())
                 .emailReceptor(paymentVoucherRequest.getEmailReceptor())
                 .totalValorVentaGravada(paymentVoucherRequest.getTotalValorVentaGravada())
+                .totalValorVentaInafecta(paymentVoucherRequest.getTotalValorVentaInafecta())
+                .totalValorVentaGratuita(paymentVoucherRequest.getTotalValorVentaGratuita())
+                .totalValorVentaExportacion(paymentVoucherRequest.getTotalValorVentaExportacion())
+                .totalValorVentaExonerada(paymentVoucherRequest.getTotalValorVentaExonerada())
+                .totalValorVentaGravadaIVAP(paymentVoucherRequest.getTotalValorVentaGravadaIVAP())
                 .totalIgv(paymentVoucherRequest.getTotalIgv())
                 .importeTotalVenta(paymentVoucherRequest.getImporteTotalVenta())
                 .tipoComprobanteAfectado(paymentVoucherRequest.getTipoComprobanteAfectado())
@@ -37,6 +42,7 @@ public class PaymentVoucherConverter {
                 .cuotas(paymentVoucherRequest.getCuotas())
                 .items(paymentVoucherRequest.getItems())
                 .guiasRelacionadas(paymentVoucherRequest.getGuiasRelacionadas())
+                .totalImpOperGratuita(paymentVoucherRequest.getTotalImpOperGratuita())
                 .build();
     }
 /*

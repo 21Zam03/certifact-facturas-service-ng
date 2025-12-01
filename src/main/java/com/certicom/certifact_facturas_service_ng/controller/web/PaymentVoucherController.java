@@ -70,6 +70,8 @@ public class PaymentVoucherController {
 
         PaymentVoucherDto paymentVoucherDto = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);
 
+        System.out.println("OPERACION: "+paymentVoucherDto.getTotalImpOperGratuita());
+
         paymentVoucherValidator.validate(paymentVoucherDto, false);
 
         Map<String, Object> result = paymentVoucherService.createPaymentVoucher(paymentVoucherDto, Long.valueOf(userId));
