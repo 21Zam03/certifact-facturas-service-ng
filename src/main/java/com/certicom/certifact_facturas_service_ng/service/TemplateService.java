@@ -11,7 +11,7 @@ import java.util.Map;
 
 public interface TemplateService {
 
-    public Map<String, String> buildPaymentVoucherSignOse(PaymentVoucherDto paymentVoucherDto);
+    public Map<String, String> buildPaymentVoucherSignOse(PaymentVoucherDto paymentVoucherDto) throws IOException, NoSuchAlgorithmException;
     public Map<String, String> buildPaymentVoucherSignOseBliz(PaymentVoucherDto paymentVoucherDto);
     public Map<String, String> buildPaymentVoucherSignCerti(PaymentVoucherDto paymentVoucherDto) throws TemplateException, SignedException, IOException, NoSuchAlgorithmException;
     public Map<String, String> buildPaymentVoucherSign(PaymentVoucherDto paymentVoucherDto);

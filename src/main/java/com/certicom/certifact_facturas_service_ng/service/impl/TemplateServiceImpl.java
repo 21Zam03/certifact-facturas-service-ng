@@ -2,11 +2,11 @@ package com.certicom.certifact_facturas_service_ng.service.impl;
 
 import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.Voided;
-import com.certicom.certifact_facturas_service_ng.dto.others.SignatureResp;
+import com.certicom.certifact_facturas_service_ng.dto.others.SignatureResponse;
 import com.certicom.certifact_facturas_service_ng.exceptions.SignedException;
 import com.certicom.certifact_facturas_service_ng.exceptions.TemplateException;
 import com.certicom.certifact_facturas_service_ng.service.TemplateService;
-import com.certicom.certifact_facturas_service_ng.signed.Firmado;
+import com.certicom.certifact_facturas_service_ng.signed.Signed;
 import com.certicom.certifact_facturas_service_ng.templates.VoidedDocumentsTemplate;
 import com.certicom.certifact_facturas_service_ng.templates.template.FacturaTemplate;
 import com.certicom.certifact_facturas_service_ng.templates.template.NotaCreditoTemplate;
@@ -14,6 +14,9 @@ import com.certicom.certifact_facturas_service_ng.templates.template.NotaDebitoT
 import com.certicom.certifact_facturas_service_ng.templates.template21.FacturaTemplate21;
 import com.certicom.certifact_facturas_service_ng.templates.template21.NotaCreditoTemplateSunat21;
 import com.certicom.certifact_facturas_service_ng.templates.template21.NotaDebitoTemplateSunat21;
+import com.certicom.certifact_facturas_service_ng.templates.templateose.FacturaTemplateOse;
+import com.certicom.certifact_facturas_service_ng.templates.templateose.NotaCreditoTemplateOse;
+import com.certicom.certifact_facturas_service_ng.templates.templateose.NotaDebitoTemplateOse;
 import com.certicom.certifact_facturas_service_ng.util.ConstantesParameter;
 import com.certicom.certifact_facturas_service_ng.util.UtilArchivo;
 import com.certicom.certifact_facturas_service_ng.util.UtilConversion;
@@ -40,25 +43,27 @@ public class TemplateServiceImpl implements TemplateService {
 
     private final FacturaTemplate facturaTemplate;
     private final FacturaTemplate21 facturaTemplate21;
+    private final FacturaTemplateOse invoiceTemplateOse;
     private final NotaCreditoTemplate notaCreditoTemplate;
     private final NotaCreditoTemplateSunat21 notaCreditoTemplate21;
+    private final NotaCreditoTemplateOse creditNoteTemplateOse;
     private final NotaDebitoTemplate notaDebitoTemplate;
     private final NotaDebitoTemplateSunat21 notaDebitoTemplate21;
+    private final NotaDebitoTemplateOse debitNoteTemplateOse;
     private final VoidedDocumentsTemplate voidedDocumentsTemplate;
 
-    private final Firmado firma;
+    private final Signed signed;
 
     @Override
-    public Map<String, String> buildPaymentVoucherSignOse(PaymentVoucherDto paymentVoucherDto) {
-
+    public Map<String, String> buildPaymentVoucherSignOse(PaymentVoucherDto voucher) throws IOException, NoSuchAlgorithmException {
         String xmlGenerado = null;
-        String idFirma;
+        String idSignature;
         String nombreDocumento;
         Map<String, String> resp;
-/*
-        switch (comprobanteDto.getTipoComprobante()) {
+        SignatureResponse signatureResp;
+        switch (voucher.getTipoComprobante()) {
             case ConstantesSunat.TIPO_DOCUMENTO_FACTURA:
-                if(comprobanteDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
+                if(voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
                     xmlGenerado = invoiceTemplateOse.buildInvoice(voucher);
                 }else if(voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
                     xmlGenerado = invoiceTemplateOse.buildInvoice(voucher);
@@ -80,8 +85,15 @@ public class TemplateServiceImpl implements TemplateService {
                 }
                 break;
         }
-*/
-        return null;
+
+        idSignature = "S"+voucher.getTipoComprobante()+voucher.getSerie()+"-"+voucher.getNumero();
+        signatureResp = signed.sign(xmlGenerado, idSignature);
+        nombreDocumento = voucher.getRucEmisor()+"-"+voucher.getTipoComprobante()+"-"+
+                voucher.getSerie()+"-"+voucher.getNumero();
+
+        resp = buildDataTemplate(signatureResp, nombreDocumento);
+        resp.put(ConstantesParameter.CODIGO_HASH, UtilArchivo.generarCodigoHash(signatureResp.toString()));
+        return resp;
     }
 
     @Override
@@ -96,7 +108,7 @@ public class TemplateServiceImpl implements TemplateService {
         String idFirma;
         String nombreDocumento;
         Map<String, String> resp;
-        SignatureResp signatureResp;
+        SignatureResponse signatureResponse;
 
         switch (paymentVoucherDto.getTipoComprobante()) {
             case ConstantesSunat.TIPO_DOCUMENTO_FACTURA:
@@ -124,12 +136,12 @@ public class TemplateServiceImpl implements TemplateService {
         }
 
         idFirma = "S" + paymentVoucherDto.getTipoComprobante() + paymentVoucherDto.getSerie() + "-" + paymentVoucherDto.getNumero();
-        signatureResp = firma.signCerticom(xmlGenerado, idFirma);
+        signatureResponse = signed.signCerticom(xmlGenerado, idFirma);
         nombreDocumento = paymentVoucherDto.getRucEmisor() + "-" + paymentVoucherDto.getTipoComprobante() + "-" +
                 paymentVoucherDto.getSerie() + "-" + paymentVoucherDto.getNumero();
 
-        resp = buildDataTemplate(signatureResp, nombreDocumento);
-        resp.put(ConstantesParameter.CODIGO_HASH, UtilArchivo.generarCodigoHash(signatureResp.toString()));
+        resp = buildDataTemplate(signatureResponse, nombreDocumento);
+        resp.put(ConstantesParameter.CODIGO_HASH, UtilArchivo.generarCodigoHash(signatureResponse.toString()));
 
         return resp;
     }
@@ -151,26 +163,26 @@ public class TemplateServiceImpl implements TemplateService {
         String idSignature;
         String nombreDocumento;
         Map<String, String> resp;
-        SignatureResp signatureResp;
+        SignatureResponse signatureResponse;
 
         xmlGenerado = voidedDocumentsTemplate.buildVoidedDocuments(voided);
         idSignature = "S" + voided.getId();
-        signatureResp = firma.signCerticom(xmlGenerado, idSignature);
+        signatureResponse = signed.signCerticom(xmlGenerado, idSignature);
 
         nombreDocumento = voided.getRucEmisor() + "-" + voided.getId();
-        resp = buildDataTemplate(signatureResp, nombreDocumento);
+        resp = buildDataTemplate(signatureResponse, nombreDocumento);
 
         return resp;
     }
 
 
 
-    private Map<String, String> buildDataTemplate(SignatureResp signatureResp, String nombreDocumento) throws SignedException, IOException, NoSuchAlgorithmException {
+    private Map<String, String> buildDataTemplate(SignatureResponse signatureResponse, String nombreDocumento) throws SignedException, IOException, NoSuchAlgorithmException {
 
         Map<String, String> resp;
         File zipeado;
 
-        zipeado = UtilArchivo.comprimir(signatureResp.getSignatureFile(),
+        zipeado = UtilArchivo.comprimir(signatureResponse.getSignatureFile(),
                 ConstantesParameter.TYPE_FILE_XML, nombreDocumento);
         MessageDigest shaDigest = MessageDigest.getInstance("SHA-256");
         String shaChecksum = getFileChecksum(shaDigest, zipeado);
@@ -178,7 +190,7 @@ public class TemplateServiceImpl implements TemplateService {
         resp.put(ConstantesParameter.PARAM_NAME_DOCUMENT, nombreDocumento);
         try {
 
-            byte encoded[] = Base64.getEncoder().encode(signatureResp.getSignatureFile().toByteArray());
+            byte encoded[] = Base64.getEncoder().encode(signatureResponse.getSignatureFile().toByteArray());
             String xmlBase64 = new String(encoded);
 
             resp.put(ConstantesParameter.PARAM_FILE_ZIP_BASE64, UtilConversion.encodeFileToBase64(zipeado));

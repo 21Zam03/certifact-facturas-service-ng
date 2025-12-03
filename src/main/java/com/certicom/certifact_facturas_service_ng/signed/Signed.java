@@ -1,7 +1,6 @@
 package com.certicom.certifact_facturas_service_ng.signed;
 
-import com.certicom.certifact_facturas_service_ng.dto.others.SignatureResp;
-import com.certicom.certifact_facturas_service_ng.enums.LogTitle;
+import com.certicom.certifact_facturas_service_ng.dto.others.SignatureResponse;
 import com.certicom.certifact_facturas_service_ng.exceptions.SignedException;
 import com.certicom.certifact_facturas_service_ng.util.LogHelper;
 import com.certicom.certifact_facturas_service_ng.util.LogMessages;
@@ -36,7 +35,7 @@ import java.util.Enumeration;
 import static com.certicom.certifact_facturas_service_ng.util.UtilFirma.*;
 
 @Component
-public class Firmado {
+public class Signed {
 
     @Value("${apifact.keystoreblizlink.file}")
     private String keystoreFileblizlink;
@@ -65,7 +64,74 @@ public class Firmado {
     @Value("${apifact.isProduction}")
     private Boolean isProduction;
 
-    public SignatureResp signCerticom(String xml, String id) throws SignedException {
+    public SignatureResponse sign(String xml, String id) {
+        String keystoreFile;
+        String keystorePassword;
+
+        if (isProduction) {
+            keystoreFile = keystoreFileblizlink;
+            keystorePassword = keystorePasswordblizlink;
+        } else {
+            keystoreFile = keystoreFileblizlink;
+            keystorePassword = keystorePasswordblizlink;
+        }
+        System.out.println("PASSWORD  -> "+keystorePassword);
+        SignatureResponse response = new SignatureResponse();
+        try {
+
+            KeyStore ks = getKeyStore(UtilConversion.decodeBase64ToFile(keystoreFile, "pfx"), keystorePassword);
+            String alias = ks.aliases().nextElement();
+            PrivateKey privateKey = (PrivateKey) ks.getKey(alias, keystorePassword.toCharArray());
+            X509Certificate cert = getCertificate(UtilConversion.decodeBase64ToFile(keystoreFile, "pfx"), keystorePassword);
+            ByteArrayOutputStream signatureFile = new ByteArrayOutputStream();
+            Document doc = buildDocument(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
+            Node parentNode = addExtensionContent(doc);
+            XMLSignatureFactory fac = XMLSignatureFactory.getInstance();
+            Reference ref = fac.newReference("", fac.newDigestMethod("http://www.w3.org/2000/09/xmldsig#sha1", null), Collections.singletonList(fac.newTransform("http://www.w3.org/2000/09/xmldsig#enveloped-signature", (TransformParameterSpec) null)), null, null);
+            SignedInfo si = fac.newSignedInfo(fac.newCanonicalizationMethod("http://www.w3.org/TR/2001/REC-xml-c14n-20010315", (C14NMethodParameterSpec) null), fac.newSignatureMethod("http://www.w3.org/2000/09/xmldsig#rsa-sha1", null), Collections.singletonList(ref));
+            KeyInfoFactory kif = fac.getKeyInfoFactory();
+            ArrayList<X509Certificate> x509Content = new ArrayList<>();
+            x509Content.add(cert);
+            X509Data xd = kif.newX509Data(x509Content);
+            KeyInfo ki = kif.newKeyInfo(Collections.singletonList(xd));
+            DOMSignContext dsc = new DOMSignContext(privateKey, doc.getDocumentElement());
+            XMLSignature signature = fac.newXMLSignature(si, ki);
+            if (parentNode != null) {
+                dsc.setParent(parentNode);
+            }
+            dsc.setDefaultNamespacePrefix("ds");
+            signature.sign(dsc);
+            String digestValue = null;
+            Element elementParent = (Element) dsc.getParent();
+            if (elementParent.getElementsByTagName("ds:Signature") != null) {
+                Element elementSignature = (Element) elementParent.getElementsByTagName("ds:Signature").item(0);
+                elementSignature.setAttribute("Id", id);
+
+                Element keyInfo = (Element) elementSignature.getElementsByTagName("ds:KeyInfo").item(0);
+                Element X509Data = (Element) keyInfo.getElementsByTagName("ds:X509Data").item(0);
+                appendChild(doc, X509Data, "ds:X509SubjectName", cert.getSubjectX500Principal().getName());
+
+                NodeList nodeList = elementParent.getElementsByTagName("ds:DigestValue");
+                int i = 0;
+                while (i < nodeList.getLength()) {
+                    digestValue = getNode(nodeList.item(i));
+                    ++i;
+                }
+            }
+            outputDocToOutputStream(doc, signatureFile);
+            signatureFile.close();
+            response.setSignatureFile(signatureFile);
+            response.setDigestValue(digestValue);
+            response.setStatus(!signatureFile.toString().trim().isEmpty() && digestValue != null && !digestValue.trim().isEmpty());
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new SignedException("Error al firmar documento xml: " + (ex == null ? "" : ex.getMessage()));
+        }
+        return response;
+    }
+
+    public SignatureResponse signCerticom(String xml, String id) throws SignedException {
         String keystoreFile;
         String keystorePassword;
 
@@ -77,7 +143,7 @@ public class Firmado {
             keystorePassword = keystorePasswordCerti;
         }
 
-        SignatureResp response = new SignatureResp();
+        SignatureResponse response = new SignatureResponse();
         try {
 
             KeyStore ks = getKeyStore(UtilConversion.decodeBase64ToFile(keystoreFile, "pfx"), keystorePassword);

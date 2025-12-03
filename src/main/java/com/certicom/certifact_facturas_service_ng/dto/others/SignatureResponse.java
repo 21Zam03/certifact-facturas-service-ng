@@ -12,7 +12,7 @@ import java.io.Serializable;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SignatureResp implements Serializable {
+public class SignatureResponse implements Serializable {
 
     private Boolean status;
     private ByteArrayOutputStream signatureFile;
