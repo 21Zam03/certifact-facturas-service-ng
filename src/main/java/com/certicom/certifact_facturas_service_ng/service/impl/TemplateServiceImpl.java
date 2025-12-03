@@ -41,14 +41,14 @@ import java.util.Map;
 @Slf4j
 public class TemplateServiceImpl implements TemplateService {
 
-    private final FacturaTemplate facturaTemplate;
-    private final FacturaTemplate21 facturaTemplate21;
+    private final FacturaTemplate invoiceTemplate;
+    private final FacturaTemplate21 invoiceTemplate21;
     private final FacturaTemplateOse invoiceTemplateOse;
-    private final NotaCreditoTemplate notaCreditoTemplate;
-    private final NotaCreditoTemplateSunat21 notaCreditoTemplate21;
+    private final NotaCreditoTemplate creditNoteTemplate;
+    private final NotaCreditoTemplateSunat21 creditNoteTemplate21;
     private final NotaCreditoTemplateOse creditNoteTemplateOse;
-    private final NotaDebitoTemplate notaDebitoTemplate;
-    private final NotaDebitoTemplateSunat21 notaDebitoTemplate21;
+    private final NotaDebitoTemplate debitNoteTemplate;
+    private final NotaDebitoTemplateSunat21 debitNoteTemplate21;
     private final NotaDebitoTemplateOse debitNoteTemplateOse;
     private final VoidedDocumentsTemplate voidedDocumentsTemplate;
 
@@ -97,8 +97,45 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public Map<String, String> buildPaymentVoucherSignOseBliz(PaymentVoucherDto paymentVoucherDto) {
-        return null;
+    public Map<String, String> buildPaymentVoucherSignOseBliz(PaymentVoucherDto voucher) throws IOException, NoSuchAlgorithmException {
+        String xmlGenerado = null;
+        String idSignature;
+        String nombreDocumento;
+        Map<String, String> resp;
+        SignatureResponse signatureResp;
+
+        switch (voucher.getTipoComprobante()) {
+            case ConstantesSunat.TIPO_DOCUMENTO_FACTURA:
+                if (voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
+                    xmlGenerado = invoiceTemplate.construirFactura(voucher);
+                } else if (voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
+                    xmlGenerado = invoiceTemplate21.construirFactura(voucher);
+                }
+                break;
+            case ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO:
+                if (voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
+                    xmlGenerado = creditNoteTemplate.construirNotaCredito(voucher);
+                } else if (voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
+                    xmlGenerado = creditNoteTemplate21.construirNotaCredito(voucher);
+                }
+                break;
+            default:
+                if (voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
+                    xmlGenerado = debitNoteTemplate.construirNotaDebito(voucher);
+                } else if (voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
+                    xmlGenerado = debitNoteTemplate21.buildDebitNote(voucher);
+                }
+                break;
+        }
+
+        idSignature = "S" + voucher.getTipoComprobante() + voucher.getSerie() + "-" + voucher.getNumero();
+        signatureResp = signed.signBliz(xmlGenerado, idSignature);
+        nombreDocumento = voucher.getRucEmisor() + "-" + voucher.getTipoComprobante() + "-" +
+                voucher.getSerie() + "-" + voucher.getNumero();
+
+        resp = buildDataTemplate(signatureResp, nombreDocumento);
+        resp.put(ConstantesParameter.CODIGO_HASH, UtilArchivo.generarCodigoHash(signatureResp.toString()));
+        return resp;
     }
 
     @Override
@@ -113,24 +150,24 @@ public class TemplateServiceImpl implements TemplateService {
         switch (paymentVoucherDto.getTipoComprobante()) {
             case ConstantesSunat.TIPO_DOCUMENTO_FACTURA:
                 if(paymentVoucherDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
-                    xmlGenerado = facturaTemplate.construirFactura(paymentVoucherDto);
+                    xmlGenerado = invoiceTemplate.construirFactura(paymentVoucherDto);
                 }else if(paymentVoucherDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
-                    xmlGenerado = facturaTemplate21.construirFactura(paymentVoucherDto);
+                    xmlGenerado = invoiceTemplate21.construirFactura(paymentVoucherDto);
                 }
                 break;
             case ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO:
                 if(paymentVoucherDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
-                    xmlGenerado = notaCreditoTemplate.construirNotaCredito(paymentVoucherDto);
+                    xmlGenerado = creditNoteTemplate.construirNotaCredito(paymentVoucherDto);
 
                 }else if(paymentVoucherDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
-                    xmlGenerado = notaCreditoTemplate21.construirNotaCredito(paymentVoucherDto);
+                    xmlGenerado = creditNoteTemplate21.construirNotaCredito(paymentVoucherDto);
                 }
                 break;
             default:
                 if(paymentVoucherDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
-                    xmlGenerado = notaDebitoTemplate.construirNotaDebito(paymentVoucherDto);
+                    xmlGenerado = debitNoteTemplate.construirNotaDebito(paymentVoucherDto);
                 }else if(paymentVoucherDto.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
-                    xmlGenerado = notaDebitoTemplate21.buildDebitNote(paymentVoucherDto);
+                    xmlGenerado = debitNoteTemplate21.buildDebitNote(paymentVoucherDto);
                 }
                 break;
         }
@@ -147,14 +184,63 @@ public class TemplateServiceImpl implements TemplateService {
     }
 
     @Override
-    public Map<String, String> buildPaymentVoucherSign(PaymentVoucherDto paymentVoucherDto) {
-        return null;
+    public Map<String, String> buildPaymentVoucherSign(PaymentVoucherDto voucher) throws IOException, NoSuchAlgorithmException {
+        String xmlGenerado = null;
+        String idSignature;
+        String nombreDocumento;
+        Map<String, String> resp;
+        SignatureResponse signatureResp;
+
+        switch (voucher.getTipoComprobante()) {
+            case ConstantesSunat.TIPO_DOCUMENTO_FACTURA:
+                if (voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
+                    xmlGenerado = invoiceTemplate.construirFactura(voucher);
+                } else if (voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
+                    xmlGenerado = invoiceTemplate21.construirFactura(voucher);
+                }
+                break;
+            case ConstantesSunat.TIPO_DOCUMENTO_NOTA_CREDITO:
+                if (voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
+                    xmlGenerado = creditNoteTemplate.construirNotaCredito(voucher);
+                } else if (voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
+                    xmlGenerado = creditNoteTemplate21.construirNotaCredito(voucher);
+                }
+                break;
+            default:
+                if (voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_0)) {
+                    xmlGenerado = debitNoteTemplate.construirNotaDebito(voucher);
+                } else if (voucher.getUblVersion().equals(ConstantesSunat.UBL_VERSION_2_1)) {
+                    xmlGenerado = debitNoteTemplate21.buildDebitNote(voucher);
+                }
+                break;
+        }
+
+        idSignature = "S" + voucher.getTipoComprobante() + voucher.getSerie() + "-" + voucher.getNumero();
+        signatureResp = signed.signBliz(xmlGenerado, idSignature);
+        nombreDocumento = voucher.getRucEmisor() + "-" + voucher.getTipoComprobante() + "-" +
+                voucher.getSerie() + "-" + voucher.getNumero();
+
+        resp = buildDataTemplate(signatureResp, nombreDocumento);
+        resp.put(ConstantesParameter.CODIGO_HASH, UtilArchivo.generarCodigoHash(signatureResp.toString()));
+        return resp;
     }
 
     @Override
     public Map<String, String> buildVoidedDocumentsSign(Voided voided) throws TemplateException, SignedException, IOException, NoSuchAlgorithmException {
+        String xmlGenerado;
+        String idSignature;
+        String nombreDocumento;
+        Map<String, String> resp;
+        SignatureResponse signatureResp;
 
-        return Collections.emptyMap();
+        xmlGenerado = voidedDocumentsTemplate.buildVoidedDocuments(voided);
+        idSignature = "S" + voided.getId();
+        signatureResp = signed.signBliz(xmlGenerado, idSignature);
+
+        nombreDocumento = voided.getRucEmisor() + "-" + voided.getId();
+        resp = buildDataTemplate(signatureResp, nombreDocumento);
+
+        return resp;
     }
 
     @Override
@@ -174,7 +260,6 @@ public class TemplateServiceImpl implements TemplateService {
 
         return resp;
     }
-
 
 
     private Map<String, String> buildDataTemplate(SignatureResponse signatureResponse, String nombreDocumento) throws SignedException, IOException, NoSuchAlgorithmException {

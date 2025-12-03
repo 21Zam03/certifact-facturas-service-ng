@@ -12,9 +12,9 @@ import java.util.Map;
 public interface TemplateService {
 
     public Map<String, String> buildPaymentVoucherSignOse(PaymentVoucherDto paymentVoucherDto) throws IOException, NoSuchAlgorithmException;
-    public Map<String, String> buildPaymentVoucherSignOseBliz(PaymentVoucherDto paymentVoucherDto);
+    public Map<String, String> buildPaymentVoucherSignOseBliz(PaymentVoucherDto paymentVoucherDto) throws IOException, NoSuchAlgorithmException;
     public Map<String, String> buildPaymentVoucherSignCerti(PaymentVoucherDto paymentVoucherDto) throws TemplateException, SignedException, IOException, NoSuchAlgorithmException;
-    public Map<String, String> buildPaymentVoucherSign(PaymentVoucherDto paymentVoucherDto);
+    public Map<String, String> buildPaymentVoucherSign(PaymentVoucherDto paymentVoucherDto) throws IOException, NoSuchAlgorithmException;
 
     public Map<String, String> buildVoidedDocumentsSign(Voided voided) throws TemplateException, SignedException, IOException, NoSuchAlgorithmException;
     public Map<String, String> buildVoidedDocumentsSignCerti(Voided voided) throws TemplateException, SignedException, IOException, NoSuchAlgorithmException;
