@@ -242,6 +242,11 @@ public class PaymentVoucherServiceImpl implements PaymentVoucherService {
         return respuesta;
     }
 
+    @Override
+    public PaymentVoucherDto getComprobanteById(Long id) {
+        return paymentVoucherData.findPaymentVoucherById(id);
+    }
+
     /*
     Map<String, Object> generateDocument(PaymentVoucherModel comprobante, Boolean isEdit, Long idUsuario) {
         Map<String, Object> resultado = new HashMap<>();

@@ -1,18 +1,24 @@
 package com.certicom.certifact_facturas_service_ng.service.impl;
 
+import com.certicom.certifact_facturas_service_ng.config.mail.MailTemplateService;
 import com.certicom.certifact_facturas_service_ng.dto.PaymentVoucherDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.EmailCompanyNotifyDto;
 import com.certicom.certifact_facturas_service_ng.dto.others.EmailSendDto;
+import com.certicom.certifact_facturas_service_ng.enums.TipoArchivoEnum;
 import com.certicom.certifact_facturas_service_ng.feign.*;
 import com.certicom.certifact_facturas_service_ng.model.CompanyModel;
 import com.certicom.certifact_facturas_service_ng.model.RegisterFileUploadModel;
 import com.certicom.certifact_facturas_service_ng.service.AmazonS3ClientService;
 import com.certicom.certifact_facturas_service_ng.service.EmailService;
+import com.certicom.certifact_facturas_service_ng.service.ReportService;
+import com.certicom.certifact_facturas_service_ng.util.StringsUtils;
+import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.mail.javamail.MimeMessagePreparator;
 import org.springframework.stereotype.Service;
@@ -34,12 +40,23 @@ public class EmailServiceImpl implements EmailService {
     @Value("${urlspublicas.imagenes}")
     private String urlImagenes;
 
+    @Value("${urlspublicas.consultaComprobante}")
+    private String urlConsultaComprobante;
+
+    @Value("${apifact.email}")
+    private String emailFrom;
+
     private final PaymentVoucherData paymentVoucherData;
     private final PaymentVoucherFileData paymentVoucherFileData;
     private final RegisterFileUploadData registerFileUploadData;
     private final CompanyData companyData;
-    //private final EmailCompanyNotifyData emailCompanyNotifyData;
+    private final EmailCompanyNotifyData emailCompanyNotifyData;
     private final AmazonS3ClientService amazonS3ClientService;
+
+    private final MailTemplateService mailTemplateService;
+    private final ReportService reportService;
+
+    private final JavaMailSender emailSender;
 
     @Autowired
     public EmailServiceImpl(
@@ -47,19 +64,25 @@ public class EmailServiceImpl implements EmailService {
             RegisterFileUploadData registerFileUploadData,
             PaymentVoucherFileData paymentVoucherFileData,
             CompanyData companyData,
-            //EmailCompanyNotifyData emailCompanyNotifyData,
-            AmazonS3ClientService amazonS3ClientService) {
+            EmailCompanyNotifyData emailCompanyNotifyData,
+            AmazonS3ClientService amazonS3ClientService,
+            MailTemplateService mailTemplateService,
+            ReportService reportService,
+            JavaMailSender emailSender) {
         this.paymentVoucherData = paymentVoucherData;
         this.registerFileUploadData = registerFileUploadData;
         this.paymentVoucherFileData = paymentVoucherFileData;
         this.companyData = companyData;
-        //this.emailCompanyNotifyData = emailCompanyNotifyData;
+        this.emailCompanyNotifyData = emailCompanyNotifyData;
         this.amazonS3ClientService = amazonS3ClientService;
+        this.mailTemplateService = mailTemplateService;
+        this.reportService = reportService;
+        this.emailSender = emailSender;
     }
 
     @Override
     public Boolean sendEmailOnConfirmSunat(EmailSendDto emailSendDTO) {
-        /*
+
         String rucEmisor = "";
         String receptor = "";
         String serie = "";
@@ -72,7 +95,8 @@ public class EmailServiceImpl implements EmailService {
         RegisterFileUploadModel uploadEntity = null;
         InputStream isXmlprevio = null;
         String[] arrayEmail = null;
-        System.out.println("ENVIO EMAIL CONFIRM "+emailSendDTO.getTipo());
+
+
         try {
             PaymentVoucherDto comprobante = paymentVoucherData.findPaymentVoucherById(emailSendDTO.getId());
             rucEmisor = comprobante.getRucEmisor();
@@ -89,30 +113,31 @@ public class EmailServiceImpl implements EmailService {
 
             Long registerFileSendId = comprobante.getPaymentVoucherFileXmlActiveId();
 
-            uploadEntity = registerFileUploadData.findById(registerFileSendId); // <- REVISAR
+            uploadEntity = registerFileUploadData.findById(registerFileSendId);
 
             String nombreComprobanteprev = String.format("%s-%s-%s-%s", rucEmisor, tipo, serie, numDocum);
             isXmlprevio = extractXmlFromZip(amazonS3ClientService.downloadFileStorageDto(uploadEntity), nombreComprobanteprev + ".xml");
 
+
             CompanyModel companyEntity = companyData.findCompanyByRuc(rucEmisor);
             List<String> emailsVoucher = new ArrayList<>();
-            System.out.println("GET EMAIL "+(emailSendDTO.getEmail()));
+
             if (emailSendDTO.getEmail() != null) {
                 String[] emails = (emailSendDTO.getEmail()).split(",");
 
-                for (int i=0;i<emails.length;i++){
-                    emailsVoucher.add(emails[i].trim());
+                for (String email : emails) {
+                    emailsVoucher.add(email.trim());
                 }
 
-            }else {
+            } else {
                 String[] emails = arrayEmail;
-                for (int i=0;i<emails.length;i++){
-                    emailsVoucher.add(emails[i].trim());
+                for (String email : emails) {
+                    emailsVoucher.add(email.trim());
                 }
             }
 
+            List<EmailCompanyNotifyDto> emailsAdicionalesNotificar = emailCompanyNotifyData.findAllByCompanyRucAndEstadoIsTrue(rucEmisor);
 
-            List<EmailCompanyNotifyDto> emailsAdicionalesNotificar = emailCompanyNotifyData.findAllByCompanyRucAndEstadoIsTrue(rucEmisor); // <- REVISAR
             List<String> emailsList = new ArrayList<>();
 
             if (!emailsAdicionalesNotificar.isEmpty() && (emailSendDTO.getEmail() == null || ((emailSendDTO.getEmail().trim()).length()==0) )){
@@ -120,14 +145,12 @@ public class EmailServiceImpl implements EmailService {
                 emailsList = emailsAdicionalesNotificar.stream().filter(e -> (e.getEmail().trim()).length()>0)
                         .map(e -> e.getEmail()).collect(Collectors.toList());
             }
-            System.out.println(emailsList);
 
             for (int j=0;j<emailsVoucher.size();j++){
                 emailsList.add(emailsVoucher.get(j));
             }
 
-
-            if (emailsList.size()>0) {
+            if (!emailsList.isEmpty()) {
 
                 List<String> emailListFinal = emailsList;
 
@@ -141,74 +164,52 @@ public class EmailServiceImpl implements EmailService {
                 String finalAfectado = afectado;
                 String finalUuid = uuid;
                 InputStream finalIsXmlprevio = isXmlprevio;
+
+                RegisterFileUploadModel finalUploadEntity = uploadEntity;
                 MimeMessagePreparator preparator = new MimeMessagePreparator() {
+
                     public void prepare(MimeMessage mimeMessage) throws Exception {
                         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
 
                         String textMensajeHtml = mailTemplateService.getFreeMarkerTemplateContent(
                                 new HashMap<String, Object>() {{
-                                    put("urlLogo", uploadEntity == null ? "" : (urlImagenes + companyEntity.getArchivoLogo().getIdRegisterFileSend()));
+                                    put("urlLogo", finalUploadEntity == null ? "" : (urlImagenes + "-"));
                                     put("nombreReceptor", finalReceptor);
                                     put("nombreDocumento", StringsUtils.getNombreCortoTipoComprobante(finalTipo));
                                     put("serie", finalSerie);
                                     put("numero", finalNumDocum);
                                     put("urlConsultaComprobante", urlConsultaComprobante + companyEntity.getRuc());
-                                    put("nombreEmpresa", companyEntity.getRazonSocial() != null ? companyEntity.getRazonSocial() : "");
-                                    put("nombreComercial", companyEntity.getNombreComercial() != null ? companyEntity.getNombreComercial() : "");
+                                    put("nombreEmpresa", companyEntity.getRazon() != null ? companyEntity.getRazon() : "");
+                                    put("nombreComercial", companyEntity.getNombreComer() != null ? companyEntity.getNombreComer() : "");
                                     put("rucEmpresa", companyEntity.getRuc() != null ? companyEntity.getRuc() : "");
                                     put("direccionEmpresa", companyEntity.getDireccion() != null ? companyEntity.getDireccion() : "");
                                 }}, "templateMailConfirmMessage.txt"
                         );
-                        helper.setSubject(StringsUtils.getNombreCortoTipoComprobante(finalTipo) + " " + finalSerie + "-" + finalNumDocum + " " + companyEntity.getRazonSocial());
+                        helper.setSubject(StringsUtils.getNombreCortoTipoComprobante(finalTipo) + " " + finalSerie + "-" + finalNumDocum + " " + companyEntity.getRazon());
 
-                        helper.setFrom(new InternetAddress(emailFrom, companyEntity.getRazonSocial()));
+                        helper.setFrom(new InternetAddress(emailFrom, companyEntity.getRazon()));
                         String[] stringArray = new String[emailListFinal.size()];
-                        System.out.println(" stringArray1 "+stringArray);
+
                         System.out.println(emailListFinal);
                         System.out.println(emailListFinal.size());
+
                         for (int j = 0; j < emailListFinal.size(); j++) {
                             if((emailListFinal.get(j).trim()).length()>5){
                                 stringArray[j] = emailListFinal.get(j);
                             }
-
                         }
-                        System.out.println(" stringArray2"+stringArray);
+
                         helper.setTo(stringArray);
                         helper.setText(textMensajeHtml, true);
                         if (companyEntity.getEmail() != null) {
-                            helper.setReplyTo(new InternetAddress(companyEntity.getEmail(), companyEntity.getRazonSocial()));
+                            helper.setReplyTo(new InternetAddress(companyEntity.getEmail(), companyEntity.getRazon()));
                         }
-
 
                         String nombreComprobante = String.format("%s-%s-%s-%s", finalRucEmisor, finalTipo, finalSerie, finalNumDocum);
 
                         InputStream isXml = finalIsXmlprevio;
 
                         if (emailSendDTO.getTipo()!=null){
-                            if (emailSendDTO.getTipo()==2){
-                                InputStream isGuia = reportService.getPdfComprobanteGuia(finalRucEmisor,  finalSerie, Integer.parseInt(finalNumDocum),"guia");
-                                helper.addAttachment(nombreComprobante + ".pdf", new ByteArrayResource(IOUtils.toByteArray(isGuia)));
-                            }else{
-                                try {
-                                    if (finalEstado.equals("02")&&(finalTipo.equals("01")|| finalAfectado.equals("01"))){
-
-                                        InputStream isCdr = extractXmlFromZip(amazonS3ClientService.downloadFileInvoice(idPayment, finalUuid, TipoArchivoEnum.CDR),"R-"+nombreComprobante + ".xml");
-                                        helper.addAttachment(nombreComprobante + "_CDR.xml", new ByteArrayResource(IOUtils.toByteArray(isCdr)));
-                                    }
-
-                                }catch (Exception e){
-                                    e.printStackTrace();
-                                }
-                                if (companyEntity.getSendticket() == 1) {
-                                    InputStream isTicket = reportService.getPdfComprobanteTicket(finalRucEmisor, finalTipo, finalSerie, Integer.parseInt(finalNumDocum));
-                                    helper.addAttachment(nombreComprobante + ".pdf", new ByteArrayResource(IOUtils.toByteArray(isTicket)));
-                                } else {
-                                    InputStream isPdf = reportService.getPdfComprobanteA4(finalRucEmisor, finalTipo, finalSerie, Integer.parseInt(finalNumDocum));
-                                    helper.addAttachment(nombreComprobante + ".pdf", new ByteArrayResource(IOUtils.toByteArray(isPdf)));
-                                }
-                            }
-
-                        }else{
                             try {
                                 if (finalEstado.equals("02")&&(finalTipo.equals("01")|| finalAfectado.equals("01"))){
 
@@ -216,38 +217,58 @@ public class EmailServiceImpl implements EmailService {
                                     helper.addAttachment(nombreComprobante + "_CDR.xml", new ByteArrayResource(IOUtils.toByteArray(isCdr)));
                                 }
 
-                            }catch (Exception e){
+                            } catch (Exception e){
                                 e.printStackTrace();
                             }
-                            if (companyEntity.getSendticket() == 1) {
+                            /*LLAMAR AL MICROSERVIICO DE REPORTES PARA GENERAR LOS ARCHIVOS TICKETS y A4
+                            if (companyEntity.getSendTicket() == 1) {
                                 InputStream isTicket = reportService.getPdfComprobanteTicket(finalRucEmisor, finalTipo, finalSerie, Integer.parseInt(finalNumDocum));
                                 helper.addAttachment(nombreComprobante + ".pdf", new ByteArrayResource(IOUtils.toByteArray(isTicket)));
                             } else {
                                 InputStream isPdf = reportService.getPdfComprobanteA4(finalRucEmisor, finalTipo, finalSerie, Integer.parseInt(finalNumDocum));
                                 helper.addAttachment(nombreComprobante + ".pdf", new ByteArrayResource(IOUtils.toByteArray(isPdf)));
                             }
+                            */
+                        } else{
+                            try {
+                                if ( finalEstado.equals("02") && ( finalTipo.equals("01") || finalAfectado.equals("01") ) ){
+                                    InputStream isCdr = extractXmlFromZip(amazonS3ClientService.downloadFileInvoice(idPayment, finalUuid, TipoArchivoEnum.CDR),"R-"+nombreComprobante + ".xml");
+                                    if(isCdr != null) {
+                                        ByteArrayResource bytes = new ByteArrayResource(IOUtils.toByteArray(isCdr));
+                                        helper.addAttachment(nombreComprobante + "_CDR.xml", bytes);
+                                    }
+                                }
+                            } catch (Exception e){
+                                e.printStackTrace();
+                            }
+
+                            /*LLAMAR AL MICROSERVIICO DE REPORTES PARA GENERAR LOS ARCHIVOS TICKETS Y A4
+                            if (companyEntity.getSendTicket() == 1) {
+
+                                InputStream isTicket = reportService.getPdfComprobanteTicket(finalRucEmisor, finalTipo, finalSerie, Integer.parseInt(finalNumDocum));
+                                helper.addAttachment(nombreComprobante + ".pdf", new ByteArrayResource(IOUtils.toByteArray(isTicket)));
+                            } else {
+                                InputStream isPdf = reportService.getPdfComprobanteA4(finalRucEmisor, finalTipo, finalSerie, Integer.parseInt(finalNumDocum));
+                                helper.addAttachment(nombreComprobante + ".pdf", new ByteArrayResource(IOUtils.toByteArray(isPdf)));
+                            }
+                            */
+
                         }
-
-
                         helper.addAttachment(nombreComprobante + ".xml", new ByteArrayResource(IOUtils.toByteArray(isXml)));
-
                     }
                 };
-
                 emailSender.send(preparator);
-
             }
             return true;
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
-        return true;
-        * */
-        return true;
     }
 
     private ByteArrayInputStream extractXmlFromZip(ByteArrayInputStream zipBis, String zipEntryName) throws IOException {
+        System.out.println("ZIPBIS: "+zipBis);
+        System.out.println("ZIPENTRYNAME: "+zipEntryName);
         try (ZipInputStream zipin = new ZipInputStream(zipBis)) {
             ZipEntry ze;
             while ((ze = zipin.getNextEntry()) != null) {

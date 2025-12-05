@@ -70,8 +70,6 @@ public class PaymentVoucherController {
 
         PaymentVoucherDto paymentVoucherDto = PaymentVoucherConverter.requestToModel(paymentVoucherRequest);
 
-        System.out.println("OPERACION: "+paymentVoucherDto.getTotalImpOperGratuita());
-
         paymentVoucherValidator.validate(paymentVoucherDto, false);
 
         Map<String, Object> result = paymentVoucherService.createPaymentVoucher(paymentVoucherDto, Long.valueOf(userId));
@@ -158,6 +156,15 @@ public class PaymentVoucherController {
             @RequestHeader(name = "X-User-Id", required = true) Long usuarioId,
             @RequestHeader(name = "X-User-Roles", required = true) List<String> roles) {
         return new ResponseEntity<Object>(paymentVoucherService.getEstadoSunatByListaIdsInter(idsPaymentVouchers), HttpStatus.OK);
+    }
+
+    @GetMapping("/comprobanteById")
+    public ResponseEntity<?> comprobanteById(
+            @RequestParam(name = "id", required = true) Long id,
+            @RequestHeader(name = "X-User-Ruc", required = true) String ruc,
+            @RequestHeader(name = "X-User-Id", required = true) Long usuarioId,
+            @RequestHeader(name = "X-User-Roles", required = true) List<String> roles) {
+        return new ResponseEntity<Object>(paymentVoucherService.getComprobanteById(id), HttpStatus.OK);
     }
 
 }

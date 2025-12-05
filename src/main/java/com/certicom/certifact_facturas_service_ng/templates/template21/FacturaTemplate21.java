@@ -551,7 +551,9 @@ public class FacturaTemplate21 {
                 if (item.getCodigoTipoAfectacionIGV().equals("21") ||
                         item.getCodigoTipoAfectacionIGV().equals("11") ||
                         item.getCodigoTipoAfectacionIGV().equals("12") ||
-                        item.getCodigoTipoAfectacionIGV().equals("14")){
+                        item.getCodigoTipoAfectacionIGV().equals("14") ||
+                        item.getCodigoTipoAfectacionIGV().equals("13") ||
+                        item.getCodigoTipoAfectacionIGV().equals("31")){
                     appendChild(doc, cacInvoiceLine, "cbc:LineExtensionAmount", UtilFormat.format4(item.getValorReferencialUnitario().multiply(item.getCantidad())))
                             .setAttribute(ConstantesSunat.ATTRIBUTE_CURRENCY_ID, factura.getCodigoMoneda());
                     Element pricingReferenceElement = appendChild(doc, cacInvoiceLine, "cac:PricingReference");
@@ -560,7 +562,16 @@ public class FacturaTemplate21 {
                 }
                 else{
                     String constAttribute = ConstantesSunat.CODIGO_TIPO_PRECIO_PRECIO_UNITARIO;
-                    if (item.getCodigoTipoAfectacionIGV().equals("15")){
+                    if (
+                            item.getCodigoTipoAfectacionIGV().equals("15") ||
+                            item.getCodigoTipoAfectacionIGV().equals("32") ||
+                            item.getCodigoTipoAfectacionIGV().equals("33") ||
+                                    item.getCodigoTipoAfectacionIGV().equals("34") ||
+                                    item.getCodigoTipoAfectacionIGV().equals("35") ||
+                                    item.getCodigoTipoAfectacionIGV().equals("36") ||
+                                    item.getCodigoTipoAfectacionIGV().equals("16") ||
+                                    item.getCodigoTipoAfectacionIGV().equals("17")
+                    ){
                         constAttribute = ConstantesSunat.CODIGO_TIPO_PRECIO_VALOR_REFERENCIAL;
                     }
 

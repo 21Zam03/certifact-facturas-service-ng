@@ -26,4 +26,7 @@ public interface PaymentVoucherService {
     List<PaymentVoucherDto> findComprobanteByCredito(String filtroNumDoc, String ruc);
 
     List<InfoEstadoSunat> getEstadoSunatByListaIdsInter(List<Long> idsPaymentVouchers);
+
+    PaymentVoucherDto getComprobanteById(Long id);
+
 }
